@@ -8,10 +8,13 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static Clickless.MouseController;
 
 namespace Clickless.src
 {
+
+
     public static class ScreenController
     {
 
@@ -29,61 +32,32 @@ namespace Clickless.src
         /// <param name="save"></param>
         /// <param name="filename"></param>
         /// <param name="path"></param>
-        public static Image CaptureDesktop(string filename = "clickless", string path = "")
+        public static Image CaptureDesktop(string filename = "clickless")
         {
             var image = CaptureDesktop();
-            if (path == "")
-            {
-                path = Path.Combine(Environment.CurrentDirectory, "images", filename + ".png");
-                image.Save(path, ImageFormat.Png);
-            }
+            var saved = new Bitmap(image);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resources", "images");
+            Directory.CreateDirectory(path); //Safety check if the images folder doesn't exist.
+            saved.Save(Path.Combine(path, filename), ImageFormat.Png);
             return image;
         }
     }
 
     public class ScreenCapture
     {
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-        public static extern IntPtr GetDesktopWindow();
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct Rect
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-        }
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetWindowRect(IntPtr hWnd, ref Rect rect);
-
         public static Image CaptureDesktop()
         {
-            return CaptureWindow(GetDesktopWindow());
-        }
+            int screenLeft = SystemInformation.VirtualScreen.Left;
+            int screenTop = SystemInformation.VirtualScreen.Top;
+            int screenWidth = SystemInformation.VirtualScreen.Width;
+            int screenHeight = SystemInformation.VirtualScreen.Height;
 
-        public static Bitmap CaptureActiveWindow()
-        {
-            return CaptureWindow(GetForegroundWindow());
-        }
-
-        public static Bitmap CaptureWindow(IntPtr handle)
-        {
-            var rect = new Rect();
-            GetWindowRect(handle, ref rect);
-            var bounds = new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
-            var result = new Bitmap(bounds.Width, bounds.Height);
-
-            using (var graphics = Graphics.FromImage(result))
-            {
-                graphics.CopyFromScreen(new Point(bounds.Left, bounds.Top), Point.Empty, bounds.Size);
-            }
-
-            return result;
+            // Create a bitmap of the appropriate size to receive the full-screen screenshot.
+            Image bitmap = new Bitmap(screenWidth, screenHeight);
+            Graphics g = Graphics.FromImage(bitmap);
+            g.CopyFromScreen(screenLeft, screenTop, 0, 0, bitmap.Size);
+            return bitmap;
+            
         }
     }
 }

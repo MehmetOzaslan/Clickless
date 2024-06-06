@@ -40,7 +40,7 @@
         [Test]
         public void TestCaptureSave()
         {
-            Image img = ScreenController.CaptureDesktop("test");
+            Image img = ScreenController.CaptureDesktop("test.png");
             Assert.That(img, Is.Not.Null);
             Assert.Greater(img.Width, 0);
             Assert.Greater(img.Height, 0);
