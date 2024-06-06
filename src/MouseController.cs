@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using Util;
 
 
 namespace Clickless
@@ -16,6 +17,17 @@ namespace Clickless
 
         [DllImport("user32.dll")]
         public static extern int SetCursorPos(int x, int y);
+
+        public static void IterateOverLocations(IEnumerable<MathUtil.Vector2> locations, Action preAction= null, Action postAction = null)
+        {
+            foreach (var item in locations)
+            {
+                preAction?.Invoke();
+                MoveCursor((int) item.x, (int) item.y);
+                postAction?.Invoke();
+            }
+        }
+
 
         //Move the cursor to the given coordinates.
         public static void MoveCursor(int x, int y)

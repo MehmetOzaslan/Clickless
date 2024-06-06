@@ -45,5 +45,20 @@
             Assert.Greater(img.Width, 0);
             Assert.Greater(img.Height, 0);
         }
+
+
+        [Test]
+        public void TestGrid()
+        {
+            var grid = ScreenController.ObtainGrid(30,30);
+            Assert.That(grid, Is.Not.Null);
+            
+            //Ensure there are actually elements in here.
+            Assert.That(grid.Count, Is.GreaterThan(0));
+
+            //Test the padding
+            Assert.That(grid[0].x, Is.EqualTo(30));
+            Assert.That(grid[0].y, Is.EqualTo(30));
+        }
     }
 }

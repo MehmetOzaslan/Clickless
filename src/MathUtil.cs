@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Util
 {
-    internal class MathUtil
+    public class MathUtil
     {
 
         public struct Vector2
