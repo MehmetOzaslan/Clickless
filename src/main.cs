@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace Clickless.src
 {
-    public class Program
+    public class Startup
     {
         public const int loopDelay = 10;
 
         static void Main(string[] args)
         {
+            Console.WriteLine($"Current .NET Framework version: {Environment.Version}");
             Console.WriteLine(args.Length);
             MouseController.MoveCursor(1, 1);
 
@@ -23,16 +24,10 @@ namespace Clickless.src
         static void Run()
         {
             while (true) {
-
-
-                MouseController.CURSORINFO info = MouseController.CursorInfo();
+                MouseController.CURSORINFO info = MouseController.GetCursorInfo();
                 var x = info.ptScreenPos.x;
                 var y = info.ptScreenPos.y;
-                
                 Console.WriteLine(y + " " + x + " " + info.hCursor.ToString());
-
-
-
                 Thread.Sleep(loopDelay);
             }
         }

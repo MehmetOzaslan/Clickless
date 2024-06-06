@@ -8,8 +8,12 @@ using System.Runtime.InteropServices;
 
 namespace Clickless
 {
+
     public static class MouseController
     {
+
+        const int NORMAL_CURSOR = 665539;
+
         [DllImport("user32.dll")]
         public static extern int SetCursorPos(int x, int y);
 
@@ -58,7 +62,7 @@ namespace Clickless
         static extern bool GetCursorInfo(ref CURSORINFO pci);
 
 
-        public static CURSORINFO CursorInfo()
+        public static CURSORINFO GetCursorInfo()
         {
             CURSORINFO cr = CreateCursorInfo();
 
