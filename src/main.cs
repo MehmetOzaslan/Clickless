@@ -12,7 +12,7 @@ namespace Clickless.src
 {
     public class Program
     {
-        public const int loopDelay = 0;
+        public const int loopDelay = 1000;
 
         static void Main(string[] args)
         {
@@ -54,7 +54,13 @@ namespace Clickless.src
                 MouseController.MoveCursor(x, y);
 
 
-                Console.WriteLine(y + " " + x + " " + info.hCursor.ToString() + AppDomain.CurrentDomain.BaseDirectory);
+                //Console.WriteLine(y + " " + x + " " + info.hCursor.ToString() + AppDomain.CurrentDomain.BaseDirectory + "  ");
+
+                foreach (var item in ScreenController.ObtainGrid())
+                {
+                    Console.Write(item.x);
+                }
+
                 Thread.Sleep(loopDelay);
             }
         }

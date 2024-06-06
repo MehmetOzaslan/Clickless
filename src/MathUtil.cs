@@ -28,7 +28,7 @@ namespace Util
         /// <param name="b"></param>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static float lerp(float a, float b, float t) { return a + b * t; }
+        public static float Lerp(float a, float b, float t) { return a + (b - a) * t; }
 
         /// <summary>
         /// t is not manually bound from 0 to 1 and will not throw an error.
@@ -37,7 +37,7 @@ namespace Util
         /// <param name="b"></param>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static Vector2 lerp(Vector2 a, Vector2 b, float t) { return new Vector2(lerp(a.x,b.x,t), lerp(a.y,b.y,t)); }
+        public static Vector2 lerp(Vector2 a, Vector2 b, float t) { return new Vector2(Lerp(a.x,b.x,t), Lerp(a.y,b.y,t)); }
 
 
 

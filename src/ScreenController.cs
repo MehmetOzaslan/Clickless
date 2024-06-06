@@ -33,17 +33,20 @@ namespace Clickless.src
         {
             int width = SystemInformation.VirtualScreen.Width;
             int height = SystemInformation.VirtualScreen.Height;
-            float numRow = (width - margins * 2) / spacing;
-            float numCol = (height - margins * 2) / spacing;
+            int numRow = (width - margins * 2) / spacing;
+            int numCol = (height - margins * 2) / spacing;
             List<MathUtil.Vector2> outList = new List<MathUtil.Vector2>();
 
-            for (float i = 0; i <= numRow; i+= 1f)
-            {
-                for (float j = 0; j <= numCol; j+=1f)
-                {
-                    float x = i / numRow * spacing + margins;
-                    float y = j / numRow * spacing + margins;
+            float dx = 1.0f / numRow;
+            float dy = 1.0f / numCol;
 
+            //i and j are bound between 0 and 1, representing the % position on the screen.
+            for (float i = 0; i <= 1; i+=dx)
+            {
+                for (float j = 0; j <= 1; j += dy)
+                {
+                    float x = MathUtil.Lerp(margins, width - margins, i);
+                    float y = MathUtil.Lerp(margins, height - margins, j);
                     outList.Add(new MathUtil.Vector2(x, y));
                 }
             }

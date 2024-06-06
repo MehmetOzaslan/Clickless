@@ -28,6 +28,16 @@ namespace Clickless
             }
         }
 
+        public static void IterateOverLocations(IEnumerable<MathUtil.Vector2> locations, Action<MathUtil.Vector2> preAction = null, Action<MathUtil.Vector2> postAction = null)
+        {
+            foreach (var item in locations)
+            {
+                preAction?.Invoke(item);
+                MoveCursor((int)item.x, (int)item.y);
+                postAction?.Invoke(item);
+            }
+        }
+
 
         //Move the cursor to the given coordinates.
         public static void MoveCursor(int x, int y)
@@ -45,6 +55,12 @@ namespace Clickless
         {
             public Int32 x;
             public Int32 y;
+
+            public POINT(int x, int y)
+            {
+                this.x = x;
+                this.y = y;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]

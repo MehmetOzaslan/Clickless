@@ -2,10 +2,12 @@
 {
     using System;
     using System.Drawing;
+    using System.Threading;
     using System.Threading.Tasks;
     using Clickless;
     using Clickless.src;
     using NUnit.Framework;
+    using static Util.MathUtil;
 
     [TestFixture]
     public class MouseTests
@@ -23,7 +25,35 @@
                 }
             }
         }
+
+        [Test]
+        public void TestIteration() {
+
+
+            //Test random points.
+            var pos = new[] { new Vector2(0, 0), new Vector2(10, 10), new Vector2(20, 20), new Vector2(11,11) };
+            MouseController.IterateOverLocations(pos, 
+                (vec) => { Assert.AreNotEqual(MouseController.GetCursorInfo().ptScreenPos.x, (int)vec.x); },
+                (vec) => { Assert.AreEqual(MouseController.GetCursorInfo().ptScreenPos.x, (int)vec.x); });
+        }
+
+        [Test]
+        public void TestScreenIteration()
+        {
+            int error = 4;
+
+            //Test the screen.
+            var screenGrid = ScreenController.ObtainGrid(10,10);
+            MouseController.IterateOverLocations(screenGrid,
+                (vec) => {
+                    Assert.AreNotEqual(vec.y, MouseController.GetCursorInfo().ptScreenPos.y);
+                },
+                (vec) => {
+                    Assert.AreEqual(vec.y, MouseController.GetCursorInfo().ptScreenPos.y, error);
+                });
+        }
     }
+
 
     [TestFixture]
     public class CaptureTests
@@ -59,6 +89,11 @@
             //Test the padding
             Assert.That(grid[0].x, Is.EqualTo(30));
             Assert.That(grid[0].y, Is.EqualTo(30));
+
+            //Test the spacing
+            Assert.AreEqual(30, grid[0].y, 2);
+            Assert.AreEqual(60, grid[1].y, 2);
+            Assert.AreEqual(90, grid[2].y, 2);
         }
     }
 }
