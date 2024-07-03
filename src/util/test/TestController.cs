@@ -45,12 +45,54 @@
             //Test the screen.
             var screenGrid = ScreenController.ObtainGrid(10,10);
             MouseController.IterateOverLocations(screenGrid,
-                (vec) => {
+                (vec) =>
+                {
+                    //ScreenController.CaptureSquare((int)vec.x,(int)vec.y,10);
                     Assert.AreNotEqual(vec.y, MouseController.GetCursorInfo().ptScreenPos.y);
                 },
-                (vec) => {
+                (vec) =>
+                {
+                    //ScreenController.CaptureSquare((int)vec.x, (int)vec.y, 10);
                     Assert.AreEqual(vec.y, MouseController.GetCursorInfo().ptScreenPos.y, error);
                 });
+        }
+
+        [Test]
+        public void TestScreenIterationParallelCapture()
+        {
+            int error = 4;
+
+            //Test the screen.
+            var screenGrid = ScreenController.ObtainGrid(10, 100).ToArray();
+            
+            MouseController.IterateOverLocations(screenGrid,
+                (vec) =>
+                {
+                    ScreenController.CaptureSquare((int)vec.x,(int)vec.y, 32);
+                },
+                (vec) =>
+                {
+                    ScreenController.CaptureSquare((int)vec.x, (int)vec.y, 32);
+                },
+                parallel: true
+                );
+        }
+        [Test]
+        public void TestScreenIterationParallel()
+        {
+            int error = 4;
+
+            //Test the screen.
+            var screenGrid = ScreenController.ObtainGrid(10, 10);
+            MouseController.IterateOverLocations(screenGrid,
+                (vec) =>
+                {
+                },
+                (vec) =>
+                {
+                },
+                parallel: true
+                );
         }
     }
 
@@ -63,9 +105,9 @@
         {
             Image img = ScreenController.CaptureDesktop();
             Assert.That(img, Is.Not.Null);
-            Assert.Greater(img.Width, 0);
-            Assert.Greater(img.Height, 0);
-        }
+                Assert.Greater(img.Width, 0);
+                Assert.Greater(img.Height, 0);
+            }
 
         [Test]
         public void TestCaptureSave()

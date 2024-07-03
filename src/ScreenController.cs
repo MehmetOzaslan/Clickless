@@ -14,8 +14,6 @@ using static Clickless.MouseController;
 
 namespace Clickless.src
 {
-
-
     public static class ScreenController
     {
         public static Size GetSize() { return SystemInformation.VirtualScreen.Size; }
@@ -50,9 +48,10 @@ namespace Clickless.src
                     outList.Add(new MathUtil.Vector2(x, y));
                 }
             }
-
             return outList;
         }
+
+
 
         public static Image CaptureDesktop()
         {
@@ -67,6 +66,39 @@ namespace Clickless.src
             g.CopyFromScreen(screenLeft, screenTop, 0, 0, bitmap.Size);
             return bitmap;
         }
+
+
+        public static Image CaptureRegion(Rectangle rect)
+        {
+            int screenLeft = SystemInformation.VirtualScreen.Left;
+            int screenTop = SystemInformation.VirtualScreen.Top;
+            int screenWidth = SystemInformation.VirtualScreen.Width;
+            int screenHeight = SystemInformation.VirtualScreen.Height;
+
+            // Create a bitmap of the appropriate size to receive the full-screen screenshot.
+            Image bitmap = new Bitmap(rect.Width, rect.Height);
+            Graphics g = Graphics.FromImage(bitmap);
+            g.CopyFromScreen(rect.Left, rect.Top, rect.Right, rect.Bottom, bitmap.Size);
+            return bitmap;
+        }
+
+        public static Image CaptureSquare(int x, int y, int length = 10, bool centered = false)
+        {
+            Rectangle rect;
+            if (centered)
+            {
+               rect = new Rectangle(x,y, length, length);
+            }
+            else
+            {
+                rect = new Rectangle(x-(length/2), y-(length / 2), length, length);
+            }
+
+            return CaptureRegion(rect);
+        }
+
+
+
 
         /// <summary>
         /// Defaults to src/images if saving.

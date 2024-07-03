@@ -5,37 +5,90 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using Util;
+using System.Windows.Forms;
+using System.Drawing;
 
 
 namespace Clickless
 {
 
-    public static class MouseController
+    
+    public class MouseController
     {
 
-        const int NORMAL_CURSOR = 665539;
+        private static MouseController instance = null;
+        private static readonly object padlock = new object();
+        const uint OCR_NORMAL = 32512;
+        private static IntPtr originalCursor;
+
+
+
+        MouseController()
+        {
+        }
+
+        public static MouseController Instance
+        {
+            get
+            {
+                lock (padlock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new MouseController();
+                    }
+                    return instance;
+                }
+            }
+        }
 
         [DllImport("user32.dll")]
         public static extern int SetCursorPos(int x, int y);
 
-        public static void IterateOverLocations(IEnumerable<MathUtil.Vector2> locations, Action preAction= null, Action postAction = null)
+        [DllImport("user32.dll")]
+        public static extern IntPtr LoadCursorFromFile(string lpFileName);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
+
+        [DllImport("user32.dll")]
+        public static extern bool SetSystemCursor(IntPtr hcur, uint id);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr CopyIcon(IntPtr hIcon);
+
+
+        public static void IterateOverLocations(IEnumerable<MathUtil.Vector2> locations, Action preAction = null, Action postAction = null)
         {
             foreach (var item in locations)
             {
                 preAction?.Invoke();
-                MoveCursor((int) item.x, (int) item.y);
+                MoveCursor((int)item.x, (int)item.y);
                 postAction?.Invoke();
             }
         }
 
-        public static void IterateOverLocations(IEnumerable<MathUtil.Vector2> locations, Action<MathUtil.Vector2> preAction = null, Action<MathUtil.Vector2> postAction = null)
+        public static void IterateOverLocations(IEnumerable<MathUtil.Vector2> locations, Action<MathUtil.Vector2> preAction = null, Action<MathUtil.Vector2> postAction = null, bool parallel = false)
         {
-            foreach (var item in locations)
+
+            if (parallel)
             {
-                preAction?.Invoke(item);
-                MoveCursor((int)item.x, (int)item.y);
-                postAction?.Invoke(item);
+                Parallel.ForEach(locations, item =>
+                {
+                    preAction?.Invoke(item);
+                    MoveCursor((int)item.x, (int)item.y);
+                    postAction?.Invoke(item);
+                });
             }
+            else { 
+                foreach (var item in locations)
+                {
+                    preAction?.Invoke(item);
+                    MoveCursor((int)item.x, (int)item.y);
+                    postAction?.Invoke(item);
+                }
+            }
+
         }
 
 
@@ -99,7 +152,63 @@ namespace Clickless
             return cr;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ICONINFO
+        {
+            public bool fIcon;
+            public int xHotspot;
+            public int yHotspot;
+            public IntPtr hbmMask;
+            public IntPtr hbmColor;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr CreateIconIndirect(ref ICONINFO iconInfo);
+        [DllImport("gdi32.dll", SetLastError = true)]
+        static extern bool DeleteObject(IntPtr hObject);
+
+
+
+        [DllImport("user32.dll")]
+        private static extern int ShowCursor(bool bShow);
+
+
+
+        public static void HideCursor()
+        {
+            originalCursor = CopyIcon(LoadCursor(IntPtr.Zero, (int)OCR_NORMAL));
+            if (originalCursor == IntPtr.Zero)
+            {
+                Console.WriteLine("Failed to copy original cursor.");
+                return;
+            }
+
+            // Load the cursor from file
+            IntPtr hCursor = LoadCursorFromFile("C:/Users/mytur/Downloads/transparent.cur");
+            if (hCursor == IntPtr.Zero)
+            {
+                Console.WriteLine("Failed to load cursor from file.");
+                return;
+            }
+
+            if (!SetSystemCursor(hCursor, OCR_NORMAL))
+            {
+                Console.WriteLine("Failed to set system cursor.");
+                return;
+            }
+        }
+
+        // Restore the default cursor before exiting
+        public static void ShowCursor()
+        {
+            // Restore the original cursor before exiting
+            SetSystemCursor(originalCursor, OCR_NORMAL);
+            IntPtr defaultCursor = LoadCursor(IntPtr.Zero, (int)OCR_NORMAL); 
+            SetSystemCursor(defaultCursor, OCR_NORMAL);
+        }
+
         private const Int32 CURSOR_SHOWING = 0x00000001;
         private const Int32 CURSOR_SUPPRESSED = 0x00000002;
     }
 }
+

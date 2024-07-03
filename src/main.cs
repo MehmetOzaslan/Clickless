@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Util;
 
 
+
 namespace Clickless.src
 {
     public class Program
@@ -16,9 +17,12 @@ namespace Clickless.src
 
         static void Main(string[] args)
         {
+            MouseController.HideCursor();
+            Console.WriteLine("Mouse cursor hidden. Press Enter to restore the cursor.");
+            Console.ReadLine();
+            MouseController.ShowCursor();
             Run();
         }
-
 
         static void Run()
         {
