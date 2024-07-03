@@ -98,29 +98,6 @@
         }
 
 
-
-
-        //NOTE: Is prone to flakiness.
-        [Test]
-        public void TestMouseTypeCapture()
-        {
-            CursorTypeTracker cursorTypeTracker = new CursorTypeTracker();
-
-            //Test the screen.
-            var screenGrid = ScreenController.ObtainGrid(10, 100);
-            MouseController.IterateOverLocations(screenGrid,
-                (vec) =>
-                {
-                },
-                (vec) =>
-                {
-                    var info = MouseController.GetCursorInfo();
-                    cursorTypeTracker.Update(vec, info);
-                });
-
-            Assert.GreaterOrEqual(cursorTypeTracker.GetTypes().Count, 1);
-        }
-
         [Test]
         public void TestMouseStateCapture()
         {

@@ -98,8 +98,6 @@ namespace Clickless.src
         }
 
 
-
-
         /// <summary>
         /// Defaults to src/images if saving.
         /// Name: Clickless
