@@ -2,6 +2,8 @@
 {
     using System;
     using System.Drawing;
+    using System.IO;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Clickless;
@@ -94,6 +96,80 @@
                 parallel: true
                 );
         }
+
+
+
+
+        //NOTE: Is prone to flakiness.
+        [Test]
+        public void TestMouseTypeCapture()
+        {
+            CursorTypeTracker cursorTypeTracker = new CursorTypeTracker();
+
+            //Test the screen.
+            var screenGrid = ScreenController.ObtainGrid(10, 100);
+            MouseController.IterateOverLocations(screenGrid,
+                (vec) =>
+                {
+                },
+                (vec) =>
+                {
+                    var info = MouseController.GetCursorInfo();
+                    cursorTypeTracker.Update(vec, info);
+                });
+
+            Assert.GreaterOrEqual(cursorTypeTracker.GetTypes().Count, 1);
+        }
+
+        [Test]
+        public void TestMouseStateCapture()
+        {
+            CursorStateTracker stateTracker = new CursorStateTracker();
+
+            //Test the screen.
+            var screenGrid = ScreenController.ObtainGrid(10, 100);
+            MouseController.IterateOverLocations(screenGrid,
+                (vec) =>
+                {
+                },
+                (vec) =>
+                {
+                    var info = MouseController.GetCursorInfo();
+                    stateTracker.Update(vec, info);
+                });
+
+            Assert.GreaterOrEqual(stateTracker.GetPositionStates().Count, 10);
+        }
+
+
+        [Test]
+        public void TestMouseImageSave()
+        {
+            CursorStateTracker stateTracker = new CursorStateTracker();
+
+            //Test the screen.
+            var screenGrid = ScreenController.ObtainGrid(10, 10);
+            MouseController.IterateOverLocations(screenGrid,
+                (vec) =>
+                {
+                },
+                (vec) =>
+                {
+                    var info = MouseController.GetCursorInfo();
+                    stateTracker.Update(vec, info);
+                });
+
+            Assert.GreaterOrEqual(stateTracker.GetPositionStates().Count, 10);
+
+
+            CursorImageGenerator generator = new CursorImageGenerator(stateTracker);
+
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resources", "images");
+
+            generator.CreateImage(path + "testCapture.png");
+        }
+
+
     }
 
 

@@ -88,7 +88,6 @@ namespace Clickless
                     postAction?.Invoke(item);
                 }
             }
-
         }
 
 
