@@ -41,6 +41,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\CursorImageGenerator.cs" />
+    <Compile Include="src\CursorInfoRetriever.cs" />
     <Compile Include="src\CursorStateTracker.cs" />
     <Compile Include="src\CursorTypeTracker.cs" />
     <Compile Include="src\ICursorUpdator.cs" />

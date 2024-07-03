@@ -17,10 +17,10 @@ namespace Clickless.src
 
         static void Main(string[] args)
         {
-            MouseController.HideCursor();
-            Console.WriteLine("Mouse cursor hidden. Press Enter to restore the cursor.");
-            Console.ReadLine();
-            MouseController.ShowCursor();
+            //MouseController.HideCursor();
+            //Console.WriteLine("Mouse cursor hidden. Press Enter to restore the cursor.");
+            //Console.ReadLine();
+            //MouseController.ShowCursor();
             Run();
         }
 
@@ -34,8 +34,7 @@ namespace Clickless.src
                 var x = info.ptScreenPos.x;
                 var y = info.ptScreenPos.y;
 
-                Console.WriteLine(y + " " + x + " " + info.hCursor.ToString() + AppDomain.CurrentDomain.BaseDirectory + "  ");
-
+                Console.WriteLine(y + " " + x + " " + info.hCursor.ToString() + AppDomain.CurrentDomain.BaseDirectory + "  " + CursorInfoRetriever.IdentifyCursorType(info.hCursor));
                 Thread.Sleep(loopDelay);
             }
         }
