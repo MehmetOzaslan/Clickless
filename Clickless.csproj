@@ -44,7 +44,6 @@
     <Compile Include="src\CursorImageGenerator.cs" />
     <Compile Include="src\CursorInfoRetriever.cs" />
     <Compile Include="src\CursorStateTracker.cs" />
-    <Compile Include="src\CursorTypeTracker.cs" />
     <Compile Include="src\ICursorUpdator.cs" />
     <Compile Include="src\main.cs" />
     <Compile Include="src\MathUtil.cs" />

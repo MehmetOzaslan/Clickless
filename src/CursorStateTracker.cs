@@ -20,22 +20,22 @@ namespace Clickless.src
     /// Tracks the state of the cursor across coordinates. 
     /// Adds different states
     /// </summary>
-    public class  CursorStateTracker : ICursorUpdator
+    public class CursorStateTracker : ICursorUpdator
     {
-        private Dictionary<MathUtil.Vector2, CURSORINFO> _cursorPositionStates;
+        private Dictionary<Vector2, IntPtr> _cursorPositionStates;
 
         public CursorStateTracker() {
-            _cursorPositionStates = new Dictionary<MathUtil.Vector2, CURSORINFO>();
+            _cursorPositionStates = new Dictionary<Vector2, IntPtr>();
         }
 
-        public Dictionary<MathUtil.Vector2, CURSORINFO> GetPositionStates()
+        public Dictionary<Vector2, IntPtr> GetPositionStates()
         {
             return _cursorPositionStates; 
         }
 
-        public void Update(MathUtil.Vector2 pos, CURSORINFO info)
+        public void Update(Vector2 pos, CURSORINFO info)
         {
-            _cursorPositionStates.Add(pos, info);
+            _cursorPositionStates.Add(pos, info.hCursor);
         }
     }
 }

@@ -10,11 +10,6 @@ using System.Windows.Forms;
 namespace Clickless.src
 {
 
-    public struct CursorType
-    {
-        IntPtr type;
-    }
-
     /// <summary>
     /// Utility class intended to differentiate between cursor types when hovering over the desktop.
     /// </summary>

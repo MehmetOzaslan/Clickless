@@ -22,10 +22,10 @@ namespace Clickless.src
     {
 
         private int _width = 0, _height = 0;
-        private int rect_width = 10;
-        private int rect_height = 10;
+        private int rect_width = 5;
+        private int rect_height = 5;
 
-        private Dictionary<CURSORINFO, Color> _colorMapping;
+        private Dictionary<IntPtr, Color> _colorMapping;
         private CursorStateTracker _tracker;
 
 
@@ -37,7 +37,7 @@ namespace Clickless.src
         {
             _tracker = tracker;
 
-            _colorMapping = new Dictionary<CURSORINFO, Color>();
+            _colorMapping = new Dictionary<IntPtr, Color>();
 
             foreach (var item in tracker.GetPositionStates())
             {
@@ -112,27 +112,6 @@ namespace Clickless.src
                 return Color.FromArgb(r, g, b);
             }
         }
-
-        public static Color ObjToColor(CURSORINFO obj)
-        {
-
-            var cursorobj = (int)obj.hCursor;
-
-            byte[] objectBytes = ObjectToByteArray(cursorobj);
-
-            //Hashes the bytes
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                byte[] hashBytes = sha256.ComputeHash(objectBytes);
-
-                int r = hashBytes[0];
-                int g = hashBytes[1];
-                int b = hashBytes[2];
-
-                return Color.FromArgb(r, g, b);
-            }
-        }
-
 
         /// <summary>
         /// Obtains a byte array of an object using a binary formatter.

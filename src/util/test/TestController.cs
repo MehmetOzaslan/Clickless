@@ -127,14 +127,16 @@
             //Test the screen.
             var screenGrid = ScreenController.ObtainGrid(10, 10);
             MouseController.IterateOverLocations(screenGrid,
-                (vec) =>
+                preAction: (vec) =>
                 {
                 },
-                (vec) =>
+                postAction: (vec) =>
                 {
                     var info = MouseController.GetCursorInfo();
                     stateTracker.Update(vec, info);
-                });
+                },
+                parallel : false
+                );
 
             Assert.GreaterOrEqual(stateTracker.GetPositionStates().Count, 10);
 
