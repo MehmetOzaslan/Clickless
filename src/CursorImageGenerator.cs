@@ -20,7 +20,6 @@ namespace Clickless.src
     /// </summary>
     public class CursorImageGenerator
     {
-
         private int _width = 0, _height = 0;
         private int rect_width = 5;
         private int rect_height = 5;
@@ -36,7 +35,6 @@ namespace Clickless.src
         public CursorImageGenerator(CursorStateTracker tracker)
         {
             _tracker = tracker;
-
             _colorMapping = new Dictionary<IntPtr, Color>();
 
             foreach (var item in tracker.GetPositionStates())
@@ -62,10 +60,8 @@ namespace Clickless.src
             }
         }
 
-
         public void CreateImage(string filepath)
         {
-
             // Create a new bitmap image
             using (Bitmap bitmap = new Bitmap(_width, _height))
             {
