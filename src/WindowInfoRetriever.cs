@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using static Clickless.MouseController;
 
 namespace Clickless.src
 {
@@ -25,6 +24,17 @@ namespace Clickless.src
         [DllImport("user32.dll")]
         public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        public static uint GetWindowPIDAtPoint(POINT point)
+        {
+            uint pid;
+            IntPtr hWnd = WindowFromPoint(point);
+            GetWindowThreadProcessId(hWnd, out pid);
+            return pid;
+        }
+
         public static string GetWindowTextAtPoint(POINT point)
         {
             StringBuilder lpString = new StringBuilder(_windowCharLength);
@@ -40,5 +50,7 @@ namespace Clickless.src
             GetWindowRect(hWnd, out lpRect);
             return lpRect;
         }
+
+
     }
 }

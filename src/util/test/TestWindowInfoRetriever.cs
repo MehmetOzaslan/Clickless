@@ -1,48 +1,52 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using Clickless.src;
+using Clickless.src.util.test;
+using NUnit.Framework;
+using static Clickless.src.WindowInfoRetriever;
 
 namespace NUnit.Tests
 {
-    using System;
-    using System.Drawing;
-    using System.IO;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using System.Windows.Forms;
-    using Clickless;
-    using Clickless.src;
-    using Clickless.src.util.test;
-    using NUnit.Framework;
-    using static Util.MathUtil;
-
     [TestFixture]
     public class TestWindowInfoRetriever
     {
+        const string caption = "Test Caption";
+        const string text = "Test Text";
+        POINT point = new POINT(200, 200);
+
+        [SetUp]
+        public void Init()
+        {
+            WindowTestHelper.ShowMessage(text, caption, point);
+        }
+
+        [TearDown] 
+        public void Cleanup() {
+            WindowTestHelper.CloseAll();
+        }
+
+
         [Test]
         public void TestCaption() {
-            const string caption = "Test Caption";
-            const string text = "Test Text";
-            Point point = new Point(200, 200);
-            WindowTestHelper.ShowMessage(text, caption, point);
-            string windowText = WindowInfoRetriever.GetWindowTextAtPoint(new MouseController.POINT(point.X, point.Y));
+
+            string windowText = GetWindowTextAtPoint(point);
             Assert.AreEqual(caption, windowText);
         }
 
         [Test]
         public void TestRect()
         {
-            const string caption = "Test Caption";
-            const string text = "Test Text";
-            Point point = new Point(200, 200);
-            WindowTestHelper.ShowMessage(text, caption, point);
-            RECT windowRect = WindowInfoRetriever.GetWindowRectAtPoint(new MouseController.POINT(point.X, point.Y));
+            RECT windowRect = GetWindowRectAtPoint(point);
             Assert.AreEqual(WindowTestHelper.height, Math.Abs(windowRect.Top - windowRect.Bottom));
             Assert.AreEqual(WindowTestHelper.width, Math.Abs(windowRect.Right - windowRect.Left));
+        }
+
+        //NOTE: This may change if the window is made modal in the future.
+        [Test]
+        public void TestPID()
+        {
+            int PID = (int)GetWindowPIDAtPoint(point);
+            int nProcessID = System.Diagnostics.Process.GetCurrentProcess().Id;
+            Assert.AreEqual(nProcessID, PID);
         }
 
     }

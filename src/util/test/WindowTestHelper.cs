@@ -18,6 +18,8 @@ namespace Clickless.src.util.test
     {
         public const int width = 300;
         public const int height = 200;
+        public readonly POINT defaultPos = new POINT(300, 300);
+
         private static Stack<WindowTestHelper> _windowTestHelpers = new Stack<WindowTestHelper>();
         public const string _text = "Test Text";
         private Label messageLabel;
@@ -26,7 +28,7 @@ namespace Clickless.src.util.test
         {
             this.messageLabel = new Label();
             this.messageLabel.AutoSize = true;
-            this.messageLabel.Location = new System.Drawing.Point(20, 20);
+            this.messageLabel.Location = (Point) defaultPos;
             this.Controls.Add(messageLabel);
 
             this.Text = _text;
@@ -51,13 +53,13 @@ namespace Clickless.src.util.test
             window.BringToFront();
         }
 
-        public static void ShowMessage(string message, string caption, Point point)
+        public static void ShowMessage(string message, string caption, POINT point)
         {
             WindowTestHelper window = new WindowTestHelper();
             window.messageLabel.Text = message;
             window.Text = caption;
             window.StartPosition = FormStartPosition.Manual;
-            window.Location = point;
+            window.Location = (Point) point;
             window.Show();
             window.BringToFront();
         }

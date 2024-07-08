@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using Util;
 using System.Windows.Forms;
 using System.Drawing;
+using Clickless.src;
 
 
 namespace Clickless
@@ -98,22 +99,6 @@ namespace Clickless
         }
 
 
-        /// <summary>
-        /// http://pinvoke.net/default.aspx/user32.GetCursorInfo
-        /// </summary>
-        /// 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct POINT
-        {
-            public Int32 x;
-            public Int32 y;
-
-            public POINT(int x, int y)
-            {
-                this.x = x;
-                this.y = y;
-            }
-        }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct CURSORINFO

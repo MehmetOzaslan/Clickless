@@ -38,8 +38,6 @@ namespace NUnit.Tests
             }
             WindowTestHelper.CloseAll();
         }
-
-
     }
 
 }
