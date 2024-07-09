@@ -13,14 +13,36 @@ namespace Clickless.src
     {
         private readonly ClientWebSocket _client;
 
+        public ClientWebSocket Client => _client;
+
         public MLClientWebsocket()
         {
             _client = new ClientWebSocket();
         }
 
-
-        private async Task ReceiveMessages()
+        public async Task ConnectAsync(Uri uri)
         {
+            await _client.ConnectAsync(uri, CancellationToken.None);
+            Console.WriteLine("Connected to " + uri.ToString());
+        }
+
+        public async Task DisconnectAsync()
+        {
+            await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client Closed", CancellationToken.None);
+            _client.Dispose();
+            Console.WriteLine("Client Disconnected");
+        }
+
+        public async Task Abort()
+        {
+            await _client.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Client Closed", CancellationToken.None);
+            _client.Dispose();
+            Console.WriteLine("Client Disconnected");
+        }
+
+        public async Task ReceiveMessages()
+        {
+            //TODO: Tweak this.
             //Create a buffer and read the following amount per chunk.
             var buffer = new byte[1024 * 4];
             while (_client.State == WebSocketState.Open)
@@ -37,6 +59,22 @@ namespace Clickless.src
                     Console.WriteLine($"Received: {message}");
                 }
             }
+        }
+
+        public async Task<string> ReceiveMessageAsync()
+        {
+            var buffer = new byte[1024 * 4];
+            var result = await Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            return Encoding.UTF8.GetString(buffer, 0, result.Count);
+        }
+
+        public async Task<byte[]> ReceiveByteMessageAsync()
+        {
+            var buffer = new byte[1024 * 1000 * 10];
+            var result = await Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            var receivedBytes = new byte[result.Count];
+            Array.Copy(buffer, receivedBytes, result.Count);
+            return receivedBytes;
         }
 
         public async Task SendMessageAsync(string message)
@@ -56,7 +94,6 @@ namespace Clickless.src
                 imageBytes = ms.ToArray();
             }
 
-
             //Write it to the websocket in chunks.
             var bufferSize = 1024;
             var totalSent = 0;
@@ -71,14 +108,6 @@ namespace Clickless.src
             Console.WriteLine("Sent image");
         }
 
-
-
-        public async Task DisconnectAsync()
-        {
-            await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client closed", CancellationToken.None);
-            _client.Dispose();
-            Console.WriteLine("Disconnected!");
-        }
 
     }
 }
