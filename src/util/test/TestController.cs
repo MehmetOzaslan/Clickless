@@ -155,6 +155,7 @@
     [TestFixture]
     public class CaptureTests
     {
+
         [Test]
         public void TestCapture()
         {
@@ -162,12 +163,14 @@
             Assert.That(img, Is.Not.Null);
                 Assert.Greater(img.Width, 0);
                 Assert.Greater(img.Height, 0);
-            }
+        }
 
         [Test]
         public void TestCaptureSave()
         {
-            Image img = ScreenController.CaptureDesktop("test.png");
+            Image img = ScreenController.CaptureDesktop();
+            ScreenController.SaveImage(img);
+
             Assert.That(img, Is.Not.Null);
             Assert.Greater(img.Width, 0);
             Assert.Greater(img.Height, 0);
@@ -192,5 +195,7 @@
             Assert.AreEqual(60, grid[1].y, 2);
             Assert.AreEqual(90, grid[2].y, 2);
         }
+
+
     }
 }
