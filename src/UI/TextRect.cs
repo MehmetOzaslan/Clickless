@@ -12,8 +12,14 @@ namespace Clickless.src.UI
     /// <summary>
     /// This represents the data to display on the screen when changes are made.
     /// </summary>
-    internal class TextRect
+    public class TextRect
     {
+        public TextRect(Rectangle rect, string text){
+            this.Rectangle = rect;
+            this.Text = text;
+        }
+
+
         //TODO: Move this to a settings file somewhere.
         static Brush borderBrush = new HatchBrush(HatchStyle.DarkDownwardDiagonal, Color.Magenta); // Changed to black for better visibility
         static Brush textBGBrush = new SolidBrush(Color.Black);
@@ -25,8 +31,8 @@ namespace Clickless.src.UI
 
         public Rectangle Rectangle { get; set; }
         public string Text { get; set; }
-        private int _textX {  get { return Rectangle.Width/2 + Rectangle.Left ; } }
-        private int _textY { get { return Rectangle.Height/2 + Rectangle.Bottom; } }
+        private int _textX { get { return Rectangle.Left + Rectangle.Width / 2; } }
+        private int _textY { get { return Rectangle.Top + Rectangle.Height / 2; } }
 
 
         /// <summary>
