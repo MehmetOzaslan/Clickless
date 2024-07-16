@@ -5,10 +5,11 @@ using System.Net.WebSockets;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Clickless.src;
+using Clickless.src.UI;
 using Clickless.src.util.test;
 using NUnit.Framework;
-using static System.Net.Mime.MediaTypeNames;
 using static Clickless.src.WindowInfoRetriever;
 using Image = System.Drawing.Image;
 
@@ -20,7 +21,7 @@ namespace NUnit.Tests
         private const string echoTextURL = "ws://localhost:8210/echotext";
         private const string echoBytesURL = "ws://localhost:8210/echobytes";
         private const string imageSaveURL = "ws://localhost:8210/imagesave";
-
+        private const string imagemlURL = "ws://localhost:8210/imageml";
 
 
         MLClientWebsocket websocket;
@@ -44,8 +45,6 @@ namespace NUnit.Tests
             await websocket.DisconnectAsync();
             Assert.AreEqual(WebSocketState.Closed, websocket.Client.State);
         }
-
-
 
         [Test]
         public async Task TestSend()
@@ -125,7 +124,34 @@ namespace NUnit.Tests
             Assert.AreEqual(WebSocketState.Aborted, websocket.Client.State);
         }
 
+        [Test]
+        public async Task TestImageMLandResponse()
+        {
+            await websocket.ConnectAsync(new Uri(imagemlURL));
+            Assert.AreEqual(WebSocketState.Open, websocket.Client.State);
 
+
+            Image img = ScreenController.CaptureDesktop();
+
+            await websocket.SendImageAsync(img);
+            string result = await websocket.ReceiveMessageAsync();
+            Assert.Greater(result.Length, 1);
+
+            var rects = TextRectGenerator.GenerateBoxes(result);
+            Console.WriteLine("Rcvd " + result);
+            
+
+            var form = new TransparentForm();
+            form.Rects = rects;
+            Application.EnableVisualStyles();
+            Application.Run(form);
+
+            await websocket.DisconnectAsync();
+            Assert.AreEqual(WebSocketState.Closed, websocket.Client.State);
+        }
+
+
+        
         [Test]
         public async Task TestImageSave()
         {
@@ -145,39 +171,6 @@ namespace NUnit.Tests
 
 
 
-        [Test]
-        public async Task TestImageEcho()
-        {
-            await websocket.ConnectAsync(new Uri(echoBytesURL));
-            Assert.AreEqual(WebSocketState.Open, websocket.Client.State);
-
-            Image img = ScreenController.CaptureDesktop();
-
-            //TODO: Change this
-            byte[] imageBytes;
-            using (var ms = new MemoryStream())
-            {
-                img.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-                imageBytes = ms.ToArray();
-            }
-
-
-            await websocket.SendImageAsync(img);
-
-            var returnData = await websocket.ReceiveByteMessageAsync();
-
-            Console.WriteLine("Rcvd: " + returnData.ToString());
-
-            Assert.AreEqual(imageBytes, returnData);
-
-            await Task.Delay(100);
-            await websocket.Abort();
-            Assert.AreEqual(WebSocketState.Closed, websocket.Client.State);
-
-        }
     }
-
-
-
 }
 
