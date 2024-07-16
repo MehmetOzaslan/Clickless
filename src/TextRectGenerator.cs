@@ -15,57 +15,47 @@ namespace Clickless.src
         public const int ASCII_A = 65;
 
         /// <summary>
-        /// Gets the logarithm of a number in base 26. Divides until the number is > 26.
+        /// Gets the logarithm of a number in base 26. 
+        /// Multiplies 1 until it's greater than the number.
         /// </summary>
-        private static int Log26Rounded(int num)
+        public static int Log26Rounded(int num)
         {
             int count = 0;
-            while (num > 26)
+            int counter = 1;
+            do
             {
-                num/= 26;
+                counter *= 26;
                 count++;
-            }
+            } while (counter < num);
+
             return count;
         }
 
+        public static string int2cmd(int num)
+        {
+            string command = "";
+
+            while (num > 0)
+            {
+                num--;
+                int remainder = num % 26;
+                command = (char)(ASCII_A + remainder) + command;
+                //Go to the next digit.
+                num /= 26;
+            }
+
+            return command;
+        }
 
         public static List<string> GenerateCommands(int num) {
             List<string> commands = new List<string>();
             
             int[] ints = new int[num];
-
+            
             int _currNum = 0;
-            for (int i = 0; i < num; i++) {
-                ints[i] = i;
+            for (int i = 1; i < num; i++) {
+                commands.Add(int2cmd(i));
             }
-
-            //We are basically counting with base 26.
-            //26
-            //676
-            //17576
-
-            foreach (int i in ints) {
-
-                //Number of digits obtained through logarithm.
-                int digitCount = Log26Rounded(i);
-                int str_length = 0;
-
-                var command = "";
-                do
-                {
-                    if(digitCount == 0)
-                    {
-                        command += (char)((i) + ASCII_A);
-                    }
-                    else
-                    {
-                        command += (char)(i/(26*digitCount) + ASCII_A);
-                    }
-                    str_length += 1;
-                } while (str_length < digitCount);
-                commands.Add(command);
-            }
-
 
             return commands;
         }
