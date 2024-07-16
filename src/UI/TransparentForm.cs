@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using Clickless.src.UI;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
@@ -17,25 +19,18 @@ public class TransparentForm : Form
         this.DoubleBuffered = true;
     }
 
+    private List<TextRect> rects = new List<TextRect> { };
 
-
+    public List<TextRect> Rects { get => rects; set { rects = value;  this.Invalidate(); } }
 
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
 
         Graphics g = e.Graphics;
-        Brush b = new HatchBrush(HatchStyle.DarkDownwardDiagonal, Color.Magenta); // Changed to black for better visibility
-        Brush t = new SolidBrush(Color.Black);
-        Brush w = new SolidBrush(Color.White);
-
-        int x = 100;
-        int y = 100;
-
-        foreach (var text in texts)
+        foreach (var rect in rects)
         {
-            x += 30;
-            y += 30;
+            rect.DrawToGraphics(g);
         }
     }
 }
