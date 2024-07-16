@@ -12,24 +12,7 @@ namespace Clickless.src
     /// 
     public static class CommandGenerator
     {
-        public const int ASCII_A = 65;
-
-        /// <summary>
-        /// Gets the logarithm of a number in base 26. 
-        /// Multiplies 1 until it's greater than the number.
-        /// </summary>
-        public static int Log26Rounded(int num)
-        {
-            int count = 0;
-            int counter = 1;
-            do
-            {
-                counter *= 26;
-                count++;
-            } while (counter < num);
-
-            return count;
-        }
+        private const int ASCII_A = 65;
 
         public static string int2cmd(int num)
         {
@@ -37,6 +20,7 @@ namespace Clickless.src
 
             while (num > 0)
             {
+                //Allow for proper indexing, eg: 1:A instead of 0:A
                 num--;
                 int remainder = num % 26;
                 command = (char)(ASCII_A + remainder) + command;
@@ -47,14 +31,16 @@ namespace Clickless.src
             return command;
         }
 
+        /// <summary>
+        /// Creates n unique strings from [A..Z] 
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
         public static List<string> GenerateCommands(int num) {
             List<string> commands = new List<string>();
             
-            int[] ints = new int[num];
-            
-            int _currNum = 0;
-            for (int i = 1; i < num; i++) {
-                commands.Add(int2cmd(i));
+            for (int i = 0; i < num; i++) {
+                commands.Add(int2cmd(i + 1));
             }
 
             return commands;
