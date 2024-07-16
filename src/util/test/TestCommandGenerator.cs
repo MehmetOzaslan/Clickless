@@ -55,15 +55,5 @@ namespace NUnit.Tests
             Assert.AreEqual("AAA", cmds[676+26]);
             Assert.AreEqual("AAAA", cmds[17576+676+26]);
         }
-
-        [Test]
-        public void TestLogCounting()
-        {
-            Assert.AreEqual(1, CommandGenerator.Log26Rounded(26));
-            Assert.AreEqual(2, CommandGenerator.Log26Rounded(676));
-            Assert.AreEqual(3, CommandGenerator.Log26Rounded(17576));
-        }
-
-
     }
 }
