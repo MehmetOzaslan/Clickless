@@ -23,7 +23,6 @@ namespace Clickless
         private static IntPtr originalCursor;
 
 
-
         MouseController()
         {
         }
@@ -42,6 +41,38 @@ namespace Clickless
                 }
             }
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct INPUT
+        {
+            public uint type;
+            public InputUnion u;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        struct InputUnion
+        {
+            [FieldOffset(0)]
+            public MOUSEINPUT mi;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct MOUSEINPUT
+        {
+            public int dx;
+            public int dy;
+            public uint mouseData;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        const uint INPUT_MOUSE = 0;
+        const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
+        const uint MOUSEEVENTF_LEFTUP = 0x0004;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern uint SendInput(uint nInputs, [MarshalAs(UnmanagedType.LPArray), In] INPUT[] pInputs, int cbSize);
 
         [DllImport("user32.dll")]
         public static extern int SetCursorPos(int x, int y);
@@ -193,6 +224,40 @@ namespace Clickless
 
         private const Int32 CURSOR_SHOWING = 0x00000001;
         private const Int32 CURSOR_SUPPRESSED = 0x00000002;
+
+
+        public static void DoMouseClick()
+        {
+            INPUT[] inputs = new INPUT[2];
+
+            // Mouse left button down
+            inputs[0] = new INPUT
+            {
+                type = INPUT_MOUSE,
+                u = new InputUnion
+                {
+                    mi = new MOUSEINPUT
+                    {
+                        dwFlags = MOUSEEVENTF_LEFTDOWN
+                    }
+                }
+            };
+
+            // Mouse left button up
+            inputs[1] = new INPUT
+            {
+                type = INPUT_MOUSE,
+                u = new InputUnion
+                {
+                    mi = new MOUSEINPUT
+                    {
+                        dwFlags = MOUSEEVENTF_LEFTUP
+                    }
+                }
+            };
+
+            SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+        }
     }
 }
 
