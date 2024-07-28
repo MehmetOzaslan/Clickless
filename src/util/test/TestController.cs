@@ -177,6 +177,28 @@
         }
 
 
+
+        [Test]
+        public void TestDesktopResolution()
+        {
+            var size = ScreenController.GetSize();
+            Assert.AreEqual(1920, size.Width);
+            Assert.AreEqual(1080, size.Height);
+        }
+
+        [Test]
+        public void TestCaptureSaveDesktopResolution()
+        {
+            Image img = ScreenController.CaptureDesktop();
+            ScreenController.SaveImage(img);
+
+            Assert.That(img, Is.Not.Null);
+            Assert.AreEqual(1920, img.Width);
+            Assert.AreEqual(1080,img.Height);
+        }
+
+
+
         [Test]
         public void TestGrid()
         {

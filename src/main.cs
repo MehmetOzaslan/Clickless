@@ -1,10 +1,14 @@
-﻿using System;
+﻿using Clickless.src.UI;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Drawing.Printing;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Util;
 
 
@@ -15,29 +19,48 @@ namespace Clickless.src
     {
         public const int loopDelay = 1000;
 
+        [STAThread]
         static void Main(string[] args)
         {
-            //MouseController.HideCursor();
-            //Console.WriteLine("Mouse cursor hidden. Press Enter to restore the cursor.");
-            //Console.ReadLine();
-            //MouseController.ShowCursor();
-            Run();
-        }
+            Application.EnableVisualStyles();
 
-        static void Run()
-        {
+            var keyboardHook = KeyboardHook.Instance;
+
+            // Start the Windows Forms message loop on a separate thread
+            Thread uiThread = new Thread(RunMessageLoop);
+            uiThread.SetApartmentState(ApartmentState.STA); // Set the apartment state to STA
+            uiThread.Start();
 
             float offset = 0f;
+            var websocket = new MLClientWebsocket();
 
-            while (true) {
-                MouseController.CURSORINFO info = MouseController.GetCursorInfo();
-                var x = info.ptScreenPos.x;
-                var y = info.ptScreenPos.y;
+            Task task = websocket.ConnectAsync(new Uri(MLClientWebsocket.imagemlURL));
+            task.Wait();
 
-                Console.WriteLine(y + " " + x + " " + info.hCursor.ToString() + AppDomain.CurrentDomain.BaseDirectory + "  " + CursorInfoRetriever.IdentifyCursorType(info.hCursor));
-                Thread.Sleep(loopDelay);
-            }
+            Assert.AreEqual(WebSocketState.Open, websocket.Client.State);
+
+            KeyMatcher keyMatcher = new KeyMatcher(websocket);
+            keyboardHook.KeyDown += (sender, e) => {
+                var keys = KeyboardHook.Instance.CurrentlyPressedKeys;
+                Console.WriteLine("====== KEYS =====");
+                foreach (var item in keys)
+                {
+                    Console.Write($"{item} || ");
+                }
+                Console.WriteLine();
+                Console.WriteLine("=================");
+                keyMatcher.ExecuteCommand(keys);
+            };
         }
+
+        static void RunMessageLoop()
+        {
+            
+            
+            Application.Run();
+        }
+
     }
+
 
 }

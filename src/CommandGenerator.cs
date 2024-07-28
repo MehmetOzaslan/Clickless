@@ -8,6 +8,7 @@ namespace Clickless.src
     /// 
     public static class CommandGenerator
     {
+
         private const int ASCII_A = 65;
 
         public static string int2cmd(int num)
@@ -29,16 +30,15 @@ namespace Clickless.src
 
         /// <summary>
         /// Creates n unique strings from [A..Z] 
+        /// TODO: Ensure that all commands do not contain a prefix of another command.
         /// </summary>
         /// <param name="num"></param>
         /// <returns></returns>
         public static List<string> GenerateCommands(int num) {
             List<string> commands = new List<string>();
-            
             for (int i = 0; i < num; i++) {
                 commands.Add(int2cmd(i + 1));
             }
-
             return commands;
         }
     }
