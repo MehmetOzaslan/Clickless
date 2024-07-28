@@ -8,21 +8,73 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Drawing;
 using Clickless.src.UI;
+using static System.Net.Mime.MediaTypeNames;
+using static Clickless.src.KeyboardHook;
 
 namespace Clickless.src
 {
     /// <summary>
     /// Converts the json response through the websocket to a text rect.
     /// </summary>
-    ///
 
 
-    internal class TextRectGenerator
+    public class TextRectGenerator
     {
+        private List<TextRect> _bboxes = new List<TextRect>();
+        public event EventHandler Emptied;
+        public event EventHandler Filtered;
+        public event EventHandler Filled;
 
-        
-        public static List<TextRect> GenerateBoxes(string json_response)
+
+        public void SetBoxes(List<TextRect> bboxes) {  
+            _bboxes = bboxes;
+            Filled?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void SetBoxesFromResponse(string response)
         {
+            SetBoxes(GenerateBoxesFromResponse(response));   
+        }
+
+        //Filter by the first character for each rect.
+        public void FilterBoxes(char filter) {
+            if (!checkBoxFull())
+            {
+                Emptied?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+
+            //Filter the boxes.
+            _bboxes = _bboxes.Where(x=> x.Text[0] == filter).ToList();
+
+
+            if (!checkBoxFull())
+            {
+                Emptied?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+
+            else
+            {
+                Filtered?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public void ClearBoxes()
+        {
+            _bboxes.Clear();
+            Emptied?.Invoke(this, EventArgs.Empty);
+        }
+
+        private bool checkBoxFull()
+        {
+            return _bboxes != null &&  _bboxes.Count > 0;
+        }
+
+
+        public static List<TextRect> GenerateBoxesFromResponse(string json_response)
+        {
+            List<TextRect> bboxes = new List<TextRect>();
             //I could parse the response into a json and add a incredibly large library.
             //Or I could just follow the following format:
             //[[xmin, ymin, xmax, ymax],[xmin, ymin, xmax, ymax],[xmin, ymin, xmax, ymax]]
@@ -46,7 +98,6 @@ namespace Clickless.src
             }
 
             //Create all rects.
-
             List<Rectangle> rects = new List<Rectangle>();
 
             for (int i = 0; i < numbers.Count; i+=4)
@@ -64,16 +115,14 @@ namespace Clickless.src
             //Create the text commands.
             var commands = CommandGenerator.GenerateCommands(rects.Count);
 
-
-            //Wrap them together in the text rect object.
-            List<TextRect> textRects = new List<TextRect>();
+            //Wrap them together in the text rect list.
             for (int i = 0; i < commands.Count; i++)
             {
                 TextRect textRect = new TextRect(rects[i], commands[i]);
-                textRects.Add(textRect);
+                bboxes.Add(textRect);
             }
 
-            return textRects;
+            return bboxes;
         }
 
 
