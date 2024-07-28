@@ -3,19 +3,27 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 
 
+
+
 def get_bboxes(image):
+        blur : int = 0
+        db_dist : int = 5
+
+
         # GaussianBlur to reduce image noise
-        blurred_image = cv2.GaussianBlur(image, (5, 5), 1.4)
+        # blurred_image = cv2.GaussianBlur(image, (5, 5), blur)
 
         # Apply Canny edge detection
-        edges = cv2.Canny(blurred_image, 100, 200)
+        edges = cv2.Canny(image, 100, 200)
+
+        
 
         # Find coordinates of edge points
         y, x = np.where(edges > 0)
         edge_points = np.column_stack((x, y))
 
         # Apply DBSCAN clustering based on distance
-        db = DBSCAN(eps=10, min_samples=5).fit(edge_points)
+        db = DBSCAN(eps=db_dist, min_samples=5).fit(edge_points)
         labels = db.labels_
 
         # Get the number of clusters
@@ -35,3 +43,5 @@ def get_bboxes(image):
                 bboxes.append(x_max)
                 bboxes.append(y_max)
         return bboxes
+
+
