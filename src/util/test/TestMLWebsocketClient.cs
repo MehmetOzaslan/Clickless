@@ -100,7 +100,7 @@ namespace NUnit.Tests
             Console.WriteLine("Rcvd: " + returnData);
 
             await Task.Delay(100);
-
+                
 
             await websocket.DisconnectAsync();
             Assert.AreEqual(WebSocketState.Closed, websocket.Client.State);
@@ -119,7 +119,6 @@ namespace NUnit.Tests
 
             await Task.Delay(100);
 
-
             await websocket.Abort();
             Assert.AreEqual(WebSocketState.Aborted, websocket.Client.State);
         }
@@ -130,16 +129,14 @@ namespace NUnit.Tests
             await websocket.ConnectAsync(new Uri(imagemlURL));
             Assert.AreEqual(WebSocketState.Open, websocket.Client.State);
 
-
             Image img = ScreenController.CaptureDesktop();
 
             await websocket.SendImageAsync(img);
             string result = await websocket.ReceiveMessageAsync();
             Assert.Greater(result.Length, 1);
 
-            var rects = TextRectGenerator.GenerateBoxes(result);
             Console.WriteLine("Rcvd " + result);
-            
+            var rects = TextRectGenerator.GenerateBoxesFromResponse(result);
 
             var form = new TransparentForm();
             form.Rects = rects;
@@ -168,6 +165,15 @@ namespace NUnit.Tests
             Assert.AreEqual(WebSocketState.Aborted, websocket.Client.State);
         }
 
+
+        [Test]
+        public async Task TestKeyMatcher()
+        {
+            await websocket.ConnectAsync(new Uri(imagemlURL));
+            var matcher = new KeyMatcher(websocket);
+
+            await matcher.RunMLandDisplayWindow();
+        }
 
 
 

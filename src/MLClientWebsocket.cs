@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.IO;
 using System.Net.WebSockets;
@@ -9,8 +10,13 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Clickless.src
 {
-    internal class MLClientWebsocket
+    public class MLClientWebsocket
     {
+        public readonly static string echoTextURL = "ws://localhost:8210/echotext";
+        public readonly static string echoBytesURL = "ws://localhost:8210/echobytes";
+        public readonly static string imageSaveURL = "ws://localhost:8210/imagesave";
+        public readonly static string imagemlURL = "ws://localhost:8210/imageml";
+
         private readonly ClientWebSocket _client;
 
         public ClientWebSocket Client => _client;
@@ -42,9 +48,8 @@ namespace Clickless.src
 
         public async Task ReceiveMessages()
         {
-            //TODO: Tweak this.
             //Create a buffer and read the following amount per chunk.
-            var buffer = new byte[1024 * 4];
+            var buffer = new byte[1024];
             while (_client.State == WebSocketState.Open)
             {
                 var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -61,9 +66,58 @@ namespace Clickless.src
             }
         }
 
-        public async Task<string> ReceiveMessageAsync()
+        private async Task ReceiveMessagesAsync()
         {
             var buffer = new byte[1024 * 4];
+
+            while (Client.State == WebSocketState.Open)
+            {
+                var result = await Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    await Client.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+                }
+                else
+                {
+                    var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    ProcessMessage(message);
+                }
+            }
+        }
+
+
+        private ConcurrentDictionary<string, TaskCompletionSource<string>> _responseHandlers = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
+
+        public async Task<string> SendImageAndWaitForResponseAsync(string message, string identifier)
+        {
+            var tcs = new TaskCompletionSource<string>();
+            _responseHandlers[identifier] = tcs;
+
+            await SendMessageAsync(message);
+
+            return await tcs.Task; // Wait for response
+        }
+
+        private void ProcessMessage(string message)
+        {
+            // Assuming the message contains an identifier to correlate responses
+            var identifier = message.GetHashCode().ToString();
+            if (_responseHandlers.TryRemove(identifier, out var tcs))
+            {
+                tcs.SetResult(message);
+            }
+            else
+            {
+                // Handle general messages or log unexpected ones
+                Console.WriteLine("Received: " + message);
+            }
+        }
+
+
+        public async Task<string> ReceiveMessageAsync()
+        {
+            var buffer = new byte[1024 * 30];
             var result = await Client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             return Encoding.UTF8.GetString(buffer, 0, result.Count);
         }
@@ -95,7 +149,7 @@ namespace Clickless.src
             }
 
             //Write it to the websocket in chunks.
-            var bufferSize = 1024;
+            var bufferSize = 1024*4;
             var totalSent = 0;
 
             while (totalSent < imageBytes.Length)
