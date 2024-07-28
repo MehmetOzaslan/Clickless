@@ -19,14 +19,13 @@ namespace Clickless.src.UI
             this.Text = text;
         }
 
-
-        //TODO: Move this to a settings file somewhere.
-        static Brush borderBrush = new HatchBrush(HatchStyle.DarkDownwardDiagonal, Color.Magenta); // Changed to black for better visibility
-        static Brush textBGBrush = new SolidBrush(Color.Black);
-        static Brush textFGBrush = new SolidBrush(Color.White);
+        static Brush borderBrush = new HatchBrush(HatchStyle.DarkDownwardDiagonal, ColorTranslator.FromHtml("#219ebc"));
+        static Brush textBGBorderBrush = new SolidBrush(ColorTranslator.FromHtml("#ffb703"));
+        static Brush textBGBrush = new SolidBrush(ColorTranslator.FromHtml("#023047"));
+        static Brush textFGBrush = new SolidBrush(ColorTranslator.FromHtml("#8ecae6"));
         public Font Font { get => font; set => font = value; }
 
-        private Font font = new Font("Calibri", 14);
+        private Font font = new Font("Calibri", 12);
 
 
         public Rectangle Rectangle { get; set; }
@@ -43,6 +42,7 @@ namespace Clickless.src.UI
         {
             SizeF textSize = g.MeasureString(Text, Font) ;
 
+            g.FillRectangle(textBGBorderBrush, _textX-2, _textY-2, textSize.Width+4, textSize.Height+4);
             g.FillRectangle(textBGBrush, _textX, _textY, textSize.Width, textSize.Height);
             g.DrawString(Text, Font, textFGBrush, _textX, _textY);
             g.DrawRectangle(new Pen(borderBrush, 2), Rectangle);

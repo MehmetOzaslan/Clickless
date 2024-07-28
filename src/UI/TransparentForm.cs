@@ -1,4 +1,5 @@
 ﻿using Clickless.src.UI;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -6,9 +7,6 @@ using System.Windows.Forms;
 
 public class TransparentForm : Form
 {
-
-    private string[] texts = { "A", "BB", "C", "DD", "E","F","G" };
-
     public TransparentForm()
     {
         this.BackColor = new Color();
@@ -17,6 +15,17 @@ public class TransparentForm : Form
         this.Bounds = Screen.PrimaryScreen.Bounds;
         this.TopMost = true;
         this.DoubleBuffered = true;
+
+        this.LostFocus += new EventHandler((sender, e) => { toFront(); } );
+    }
+
+    
+    private void toFront()
+    {
+        this.WindowState = FormWindowState.Minimized;
+        this.Show();
+        this.WindowState = FormWindowState.Normal;
+        this.BringToFront();
     }
 
     private List<TextRect> rects = new List<TextRect> { };
