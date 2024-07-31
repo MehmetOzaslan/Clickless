@@ -10,6 +10,7 @@ using System.Security.Policy;
 using System.Windows.Markup;
 using Dbscan.RBush;
 using System.Collections.Concurrent;
+using System.Collections;
 
 namespace Clickless.src
 {
@@ -23,6 +24,8 @@ namespace Clickless.src
         /// <returns></returns>
         public static Mat BitmapToMat(Bitmap bitmap)
         {
+
+
             // Lock the bitmap's bits
             BitmapData bitmapData = bitmap.LockBits(
                 new Rectangle(0, 0, bitmap.Width, bitmap.Height),
@@ -53,15 +56,15 @@ namespace Clickless.src
                 this.y = y;
             }
 
-            public Dbscan.Point Point => new Dbscan.Point(x,y);
+            public Dbscan.Point Point => new Dbscan.Point(x, y);
         }
 
         private static Rectangle GetClusterRect(Dbscan.Cluster<EdgePt> cluster)
         {
-            int xmin = (int) cluster.Objects.Min(p => p.Point.X);
-            int ymin = (int) cluster.Objects.Min(p => p.Point.Y);
-            int xmax = (int) cluster.Objects.Max(p => p.Point.X);
-            int ymax = (int) cluster.Objects.Max(p => p.Point.Y);
+            int xmin = (int)cluster.Objects.Min(p => p.Point.X);
+            int ymin = (int)cluster.Objects.Min(p => p.Point.Y);
+            int xmax = (int)cluster.Objects.Max(p => p.Point.X);
+            int ymax = (int)cluster.Objects.Max(p => p.Point.Y);
 
             return new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
         }
@@ -71,7 +74,10 @@ namespace Clickless.src
             return GetBboxes(BitmapToMat(image));
         }
 
-
+        private static Mat resizedImage = new Mat();
+        private static Mat blurredImage = new Mat();
+        private static Mat grayImage = new Mat();
+        private static Mat edges = new Mat();
 
         public static List<Rectangle> GetBboxes(Mat image)
         {
@@ -84,42 +90,37 @@ namespace Clickless.src
             //NOTE: this is 0.5 to allow for easy bitshifting
             double scaleFactor = 0.5;
 
-            Mat resizedImage = new Mat();
             Cv2.Resize(image, resizedImage, new OpenCvSharp.Size(), scaleFactor, scaleFactor);
 
-            Mat blurredImage = new Mat();
             Cv2.GaussianBlur(resizedImage, blurredImage, new OpenCvSharp.Size(gaussianKernalSize, gaussianKernalSize), 0);
 
-            Mat grayImage = new Mat();
             Cv2.CvtColor(blurredImage, grayImage, ColorConversionCodes.RGB2GRAY);
 
-            Mat edges = new Mat();
             Cv2.Canny(grayImage, edges, cannyThresh1, cannyThresh2);
 
-            image.Release();
 
-            // Find coordinates of edge points
             var edgePoints = new ConcurrentBag<EdgePt>();
-
-            Parallel.For(0, edges.Rows, y =>
+            // Find coordinates of edge points
+            Parallel.For(0, edges.Rows * edges.Cols, i =>
             {
-                for (int x = 0; x < edges.Cols; x++)
+                int y = i / edges.Cols;
+                int x = i % edges.Cols;
+                
+                if (edges.At<byte>(y, x) > 0)
                 {
-                    if (edges.At<byte>(y, x) > 0)
-                    {
-                        // Rescale the points.
-                        edgePoints.Add(new EdgePt(x << 1, y << 1));
-                    }
+                    // Rescale the 2x points via bitshift
+                    edgePoints.Add(new EdgePt(x << 1, y << 1));
                 }
+
             });
 
 
-            var clusters =DbscanRBush.CalculateClusters(
+            var clusters = DbscanRBush.CalculateClusters(
                 edgePoints,
                 epsilon: 5,
                 minimumPointsPerCluster: 5
                 );
-            
+
             List<Rectangle> rects = new List<Rectangle>();
             foreach (var item in clusters.Clusters)
             {
