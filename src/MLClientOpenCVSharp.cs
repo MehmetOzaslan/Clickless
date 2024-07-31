@@ -77,6 +77,9 @@ namespace Clickless.src
         {
             int blur = 0;
             int dbDist = 5;
+            int gaussianKernalSize = 5;
+            int cannyThresh1 = 100;
+            int cannyThresh2 = 200;
 
             //NOTE: this is 0.5 to allow for easy bitshifting
             double scaleFactor = 0.5;
@@ -85,16 +88,13 @@ namespace Clickless.src
             Cv2.Resize(image, resizedImage, new OpenCvSharp.Size(), scaleFactor, scaleFactor);
 
             Mat blurredImage = new Mat();
-            Cv2.GaussianBlur(resizedImage, blurredImage, new OpenCvSharp.Size(5, 5), 0);
+            Cv2.GaussianBlur(resizedImage, blurredImage, new OpenCvSharp.Size(gaussianKernalSize, gaussianKernalSize), 0);
 
             Mat grayImage = new Mat();
             Cv2.CvtColor(blurredImage, grayImage, ColorConversionCodes.RGB2GRAY);
 
             Mat edges = new Mat();
-            Cv2.Canny(grayImage, edges, 100, 200);
-
-            Cv2.ImShow("Canny Image", edges);
-
+            Cv2.Canny(grayImage, edges, cannyThresh1, cannyThresh2);
 
             image.Release();
 
