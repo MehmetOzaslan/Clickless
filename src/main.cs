@@ -22,14 +22,19 @@ namespace Clickless.src
         [STAThread]
         static void Main(string[] args)
         {
-            Thread uiThread = new Thread(RunMessageLoop);
-            var keyboardHook = KeyboardHook.Instance;
-            KeyMatcher keyMatcher = new KeyMatcher();
+            Thread messageThread = new Thread(RunMessageLoop);
 
             // Start the Windows Forms message loop on a separate thread
             Application.EnableVisualStyles();
-            uiThread.SetApartmentState(ApartmentState.STA); // Set the apartment state to STA
-            uiThread.Start();
+            messageThread.SetApartmentState(ApartmentState.STA); // Set the apartment state to STA
+            messageThread.Start();
+
+        }
+
+        static void RunMessageLoop()
+        {
+            var keyboardHook = KeyboardHook.Instance;
+            KeyMatcher keyMatcher = new KeyMatcher();
 
             keyboardHook.KeyDown += (sender, e) => {
                 var keys = KeyboardHook.Instance.CurrentlyPressedKeys;
@@ -42,10 +47,6 @@ namespace Clickless.src
                 Console.WriteLine("=================");
                 keyMatcher.ExecuteCommand(keys);
             };
-        }
-
-        static void RunMessageLoop()
-        {
             Application.Run();
         }
 

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -86,7 +88,7 @@ namespace Clickless.src
         {
             lock (lockObject)
             {
-                Instance.pressedKeys[e.key] = false;
+                Console.WriteLine("Thread: " + Thread.CurrentThread.ManagedThreadId);
                 Instance.KeyUp?.Invoke(Instance, e);
             }            
 
@@ -96,7 +98,7 @@ namespace Clickless.src
         {
             lock (lockObject)
             {
-                Instance.pressedKeys[e.key] = true;
+                Console.WriteLine("Thread: " + Thread.CurrentThread.ManagedThreadId);
                 Instance.KeyDown?.Invoke(Instance, e);
             }
         }
@@ -117,7 +119,7 @@ namespace Clickless.src
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
         {
-            var curProcess = System.Diagnostics.Process.GetCurrentProcess();
+            using (var curProcess = Process.GetCurrentProcess())
             using (var curModule = curProcess.MainModule)
             {
                 return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
@@ -133,11 +135,13 @@ namespace Clickless.src
 
                 if(wParam == (IntPtr)WM_KEYDOWN)
                 {
+                    Instance.pressedKeys[key] = true;
                     OnKeyDown(new KeyPressedEventArgs(key));
                 }
 
                 if(wParam == (IntPtr)WM_KEYUP)
                 {
+                    Instance.pressedKeys[key] = false;
                     OnKeyUp(new KeyPressedEventArgs(key));
                 }
             }

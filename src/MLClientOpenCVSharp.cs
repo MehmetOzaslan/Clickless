@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Security.Policy;
 using System.Windows.Markup;
 using Dbscan.RBush;
+using System.Collections.Concurrent;
 
 namespace Clickless.src
 {
@@ -71,32 +72,51 @@ namespace Clickless.src
         }
 
 
+
         public static List<Rectangle> GetBboxes(Mat image)
         {
             int blur = 0;
             int dbDist = 5;
 
+            //NOTE: this is 0.5 to allow for easy bitshifting
+            double scaleFactor = 0.5;
+
+            Mat resizedImage = new Mat();
+            Cv2.Resize(image, resizedImage, new OpenCvSharp.Size(), scaleFactor, scaleFactor);
+
+            Mat blurredImage = new Mat();
+            Cv2.GaussianBlur(resizedImage, blurredImage, new OpenCvSharp.Size(5, 5), 0);
+
+            Mat grayImage = new Mat();
+            Cv2.CvtColor(blurredImage, grayImage, ColorConversionCodes.RGB2GRAY);
+
             Mat edges = new Mat();
-            Cv2.Canny(image, edges, 100, 200);
+            Cv2.Canny(grayImage, edges, 100, 200);
+
+            Cv2.ImShow("Canny Image", edges);
+
 
             image.Release();
 
             // Find coordinates of edge points
-            List<EdgePt> edgePoints = new List<EdgePt>();
-            for (int y = 0; y < edges.Rows; y++)
+            var edgePoints = new ConcurrentBag<EdgePt>();
+
+            Parallel.For(0, edges.Rows, y =>
             {
                 for (int x = 0; x < edges.Cols; x++)
                 {
                     if (edges.At<byte>(y, x) > 0)
                     {
-                        edgePoints.Add(new EdgePt(x, y));
+                        // Rescale the points.
+                        edgePoints.Add(new EdgePt(x << 1, y << 1));
                     }
                 }
-            }
+            });
+
 
             var clusters =DbscanRBush.CalculateClusters(
                 edgePoints,
-                epsilon: 5.0,
+                epsilon: 5,
                 minimumPointsPerCluster: 5
                 );
             

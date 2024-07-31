@@ -12,6 +12,7 @@ using System.Windows.Forms;
 
 using OpenCvSharp;
 using NUnit.Tests;
+using Clickless.src.UI;
 
 namespace Clickless.src
 {
@@ -54,43 +55,47 @@ namespace Clickless.src
 
         public MLClientWebsocket Websocket { get => websocket; set => websocket = value; }
 
+        public void AddCommand(Keys[] keys, Action action)
+        {
+            Commands[keys.ToHashSet()] = action; 
+        }
+
+
         public KeyMatcher()
         {
-            Commands = new Dictionary<HashSet<Keys>, Action>(new KeySetComparer())
-            {
+            Commands = new Dictionary<HashSet<Keys>, Action>(new KeySetComparer());
+
+            //Search Command (WIN+SHIFT+S)
+            AddCommand(new Keys[] { Keys.LWin, Keys.LShiftKey, Keys.F }, async () => {
+                if (state == States.FORM_CLOSED)
                 {
-                    new HashSet<Keys> { Keys.LWin, Keys.LShiftKey, Keys.F },
-                    () => {
-                        if(state == States.FORM_CLOSED) {                        
-                            state=States.FORM_OPEN;
-                            Console.WriteLine("Creating Window");
-                            RunMLandDisplayWindow();
-                        }
-                    }
-                },
-                {
-                    new HashSet<Keys> { Keys.Enter},
-                    () => {
-                        if(state == States.FORM_OPEN) {
-                            Console.WriteLine("Clicking Mouse" +
-                                "");
-                            InputUserCommand();
-                        }
-                    }
-                },
-                {
-                    new HashSet<Keys> { Keys.Escape},
-                    () => {
-                        if(state == States.FORM_OPEN)
-                        {
-                            Console.WriteLine("Closing Window");
-                            pattern_typed = "";
-                            CloseWindow();
-                            state = States.FORM_CLOSED;
-                        }
-                    }
+                    state = States.FORM_OPEN;
+                    Console.WriteLine("Creating Window");
+                    Task task = RunMLandDisplayWindow();
+                    await task;
                 }
-            };
+            });
+
+            //Enter command (ENTER)
+            AddCommand(new Keys[] { Keys.Enter }, () => {
+                if (state == States.FORM_OPEN)
+                {
+                    Console.WriteLine("Clicking Mouse" +
+                        "");
+                    InputUserCommand();
+                }
+            });
+
+            //Escape, escapes from the transparent form.
+            AddCommand(new Keys[] { Keys.Escape }, () => {
+                    if (state == States.FORM_OPEN)
+                    {
+                        Console.WriteLine("Closing Window");
+                        pattern_typed = "";
+                        CloseWindow();
+                        state = States.FORM_CLOSED;
+                    }
+                });
         }
 
         private void noMatch(HashSet<Keys> keys)
@@ -143,25 +148,38 @@ namespace Clickless.src
             }
         }
 
-        public void RunMLandDisplayWindow()
+
+        private async Task<List<TextRect>> RunML()
         {
             Bitmap img = ScreenController.CaptureDesktopBitmap();
-            var bboxes = MLClientOpenCVSharp.GetBboxes(img);
+            var bboxes = await Task.Run(() => MLClientOpenCVSharp.GetBboxes(img));
             var rects = TextRectGenerator.GenerateBoxesFromRects(bboxes);
+            img.Dispose();
+            return rects;
+        }
 
-            Console.WriteLine("Creating window.");
+        public async Task RunMLandDisplayWindow()
+        {
+            var rectsTask = RunML();
+
             transparentForm = new TransparentForm();
+            transparentForm.Show();
+
+            var rects = await rectsTask;
             transparentForm.Rects = rects;
             state = States.FORM_OPEN;
-            transparentForm.ShowDialog();
         }
 
         public void CloseWindow()
         {
-            transparentForm.Invoke((MethodInvoker)delegate {
-                transparentForm.Close();
-            });
-            state = States.FORM_CLOSED;
+            if (transparentForm != null && transparentForm.IsHandleCreated)
+            {
+                transparentForm.Invoke((MethodInvoker)delegate {
+                    transparentForm.Close();
+                });
+                transparentForm = null;
+                state = States.FORM_CLOSED;
+            }
         }
 
         public void InputUserCommand()
