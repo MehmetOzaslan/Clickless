@@ -8,7 +8,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
+using System.Windows.Media.Imaging;
 using Util;
 using static Clickless.MouseController;
 
@@ -97,6 +99,20 @@ namespace Clickless.src
 
             // Create a bitmap of the appropriate size to receive the full-screen screenshot.
             Image bitmap = new Bitmap(screenWidth, screenHeight);
+            Graphics g = Graphics.FromImage(bitmap);
+            g.CopyFromScreen(screenLeft, screenTop, 0, 0, bitmap.Size);
+            return bitmap;
+        }
+
+        public static Bitmap CaptureDesktopBitmap()
+        {
+            int screenLeft = SystemInformation.VirtualScreen.Left;
+            int screenTop = SystemInformation.VirtualScreen.Top;
+            int screenWidth = SystemInformation.VirtualScreen.Width;
+            int screenHeight = SystemInformation.VirtualScreen.Height;
+
+            // Create a bitmap of the appropriate size to receive the full-screen screenshot.
+            var bitmap = new Bitmap(screenWidth, screenHeight);
             Graphics g = Graphics.FromImage(bitmap);
             g.CopyFromScreen(screenLeft, screenTop, 0, 0, bitmap.Size);
             return bitmap;
