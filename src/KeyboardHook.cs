@@ -81,16 +81,24 @@ namespace Clickless.src
             }
         }
 
+
         static protected void OnKeyUp(KeyPressedEventArgs e)
         {
-            Instance.pressedKeys[e.key] = false;
-            Instance.KeyUp?.Invoke(Instance, e);
+            lock (lockObject)
+            {
+                Instance.pressedKeys[e.key] = false;
+                Instance.KeyUp?.Invoke(Instance, e);
+            }            
+
         }
 
         static protected void OnKeyDown(KeyPressedEventArgs e)
         {
-            Instance.pressedKeys[e.key] = true;
-            Instance.KeyDown?.Invoke(Instance, e);
+            lock (lockObject)
+            {
+                Instance.pressedKeys[e.key] = true;
+                Instance.KeyDown?.Invoke(Instance, e);
+            }
         }
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]

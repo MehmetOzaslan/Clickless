@@ -169,10 +169,8 @@ namespace NUnit.Tests
         [Test]
         public async Task TestKeyMatcher()
         {
-            await websocket.ConnectAsync(new Uri(imagemlURL));
-            var matcher = new KeyMatcher(websocket);
-
-            await matcher.RunMLandDisplayWindow();
+            var matcher = new KeyMatcher();
+            matcher.RunMLandDisplayWindow();
         }
 
 

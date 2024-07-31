@@ -10,6 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using OpenCvSharp;
+using NUnit.Tests;
+
 namespace Clickless.src
 {
     /// <summary>
@@ -49,10 +52,10 @@ namespace Clickless.src
 
         Dictionary<HashSet<Keys>, Action> Commands;
 
-        public KeyMatcher(MLClientWebsocket conn)
-        {
-            this.websocket = conn;
+        public MLClientWebsocket Websocket { get => websocket; set => websocket = value; }
 
+        public KeyMatcher()
+        {
             Commands = new Dictionary<HashSet<Keys>, Action>(new KeySetComparer())
             {
                 {
@@ -61,7 +64,7 @@ namespace Clickless.src
                         if(state == States.FORM_CLOSED) {                        
                             state=States.FORM_OPEN;
                             Console.WriteLine("Creating Window");
-                            Task task = RunMLandDisplayWindow();
+                            RunMLandDisplayWindow();
                         }
                     }
                 },
@@ -140,34 +143,11 @@ namespace Clickless.src
             }
         }
 
-        public async Task RunMLandDisplayWindow()
+        public void RunMLandDisplayWindow()
         {
-            state = States.FORM_CLOSED;
-            Console.WriteLine($"Sending image");
-
-            if (websocket == null)
-            {
-                websocket = new MLClientWebsocket();
-                await websocket.Abort();
-                await websocket.ConnectAsync(new Uri(MLClientWebsocket.imagemlURL));
-            }
-
-            if ( websocket.Client.State != WebSocketState.Open)
-            {
-                Console.WriteLine($"Reconnecting");
-                await websocket.Abort();
-                await websocket.ConnectAsync(new Uri(MLClientWebsocket.imagemlURL));
-            }
-
-            Image img = ScreenController.CaptureDesktop();
-
-            await websocket.SendImageAsync(img);
-            string result = await websocket.ReceiveMessageAsync();
-            Assert.Greater(result.Length, 1);
-
-            Console.WriteLine("Rcvd " + result);
-
-            var rects = TextRectGenerator.GenerateBoxesFromResponse(result);
+            Bitmap img = ScreenController.CaptureDesktopBitmap();
+            var bboxes = MLClientOpenCVSharp.GetBboxes(img);
+            var rects = TextRectGenerator.GenerateBoxesFromRects(bboxes);
 
             Console.WriteLine("Creating window.");
             transparentForm = new TransparentForm();
@@ -197,11 +177,11 @@ namespace Clickless.src
             pattern_typed = "";
         }
 
-        private Point GetRectCenter(Rectangle rect)
+        private System.Drawing.Point GetRectCenter(Rectangle rect)
         {
             int centerX = rect.X + rect.Width / 2;
             int centerY = rect.Y + rect.Height / 2;
-            return new Point(centerX, centerY);
+            return new System.Drawing.Point(centerX, centerY);
         }
     }
 }

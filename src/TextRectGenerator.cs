@@ -71,10 +71,28 @@ namespace Clickless.src
             return _bboxes != null &&  _bboxes.Count > 0;
         }
 
+        public static List<TextRect> GenerateBoxesFromRects(List<Rectangle> rects)
+        {
+            List<TextRect> bboxes = new List<TextRect>();
+
+            //Create the text commands.
+            var commands = CommandGenerator.GenerateCommands(rects.Count);
+
+
+            //Wrap them together in the text rect list.
+            for (int i = 0; i < commands.Count; i++)
+            {
+                TextRect textRect = new TextRect(rects[i], commands[i]);
+                bboxes.Add(textRect);
+            }
+
+            return bboxes;
+
+
+        }
 
         public static List<TextRect> GenerateBoxesFromResponse(string json_response)
         {
-            List<TextRect> bboxes = new List<TextRect>();
             //I could parse the response into a json and add a incredibly large library.
             //Or I could just follow the following format:
             //[[xmin, ymin, xmax, ymax],[xmin, ymin, xmax, ymax],[xmin, ymin, xmax, ymax]]
@@ -112,17 +130,8 @@ namespace Clickless.src
                 rects.Add(rect);
             }
 
-            //Create the text commands.
-            var commands = CommandGenerator.GenerateCommands(rects.Count);
 
-            //Wrap them together in the text rect list.
-            for (int i = 0; i < commands.Count; i++)
-            {
-                TextRect textRect = new TextRect(rects[i], commands[i]);
-                bboxes.Add(textRect);
-            }
-
-            return bboxes;
+            return GenerateBoxesFromRects(rects);
         }
 
 

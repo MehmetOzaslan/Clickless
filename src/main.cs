@@ -22,24 +22,15 @@ namespace Clickless.src
         [STAThread]
         static void Main(string[] args)
         {
-            Application.EnableVisualStyles();
-
+            Thread uiThread = new Thread(RunMessageLoop);
             var keyboardHook = KeyboardHook.Instance;
+            KeyMatcher keyMatcher = new KeyMatcher();
 
             // Start the Windows Forms message loop on a separate thread
-            Thread uiThread = new Thread(RunMessageLoop);
+            Application.EnableVisualStyles();
             uiThread.SetApartmentState(ApartmentState.STA); // Set the apartment state to STA
             uiThread.Start();
 
-            float offset = 0f;
-            var websocket = new MLClientWebsocket();
-
-            Task task = websocket.ConnectAsync(new Uri(MLClientWebsocket.imagemlURL));
-            task.Wait();
-
-            Assert.AreEqual(WebSocketState.Open, websocket.Client.State);
-
-            KeyMatcher keyMatcher = new KeyMatcher(websocket);
             keyboardHook.KeyDown += (sender, e) => {
                 var keys = KeyboardHook.Instance.CurrentlyPressedKeys;
                 Console.WriteLine("====== KEYS =====");
@@ -55,8 +46,6 @@ namespace Clickless.src
 
         static void RunMessageLoop()
         {
-            
-            
             Application.Run();
         }
 
