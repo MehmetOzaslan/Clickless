@@ -11,7 +11,6 @@ using System.Windows.Forms;
 
 namespace Clickless.src
 {
-
     public class KeyboardHook
     {
 

@@ -42,9 +42,8 @@ namespace Clickless.src
     public class KeyMatcher
     {
         private MLClientWebsocket websocket;
-        private TransparentForm transparentForm;
+        private TransparentForm transparentForm = new TransparentForm();
         string pattern_typed = "";
-
 
         //TODO: Convert to proper state machine
         enum States { FORM_CLOSED, FORM_OPEN, WAITING_SEARCH }
@@ -76,16 +75,6 @@ namespace Clickless.src
                 }
             });
 
-            //Enter command (ENTER)
-            AddCommand(new Keys[] { Keys.Enter }, () => {
-                if (state == States.FORM_OPEN)
-                {
-                    Console.WriteLine("Clicking Mouse" +
-                        "");
-                    InputUserCommand();
-                }
-            });
-
             //Escape, escapes from the transparent form.
             AddCommand(new Keys[] { Keys.Escape }, () => {
                     if (state == States.FORM_OPEN)
@@ -98,7 +87,7 @@ namespace Clickless.src
                 });
         }
 
-        private void noMatch(HashSet<Keys> keys)
+        private void NoMatch(HashSet<Keys> keys)
         {
             Console.WriteLine("No match");
 
@@ -113,22 +102,30 @@ namespace Clickless.src
                 }
                 Console.Write(pattern_typed);
 
-                //Update the rects on the display.
-                var rects = transparentForm.Rects;
-                rects = rects.Where(x => x.Text.StartsWith(pattern_typed)).ToList();
-
-                if(rects.Count == 0)
-                {
-                    pattern_typed = "";
-                    CloseWindow();
-                    state = States.FORM_CLOSED;
-                }
-                else
-                {
-                    transparentForm.Rects = rects;
-                }
+                UpdateRects();
             }
             return;
+        }
+
+        private void UpdateRects()
+        {
+            //Update the rects on the display
+            var rects = transparentForm.Rects;
+            rects = rects.Where(x => x.Text.StartsWith(pattern_typed)).ToList();
+
+            //Handle rect logic.
+            switch (rects.Count)
+            {
+                case 0:
+                    CloseWindow();
+                    break;
+                case 1:
+                    ClickRect();
+                    break;
+                default:
+                    transparentForm.Rects = rects;
+                    break;
+            }
         }
 
         public void ExecuteCommand(Keys[] keys)
@@ -144,7 +141,7 @@ namespace Clickless.src
             }
             else
             {
-                noMatch(keys);
+                NoMatch(keys);
             }
         }
 
@@ -177,12 +174,12 @@ namespace Clickless.src
                 transparentForm.Invoke((MethodInvoker)delegate {
                     transparentForm.Close();
                 });
-                transparentForm = null;
                 state = States.FORM_CLOSED;
             }
+            pattern_typed = "";
         }
 
-        public void InputUserCommand()
+        public void ClickRect()
         {
             var rect_selected = transparentForm.Rects.FirstOrDefault(x => x.Text == this.pattern_typed);
             if(rect_selected != null)
@@ -192,7 +189,6 @@ namespace Clickless.src
                 MouseController.MoveCursor(center.X, center.Y);
                 MouseController.DoMouseClick();
             }
-            pattern_typed = "";
         }
 
         private System.Drawing.Point GetRectCenter(Rectangle rect)
