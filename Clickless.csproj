@@ -47,6 +47,7 @@
     <Compile Include="src\EdgePt.cs" />
     <Compile Include="src\KeyMatcher.cs" />
     <Compile Include="src\KeyboardHook.cs" />
+    <Compile Include="src\KeySetComparer.cs" />
     <Compile Include="src\MLClientOpenCVSharp.cs" />
     <Compile Include="src\POINT.cs" />
     <Compile Include="src\RECT.cs" />

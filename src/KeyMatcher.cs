@@ -16,29 +16,6 @@ using Clickless.src.UI;
 
 namespace Clickless.src
 {
-    /// <summary>
-    /// Ensures that the dictionary is consistent whenever we put in a hashset. 
-    /// </summary>
-    public class KeySetComparer : IEqualityComparer<HashSet<Keys>>
-    {
-        public bool Equals(HashSet<Keys> x, HashSet<Keys> y)
-        {
-            return x.SetEquals(y);
-        }
-
-        public int GetHashCode(HashSet<Keys> obj)
-        {
-            int hash = 19;
-            foreach (var key in obj.OrderBy(k => k))
-            {
-                hash = hash * 31 + key.GetHashCode();
-            }
-            return hash;
-        }
-    }
-
-
-
     public class KeyMatcher
     {
         private MLClientWebsocket websocket;
@@ -181,21 +158,12 @@ namespace Clickless.src
 
         public void ClickRect()
         {
-            var rect_selected = transparentForm.Rects.FirstOrDefault(x => x.Text == this.pattern_typed);
+            var rect_selected = transparentForm.Rects.FirstOrDefault(x => x.Text == this.pattern_typed).Rectangle;
             if(rect_selected != null)
             {
-                var center = GetRectCenter(rect_selected.Rectangle);
                 CloseWindow();
-                MouseController.MoveCursor(center.X, center.Y);
-                MouseController.DoMouseClick();
+                MouseController.ClickAtRectCenter(rect_selected);
             }
-        }
-
-        private System.Drawing.Point GetRectCenter(Rectangle rect)
-        {
-            int centerX = rect.X + rect.Width / 2;
-            int centerY = rect.Y + rect.Height / 2;
-            return new System.Drawing.Point(centerX, centerY);
         }
     }
 }

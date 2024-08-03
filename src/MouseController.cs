@@ -225,6 +225,20 @@ namespace Clickless
         private const Int32 CURSOR_SHOWING = 0x00000001;
         private const Int32 CURSOR_SUPPRESSED = 0x00000002;
 
+        public static void ClickAtRectCenter(Rectangle rect)
+        {
+            var center = GetRectCenter(rect);
+            MoveCursor(center.X, center.Y);
+            DoMouseClick();
+        }
+
+        private static Point GetRectCenter(Rectangle rect)
+        {
+            int centerX = rect.X + rect.Width / 2;
+            int centerY = rect.Y + rect.Height / 2;
+            return new Point(centerX, centerY);
+        }
+
 
         public static void DoMouseClick()
         {
