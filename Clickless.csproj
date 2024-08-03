@@ -45,7 +45,7 @@
     <Compile Include="src\CommandGenerator.cs" />
     <Compile Include="src\EdgeEnumerator.cs" />
     <Compile Include="src\EdgePt.cs" />
-    <Compile Include="src\KeyMatcher.cs" />
+    <Compile Include="src\InputHandler.cs" />
     <Compile Include="src\KeyboardHook.cs" />
     <Compile Include="src\KeySetComparer.cs" />
     <Compile Include="src\MLClientOpenCVSharp.cs" />

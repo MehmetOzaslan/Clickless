@@ -34,7 +34,7 @@ namespace Clickless.src
         static void RunMessageLoop()
         {
             var keyboardHook = KeyboardHook.Instance;
-            KeyMatcher keyMatcher = new KeyMatcher();
+            InputHandler keyMatcher = new InputHandler();
 
             keyboardHook.KeyDown += (sender, e) => {
                 var keys = KeyboardHook.Instance.CurrentlyPressedKeys;

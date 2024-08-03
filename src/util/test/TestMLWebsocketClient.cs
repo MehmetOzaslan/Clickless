@@ -169,7 +169,7 @@ namespace NUnit.Tests
         [Test]
         public async Task TestKeyMatcher()
         {
-            var matcher = new KeyMatcher();
+            var matcher = new InputHandler();
             matcher.RunMLandDisplayWindow();
         }
 

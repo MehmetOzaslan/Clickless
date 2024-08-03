@@ -8,7 +8,7 @@ using Clickless.src.UI;
 
 namespace Clickless.src
 {
-    public class KeyMatcher
+    public class InputHandler
     {
         private MLClientWebsocket websocket;
         private TransparentForm transparentForm = new TransparentForm();
@@ -26,9 +26,7 @@ namespace Clickless.src
         {
             Commands[keys.ToHashSet()] = action; 
         }
-
-
-        public KeyMatcher()
+        public InputHandler()
         {
             Commands = new Dictionary<HashSet<Keys>, Action>(new KeySetComparer());
 
