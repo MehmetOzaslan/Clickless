@@ -1,17 +1,9 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Printing;
 using System.Linq;
-using System.Net.WebSockets;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using OpenCvSharp;
-using NUnit.Tests;
 using Clickless.src.UI;
 
 namespace Clickless.src
@@ -22,7 +14,6 @@ namespace Clickless.src
         private TransparentForm transparentForm = new TransparentForm();
         string pattern_typed = "";
 
-        //TODO: Convert to proper state machine
         enum States { FORM_CLOSED, FORM_OPEN, WAITING_SEARCH }
 
         private States state = States.FORM_CLOSED;
@@ -105,23 +96,17 @@ namespace Clickless.src
             }
         }
 
-        public void ExecuteCommand(Keys[] keys)
+        public void ExecuteCommand(IEnumerable<Keys> keys)
         {
-                Console.WriteLine("CURR_STATE: " + state.ToString());
-                ExecuteCommand(new HashSet<Keys>(keys));
-        }
-
-        public void ExecuteCommand(HashSet<Keys> keys)
-        {
-            if (Commands.ContainsKey(keys)) {
-                Commands[keys].Invoke();
-            }
-            else
+            var keyset = new HashSet<Keys>(keys);
+            if (Commands.ContainsKey(keyset))
             {
-                NoMatch(keys);
+                Commands[keyset].Invoke();
+            }
+            else {
+                NoMatch(keyset);
             }
         }
-
 
         private async Task<List<TextRect>> RunML()
         {

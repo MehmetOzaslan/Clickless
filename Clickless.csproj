@@ -61,9 +61,6 @@
     <Compile Include="src\ScreenController.cs" />
     <Compile Include="src\MLClientWebsocket.cs" />
     <Compile Include="src\TextRectGenerator.cs" />
-    <Compile Include="src\UI\Settings.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="src\UI\TextRect.cs" />
     <Compile Include="src\UI\TransparentForm.cs">
       <SubType>Form</SubType>
@@ -284,9 +281,6 @@
     <Folder Include="src\images\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="src\UI\Settings.resx">
-      <DependentUpon>Settings.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="src\util\test\WindowTestHelper.resx">
       <DependentUpon>WindowTestHelper.cs</DependentUpon>
     </EmbeddedResource>
