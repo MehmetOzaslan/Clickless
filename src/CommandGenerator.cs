@@ -62,7 +62,6 @@ namespace Clickless.src
 
         /// <summary>
         /// Creates n unique strings from [A..Z] 
-        /// TODO: Ensure that all commands do not contain a prefix of another command.
         /// </summary>
         /// <param name="num"></param>
         /// <returns></returns>
