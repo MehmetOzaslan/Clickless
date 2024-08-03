@@ -31,15 +31,8 @@
         {
             var bitmap = ScreenController.CaptureDesktopBitmap();
             var mat = MLClientOpenCVSharp.BitmapToMat(bitmap);
-
             var bboxes = MLClientOpenCVSharp.GetBboxes(mat);
-
-            Console.WriteLine("Printing boxes: ");
-            foreach (var bbox in bboxes)
-            {
-                Console.Write(bbox);
-            }
-
+            Assert.GreaterOrEqual(1, bboxes.Count);
         }
     }
 }

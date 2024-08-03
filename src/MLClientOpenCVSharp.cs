@@ -84,10 +84,6 @@ namespace Clickless.src
             //TODO: Find a way to optimize this, either through the GPU or a different call.
             Cv2.Canny(grayImage, edges, cannyThresh1, cannyThresh2);
 
-            Cv2.ImShow("Result", edges);
-
-            Task task = new Task( () =>  Cv2.ImShow("Canny_Res", edges));
-
             var clusters = DbscanRBush.CalculateClusters(
                 edgeEnumerator,
                 epsilon: 5,
