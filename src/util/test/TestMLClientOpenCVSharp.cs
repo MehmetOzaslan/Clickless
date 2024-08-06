@@ -23,7 +23,6 @@
 
             Assert.IsTrue( mat.SaveImage("Conversion From Bitmap to OpenCV Mat.png"));
             bitmap.Dispose();
-
         }
 
         [Test]
