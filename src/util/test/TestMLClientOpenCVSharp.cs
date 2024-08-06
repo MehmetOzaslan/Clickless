@@ -20,7 +20,7 @@
         private Bitmap bitmap;
         IEdgeProvider edgeDetecteCompute;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             bitmap = ScreenController.CaptureDesktopBitmap();
