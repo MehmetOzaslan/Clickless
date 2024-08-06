@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using Dbscan;
+using OpenCvSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace Clickless.src
             return mat;
         }
 
-        public IEnumerable<EdgePt> GetEdges(Bitmap bitmap)
+        public IEnumerable<IPointData> GetEdges(Bitmap bitmap)
         {
             int blur = 0;
             int dbDist = 5;

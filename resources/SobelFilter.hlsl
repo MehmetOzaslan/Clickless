@@ -1,10 +1,10 @@
 Texture2D<float> inputTexture : register(t0);
-RWTexture2D<float> outputTexture : register(u0);
+//RWTexture2D<float> outputTexture : register(u0);
 
 SamplerState samplerState : register(s0);
 
 RWStructuredBuffer<int2> OutputBuffer : register(u0);
-RWStructuredBuffer<int> OutputCounter : register(u1);
+RWStructuredBuffer<uint> OutputCounter : register(u1);
 
 [numthreads(16, 16, 1)]
 void CSMain(uint3 DTid : SV_DispatchThreadID)
@@ -34,13 +34,13 @@ void CSMain(uint3 DTid : SV_DispatchThreadID)
         }
     }
 
-    float color = sqrt(color_x * color_x + color_y * color_y);
-    outputTexture[coord] = color;
+    float color = color_x * color_x + color_y * color_y;
 
-    //if (color > 0.0)
-    //{
-    //    // Atomically increment the counter and get the index to store the pixel coordinates
-    //    uint index = InterlockedAdd(OutputCounter[0], 1);
-    //    OutputBuffer[index] = pixelCoords;
-    //}
+    if (color > 0.001)
+    {
+        // Atomically increment the counter and get the index to store the pixel coordinates
+        uint index = 0;
+        InterlockedAdd(OutputCounter[0], 1, index);
+        OutputBuffer[index] = coord;
+    }
 }

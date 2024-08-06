@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections;
+    using System.Diagnostics;
     using System.Drawing;
     using System.IO;
     using System.Linq;
@@ -30,7 +31,10 @@
         [Repeat(10)]
         public void TestEdgeDetectionPerformance()
         {
+            Stopwatch total_timer = Stopwatch.StartNew();
             IEnumerable ret = edgeDetecteCompute.GetEdges(bitmap);
+            total_timer.Stop();
+            Console.WriteLine("Total time took: " + total_timer.Elapsed.TotalMilliseconds);
         }
 
         [Test]

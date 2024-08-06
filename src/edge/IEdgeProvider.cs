@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dbscan;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -10,6 +11,6 @@ namespace Clickless.src
 {
     public interface IEdgeProvider
     {
-        IEnumerable<EdgePt> GetEdges(Bitmap bitmap);
+        IEnumerable<IPointData> GetEdges(Bitmap bitmap);
     }
 }

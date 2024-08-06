@@ -297,7 +297,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="src\edge\SobelFilter.hlsl">
+    <Content Include="resources\SobelFilter.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

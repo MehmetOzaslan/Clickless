@@ -1,6 +1,7 @@
 ﻿namespace NUnit.Tests
 {
     using System;
+    using System.Diagnostics;
     using System.Drawing;
     using System.Drawing.Printing;
     using System.IO;
@@ -39,7 +40,9 @@
         [Repeat(10)]
         public void TestEdgeDetection()
         {
+            Stopwatch total_timer = Stopwatch.StartNew();
             var bboxes = edgeDetecteCompute.GetEdges(bitmap);
+            Console.WriteLine("Total time took: " + total_timer.Elapsed.TotalMilliseconds);
         }
     }
 }

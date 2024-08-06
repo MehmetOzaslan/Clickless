@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using Dbscan;
+using OpenCvSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
-using static Clickless.src.MLClient;
 
 namespace Clickless.src
 {
@@ -14,7 +14,7 @@ namespace Clickless.src
     /// <summary>
     /// Enumerator intended to decrease the amount of 
     /// </summary>
-    public class MatEnumerator : IEnumerator<EdgePt>
+    public class MatEnumerator : IEnumerator<IPointData>
     {
         private Mat _mat;
         private int _index;
@@ -28,7 +28,7 @@ namespace Clickless.src
             _index = -1;
         }
 
-        public EdgePt Current
+        public IPointData Current
         {
             get
             {
@@ -63,7 +63,7 @@ namespace Clickless.src
         }
     }
 
-    public class MatEnumerable : IEnumerable<EdgePt>
+    public class MatEnumerable : IEnumerable<IPointData>
     {
         private Mat _mat;
 
@@ -72,7 +72,7 @@ namespace Clickless.src
             _mat = mat ?? throw new ArgumentNullException(nameof(mat));
         }
 
-        public IEnumerator<EdgePt> GetEnumerator()
+        public IEnumerator<IPointData> GetEnumerator()
         {
             return new MatEnumerator(_mat);
         }

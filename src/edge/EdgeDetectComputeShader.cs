@@ -19,6 +19,9 @@ using Device = SharpDX.Direct3D11.Device;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
 using static Clickless.src.MLClient;
 using System.Diagnostics;
+using Buffer = SharpDX.Direct3D11.Buffer;
+using Dbscan;
+using System.Linq;
 
 namespace Clickless.src
 {
@@ -44,7 +47,7 @@ namespace Clickless.src
             context.ComputeShader.Set(computeShader);
         }
 
-        public IEnumerable<EdgePt> GetEdges(Bitmap bitmap)
+        public IEnumerable<IPointData> GetEdges(Bitmap bitmap)
         {
 
             Stopwatch timer = Stopwatch.StartNew();
@@ -58,14 +61,29 @@ namespace Clickless.src
             TimeSpan timespan = timer.Elapsed;
             Console.WriteLine("Copying to Gpu took: " + timespan.TotalMilliseconds);
 
-
-
             timer = Stopwatch.StartNew();
 
-            Texture2DDescription outputTextureDesc;
-            Texture2D outputTexture;
-            CreateGPUOutputTexture(inputTextureDesc.Width, inputTextureDesc.Height, out outputTexture, out outputTextureDesc);
+            int bufferSize = inputTextureDesc.Height * inputTextureDesc.Width;
 
+            var outputBuffer = new Buffer(device, new BufferDescription
+            {
+                SizeInBytes = sizeof(int) * 2 * bufferSize,
+                Usage = ResourceUsage.Default,
+                BindFlags = BindFlags.UnorderedAccess,
+                CpuAccessFlags = CpuAccessFlags.None,
+                OptionFlags = ResourceOptionFlags.BufferStructured,
+                StructureByteStride = sizeof(int) * 2,
+            });
+
+            var outputCounter = new Buffer(device, new BufferDescription
+            {
+                SizeInBytes = sizeof(int),
+                Usage = ResourceUsage.Default,
+                BindFlags = BindFlags.UnorderedAccess,
+                CpuAccessFlags = CpuAccessFlags.None,
+                OptionFlags = ResourceOptionFlags.BufferStructured,
+                StructureByteStride = sizeof(int),
+            });
 
             timer.Stop();
             timespan = timer.Elapsed;
@@ -74,11 +92,18 @@ namespace Clickless.src
 
             timer = Stopwatch.StartNew();
 
+            var outputBufferUav = new UnorderedAccessView(device, outputBuffer);
+            var outputCounterUav = new UnorderedAccessView(device, outputCounter);
             shaderResourceView = new ShaderResourceView(device, inputTexture);
-            unorderedAccessView = new UnorderedAccessView(device, outputTexture);
+
 
             context.ComputeShader.SetShaderResource(0, shaderResourceView);
-            context.ComputeShader.SetUnorderedAccessView(0, unorderedAccessView, 0);
+            //context.ComputeShader.SetUnorderedAccessView(0, unorderedAccessView, 0);
+            context.ComputeShader.SetUnorderedAccessView(0, outputBufferUav);
+            context.ComputeShader.SetUnorderedAccessView(1, outputCounterUav);
+
+            int[] initialCounter = { 0 };
+            context.UpdateSubresource(initialCounter, outputCounter);
 
             // Dispatch compute shader
             int threadGroupX = (inputTexture.Description.Width + 15) / 16;
@@ -92,61 +117,99 @@ namespace Clickless.src
 
             timer = Stopwatch.StartNew();
 
-            // Move the texture to the CPU
-            Texture2D cpuTexture;
-            MoveTextureToCPU(outputTextureDesc, outputTexture, out cpuTexture);
-            var dataBox = context.MapSubresource(cpuTexture, 0, MapMode.Read, MapFlags.None);
-            var dataPtr = dataBox.DataPointer;
+
+            // Create a staging buffer for reading data back
+            var stagingBuffer = new Buffer(device, new BufferDescription
+            {
+                SizeInBytes = Utilities.SizeOf<BufferedInt2>() * bufferSize,
+                Usage = ResourceUsage.Staging,
+                BindFlags = BindFlags.None,
+                CpuAccessFlags = CpuAccessFlags.Read,
+                OptionFlags = ResourceOptionFlags.BufferStructured,
+                StructureByteStride = Utilities.SizeOf<BufferedInt2>(),
+            });
+
+
+            var resCounterBuffer = new Buffer(device, new BufferDescription
+            {
+                SizeInBytes = sizeof(int),
+                Usage = ResourceUsage.Staging,
+                BindFlags = BindFlags.None,
+                CpuAccessFlags = CpuAccessFlags.Read,
+                OptionFlags = ResourceOptionFlags.BufferStructured,
+                StructureByteStride = sizeof(int),
+            });
+
+            
+            context.CopyResource(outputBuffer, stagingBuffer);
+            context.CopyResource(outputCounter, resCounterBuffer);
+
+
+            //Get the buffer size.
+            DataStream counterSize;
+            context.MapSubresource(resCounterBuffer, MapMode.Read, MapFlags.None, out counterSize);
+            int[] counterResult = new int[1];
+            counterSize.ReadRange(counterResult, 0, 1);
+            context.UnmapSubresource(resCounterBuffer, 0);
+
+            int validEntries = counterResult[0];
+            Console.WriteLine("EdgeCt: " + validEntries + " Maximum Should be " + bufferSize);
+
+
+            DataStream dataStream;
+            context.MapSubresource(stagingBuffer, MapMode.Read, MapFlags.None, out dataStream);
+            var results = new BufferedInt2[validEntries];
+            dataStream.ReadRange(results, 0, validEntries);
+            context.UnmapSubresource(stagingBuffer, 0);
+
+            ConcurrentBag<IPointData> edges = new ConcurrentBag<Dbscan.IPointData>();
+
+            var ret= results.Cast<IPointData>();
 
             timer.Stop();
             timespan = timer.Elapsed;
-            Console.WriteLine("CPU Transfer Took: " + timespan.TotalMilliseconds);
+            Console.WriteLine("Edge Movement Took: " + timespan.TotalMilliseconds);
 
 
             timer = Stopwatch.StartNew();
 
-            // Iterate over the gpuSrcTexture data
-            int width = outputTextureDesc.Width;
-            int height = outputTextureDesc.Height;
-            int pixelSize = 4; // For R8G8B8A8 format
-
-            //NOTE: This can be turned into an enumerable passed into the dbscan to eke out some more performance on the memory side.
-            ConcurrentBag<EdgePt> edges = new ConcurrentBag<EdgePt>();
-            Parallel.For(0, height * width, (i) =>
-            {
-                int x = i % width;
-                int y = i / width;
-                int index = (y * width + x) * pixelSize;
-                byte r = Marshal.ReadByte(dataPtr, index);
-                byte g = Marshal.ReadByte(dataPtr, index + 1);
-                byte b = Marshal.ReadByte(dataPtr, index + 2);
-                byte a = Marshal.ReadByte(dataPtr, index + 3);
-
-                var res = r & g & b & a;
-
-                //Add the coordinates of non-zero pixels.
-                if (res > 0)
-                {
-                    edges.Add(new EdgePt(x, y));
-                }
-
-            });
-
-
+            dataStream.Dispose();
+            outputBuffer.Dispose();
+            stagingBuffer.Dispose();
+            outputCounter.Dispose();
+            outputBufferUav.Dispose();
+            outputCounterUav.Dispose();
             inputTexture.Dispose();
-            outputTexture.Dispose();
-            cpuTexture.Dispose();
             shaderResourceView.Dispose();
-            unorderedAccessView.Dispose();
 
             timer.Stop();
             timespan = timer.Elapsed;
-            Console.WriteLine("Edge Movment Took: " + timespan.TotalMilliseconds);
+            Console.WriteLine("Cleanup Took: " + timespan.TotalMilliseconds);
 
 
-            return edges.ToArray();
+
+            return ret;
+            //Parallel.ForEach(results, (item)=>
+            //{
+            //    edges.Add(new EdgePt(item.X, item.Y));
+            //} );
+            
+            //foreach (var coord in results)
+            //{
+            //    if (coord.X != 0 || coord.Y != 0)
+            //    {
+            //        Console.WriteLine($"Pixel coordinate: ({coord.X}, {coord.Y})");
+            //    }
+            //}
         }
 
+        public struct BufferedInt2 : IPointData
+        {
+            public int X;
+            public int Y;
+
+            public Dbscan.Point Point => new Dbscan.Point(X,Y);
+        }
 
         private void CreateGPUOutputTexture(int width, int height, out Texture2D outputTexture, out Texture2DDescription outputTextureDesc)
         {

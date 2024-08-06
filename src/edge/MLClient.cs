@@ -17,6 +17,8 @@ using System.Threading;
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.D3DCompiler;
+using Dbscan;
+using System.Diagnostics;
 
 namespace Clickless.src
 {
@@ -53,7 +55,7 @@ namespace Clickless.src
         }
 
 
-        private static Rectangle GetClusterRect(Dbscan.Cluster<EdgePt> cluster)
+        private static Rectangle GetClusterRect(Dbscan.Cluster<IPointData> cluster)
         {
             int xmin = (int)cluster.Objects.Min(p => p.Point.X);
             int ymin = (int)cluster.Objects.Min(p => p.Point.Y);
@@ -65,7 +67,7 @@ namespace Clickless.src
 
         public static List<Rectangle> GetBboxes(Bitmap image)
         {
-            IEnumerable<EdgePt> edgeEnumerator;
+            IEnumerable<IPointData> edgeEnumerator;
 
             try
             {
@@ -81,11 +83,18 @@ namespace Clickless.src
                 edgeEnumerator = Instance.edgeProvider.GetEdges(image);
             }
 
+
+            var st = Stopwatch.StartNew();
+
             var clusters = DbscanRBush.CalculateClusters(
                 edgeEnumerator,
                 epsilon: 5,
                 minimumPointsPerCluster: 5
             );
+
+            st.Stop();
+
+            Console.WriteLine("DBScan took: " + st.ElapsedMilliseconds);
 
             List<Rectangle> rects = new List<Rectangle>();
             foreach (var item in clusters.Clusters)
