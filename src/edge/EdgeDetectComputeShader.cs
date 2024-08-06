@@ -29,7 +29,7 @@ namespace Clickless.src.edge
         ShaderResourceView shaderResourceView;
         UnorderedAccessView unorderedAccessView;
 
-        private string computeFilePath { get => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SobelFilter.cso"); }   
+        private string computeFilePath { get => Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"resources", "SobelFilter.cso"); }   
 
         public EdgeDetectComputeShader()
         {

@@ -24,6 +24,15 @@
             IEnumerable ret = edgeDetecteCompute.GetBitmapEdges(bitmap);
 
             Assert.IsNotNull(ret);
+            int count = 0;
+            foreach (var edge in ret) { 
+                count++;
+            }
+
+            Assert.AreNotEqual(0, count);
+
+            Console.WriteLine("Image Size:" + 1920 * 1080);
+            Console.WriteLine("Edge Pixel Count: " +  count);
         }
 
     }
