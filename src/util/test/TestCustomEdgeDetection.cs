@@ -15,11 +15,27 @@
     [TestFixture]
     public class EdgeDetectionTests
     {
+
+        private Bitmap bitmap;
+        IEdgeProvider edgeDetecteCompute;
+
+        [SetUp]
+        public void Setup()
+        {
+            bitmap = ScreenController.CaptureDesktopBitmap();
+            edgeDetecteCompute = new EdgeDetectComputeShader();
+        }
+
+        [Test]
+        [Repeat(10)]
+        public void TestEdgeDetectionPerformance()
+        {
+            IEnumerable ret = edgeDetecteCompute.GetEdges(bitmap);
+        }
+
         [Test]
         public void TestEdgeDetection()
         {
-            EdgeDetectComputeShader edgeDetecteCompute = new EdgeDetectComputeShader();
-            var bitmap = ScreenController.CaptureDesktopBitmap();
             IEnumerable ret = edgeDetecteCompute.GetEdges(bitmap);
 
             Assert.IsNotNull(ret);
@@ -33,6 +49,9 @@
             Console.WriteLine("Image Size:" + 1920 * 1080);
             Console.WriteLine("Edge Pixel Count: " +  count);
         }
+
+
+
 
     }
 

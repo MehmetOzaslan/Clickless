@@ -37,11 +37,21 @@ namespace Clickless.src
             }
         }
 
-        //TODO: Check if the system can use compute shaders or not.
         MLClient()
         {
-            edgeProvider = new EdgeDetectOpenCVSharp();
+            try
+            {
+                edgeProvider = new EdgeDetectComputeShader();
+            }
+            catch (Exception ex) { 
+
+                Console.Error.WriteLine(ex.Message);
+                Console.WriteLine("Compute Shader not supported, switching to CPU implementation");
+                edgeProvider = new EdgeDetectOpenCVSharp();
+            }
+
         }
+
 
         private static Rectangle GetClusterRect(Dbscan.Cluster<EdgePt> cluster)
         {
@@ -55,7 +65,21 @@ namespace Clickless.src
 
         public static List<Rectangle> GetBboxes(Bitmap image)
         {
-            IEnumerable<EdgePt> edgeEnumerator = Instance.edgeProvider.GetEdges(image);
+            IEnumerable<EdgePt> edgeEnumerator;
+
+            try
+            {
+                edgeEnumerator = Instance.edgeProvider.GetEdges(image);
+            }
+            catch (Exception ex)
+            {
+
+                Console.Error.WriteLine(ex.Message);
+                Console.WriteLine("Compute Shader not supported, switching to CPU implementation");
+                Instance.edgeProvider = new EdgeDetectOpenCVSharp();
+
+                edgeEnumerator = Instance.edgeProvider.GetEdges(image);
+            }
 
             var clusters = DbscanRBush.CalculateClusters(
                 edgeEnumerator,

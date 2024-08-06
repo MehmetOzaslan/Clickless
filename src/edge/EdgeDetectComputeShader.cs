@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using Device = SharpDX.Direct3D11.Device;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
 using static Clickless.src.MLClient;
+using System.Diagnostics;
 
 namespace Clickless.src
 {
@@ -39,25 +40,43 @@ namespace Clickless.src
             //Load the bytecode.
             var shaderBytecode = File.ReadAllBytes(computeFilePath);
             computeShader = new ComputeShader(device, shaderBytecode);
+            // Set compute shader and resources
+            context.ComputeShader.Set(computeShader);
         }
-
-
 
         public IEnumerable<EdgePt> GetEdges(Bitmap bitmap)
         {
+
+            Stopwatch timer = Stopwatch.StartNew();
+
             Texture2D inputTexture;
             Texture2DDescription inputTextureDesc;
             CopyCapturedBitmapToGPUTexture(device, bitmap, out inputTexture, out inputTextureDesc);
+
+
+            timer.Stop();
+            TimeSpan timespan = timer.Elapsed;
+            Console.WriteLine("Copying to Gpu took: " + timespan.TotalMilliseconds);
+
+
+
+            timer = Stopwatch.StartNew();
 
             Texture2DDescription outputTextureDesc;
             Texture2D outputTexture;
             CreateGPUOutputTexture(inputTextureDesc.Width, inputTextureDesc.Height, out outputTexture, out outputTextureDesc);
 
+
+            timer.Stop();
+            timespan = timer.Elapsed;
+            Console.WriteLine("Output Texture Took: " + timespan.TotalMilliseconds);
+
+
+            timer = Stopwatch.StartNew();
+
             shaderResourceView = new ShaderResourceView(device, inputTexture);
             unorderedAccessView = new UnorderedAccessView(device, outputTexture);
 
-            // Set compute shader and resources
-            context.ComputeShader.Set(computeShader);
             context.ComputeShader.SetShaderResource(0, shaderResourceView);
             context.ComputeShader.SetUnorderedAccessView(0, unorderedAccessView, 0);
 
@@ -66,11 +85,25 @@ namespace Clickless.src
             int threadGroupY = (inputTexture.Description.Height + 15) / 16;
             context.Dispatch(threadGroupX, threadGroupY, 1);
 
+            timer.Stop();
+            timespan = timer.Elapsed;
+            Console.WriteLine("Compute Took: " + timespan.TotalMilliseconds);
+
+
+            timer = Stopwatch.StartNew();
+
             // Move the texture to the CPU
             Texture2D cpuTexture;
             MoveTextureToCPU(outputTextureDesc, outputTexture, out cpuTexture);
             var dataBox = context.MapSubresource(cpuTexture, 0, MapMode.Read, MapFlags.None);
             var dataPtr = dataBox.DataPointer;
+
+            timer.Stop();
+            timespan = timer.Elapsed;
+            Console.WriteLine("CPU Transfer Took: " + timespan.TotalMilliseconds);
+
+
+            timer = Stopwatch.StartNew();
 
             // Iterate over the gpuSrcTexture data
             int width = outputTextureDesc.Width;
@@ -99,7 +132,19 @@ namespace Clickless.src
 
             });
 
-            return edges;
+
+            inputTexture.Dispose();
+            outputTexture.Dispose();
+            cpuTexture.Dispose();
+            shaderResourceView.Dispose();
+            unorderedAccessView.Dispose();
+
+            timer.Stop();
+            timespan = timer.Elapsed;
+            Console.WriteLine("Edge Movment Took: " + timespan.TotalMilliseconds);
+
+
+            return edges.ToArray();
         }
 
 

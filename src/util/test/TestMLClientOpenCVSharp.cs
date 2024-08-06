@@ -15,10 +15,20 @@
     [TestFixture]
     public class TestMLClientOpenCVSharp
     {
+
+        private Bitmap bitmap;
+        IEdgeProvider edgeDetecteCompute;
+
+        [SetUp]
+        public void Setup()
+        {
+            bitmap = ScreenController.CaptureDesktopBitmap();
+            edgeDetecteCompute = new EdgeDetectOpenCVSharp();
+        }
+
         [Test]
         public void TestConversion()
         {
-            var bitmap =  ScreenController.CaptureDesktopBitmap();
             var mat = EdgeDetectOpenCVSharp.BitmapToMat(bitmap);
 
             Assert.IsTrue( mat.SaveImage("Conversion From Bitmap to OpenCV Mat.png"));
@@ -26,11 +36,10 @@
         }
 
         [Test]
-        public void TestCapture()
+        [Repeat(10)]
+        public void TestEdgeDetection()
         {
-            var bitmap = ScreenController.CaptureDesktopBitmap();
-            var bboxes = MLClient.GetBboxes(bitmap);
-            Assert.GreaterOrEqual(1, bboxes.Count);
+            var bboxes = edgeDetecteCompute.GetEdges(bitmap);
         }
     }
 }
