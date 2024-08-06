@@ -14,10 +14,21 @@ using System.Collections;
 using System.Drawing.Printing;
 using System.Threading;
 
+using SharpDX;
+using SharpDX.Direct3D11;
+using SharpDX.D3DCompiler;
+
 namespace Clickless.src
 {
     public partial class MLClientOpenCVSharp
     {
+        //Members held statically to reduce garbage collection.
+        private static Mat resizedImage = new Mat();
+        private static Mat blurredImage = new Mat();
+        private static Mat grayImage = new Mat();
+        private static Mat edges = new Mat();
+        private static MatEnumerable edgeEnumerator = new MatEnumerable(edges);
+
         /// <summary>
         /// Converts a bitmap into a map.
         /// NOTE: The data provided is not automatically de-allocated by opencvsharp, so it must be taken care of.
@@ -60,11 +71,6 @@ namespace Clickless.src
             return GetBboxes(BitmapToMat(image));
         }
 
-        private static Mat resizedImage = new Mat();
-        private static Mat blurredImage = new Mat();
-        private static Mat grayImage = new Mat();
-        private static Mat edges = new Mat();
-        private static MatEnumerable edgeEnumerator = new MatEnumerable(edges);
 
         public static List<Rectangle> GetBboxes(Mat image)
         {
