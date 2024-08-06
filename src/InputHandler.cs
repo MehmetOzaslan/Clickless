@@ -109,7 +109,7 @@ namespace Clickless.src
         private async Task<List<TextRect>> RunML()
         {
             Bitmap img = ScreenController.CaptureDesktopBitmap();
-            var bboxes = await Task.Run(() => MLClientOpenCVSharp.GetBboxes(img));
+            var bboxes = await Task.Run(() => MLClient.GetBboxes(img));
             var rects = TextRectGenerator.GenerateBoxesFromRects(bboxes);
             img.Dispose();
             return rects;

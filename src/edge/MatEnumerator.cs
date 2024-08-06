@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
-using static Clickless.src.MLClientOpenCVSharp;
+using static Clickless.src.MLClient;
 
 namespace Clickless.src
 {
@@ -14,7 +14,7 @@ namespace Clickless.src
     /// <summary>
     /// Enumerator intended to decrease the amount of 
     /// </summary>
-    public class EdgeEnumerator : IEnumerator<EdgePt>
+    public class MatEnumerator : IEnumerator<EdgePt>
     {
         private Mat _mat;
         private int _index;
@@ -22,7 +22,7 @@ namespace Clickless.src
         private int _currentX { get { return _index % _mat.Cols; }  }
         private int _currentY { get { return _index / _mat.Cols; } }
 
-        public EdgeEnumerator(Mat mat)
+        public MatEnumerator(Mat mat)
         {
             _mat = mat ?? throw new ArgumentNullException(nameof(mat));
             _index = -1;
@@ -74,7 +74,7 @@ namespace Clickless.src
 
         public IEnumerator<EdgePt> GetEnumerator()
         {
-            return new EdgeEnumerator(_mat);
+            return new MatEnumerator(_mat);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

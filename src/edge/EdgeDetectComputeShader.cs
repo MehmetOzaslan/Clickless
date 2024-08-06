@@ -17,11 +17,11 @@ using System.Threading.Tasks;
 
 using Device = SharpDX.Direct3D11.Device;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
-using static Clickless.src.MLClientOpenCVSharp;
+using static Clickless.src.MLClient;
 
-namespace Clickless.src.edge
+namespace Clickless.src
 {
-    class EdgeDetectComputeShader
+    class EdgeDetectComputeShader : IEdgeProvider
     {
         private Device device;
         private ComputeShader computeShader;
@@ -29,7 +29,7 @@ namespace Clickless.src.edge
         ShaderResourceView shaderResourceView;
         UnorderedAccessView unorderedAccessView;
 
-        private string computeFilePath { get => Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"resources", "SobelFilter.cso"); }   
+        private string computeFilePath { get => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resources", "SobelFilter.cso"); }
 
         public EdgeDetectComputeShader()
         {
@@ -43,12 +43,12 @@ namespace Clickless.src.edge
 
 
 
-        public IEnumerable<EdgePt> GetBitmapEdges(Bitmap bitmap)
+        public IEnumerable<EdgePt> GetEdges(Bitmap bitmap)
         {
             Texture2D inputTexture;
             Texture2DDescription inputTextureDesc;
             CopyCapturedBitmapToGPUTexture(device, bitmap, out inputTexture, out inputTextureDesc);
-            
+
             Texture2DDescription outputTextureDesc;
             Texture2D outputTexture;
             CreateGPUOutputTexture(inputTextureDesc.Width, inputTextureDesc.Height, out outputTexture, out outputTextureDesc);
@@ -79,7 +79,7 @@ namespace Clickless.src.edge
 
             //NOTE: This can be turned into an enumerable passed into the dbscan to eke out some more performance on the memory side.
             ConcurrentBag<EdgePt> edges = new ConcurrentBag<EdgePt>();
-            Parallel.For(0, height * width, (int i) =>
+            Parallel.For(0, height * width, (i) =>
             {
                 int x = i % width;
                 int y = i / width;
@@ -92,7 +92,7 @@ namespace Clickless.src.edge
                 var res = r & g & b & a;
 
                 //Add the coordinates of non-zero pixels.
-                if(res > 0)
+                if (res > 0)
                 {
                     edges.Add(new EdgePt(x, y));
                 }
@@ -150,7 +150,7 @@ namespace Clickless.src.edge
         /// <param name="bitmap"></param>
         /// <param name="gpuDestinationTexture"></param>
         /// <param name="gpuDestinationTextureDesc"></param>
-        private static void CopyCapturedBitmapToGPUTexture(Device device, Bitmap bitmap, out Texture2D gpuDestinationTexture, out Texture2DDescription gpuDestinationTextureDesc )
+        private static void CopyCapturedBitmapToGPUTexture(Device device, Bitmap bitmap, out Texture2D gpuDestinationTexture, out Texture2DDescription gpuDestinationTextureDesc)
         {
             gpuDestinationTextureDesc = new Texture2DDescription
             {

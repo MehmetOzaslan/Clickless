@@ -50,13 +50,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\CommandGenerator.cs" />
-    <Compile Include="src\EdgeEnumerator.cs" />
-    <Compile Include="src\EdgePt.cs" />
+    <Compile Include="src\edge\IEdgeProvider.cs" />
+    <Compile Include="src\edge\MatEnumerator.cs" />
+    <Compile Include="src\edge\EdgePt.cs" />
     <Compile Include="src\edge\EdgeDetectComputeShader.cs" />
+    <Compile Include="src\edge\EdgeDetectOpenCVSharp.cs" />
     <Compile Include="src\InputHandler.cs" />
     <Compile Include="src\KeyboardHook.cs" />
     <Compile Include="src\KeySetComparer.cs" />
-    <Compile Include="src\edge\MLClientOpenCVSharp.cs" />
+    <Compile Include="src\edge\MLClient.cs" />
     <Compile Include="src\POINT.cs" />
     <Compile Include="src\RECT.cs" />
     <Compile Include="src\CursorImageGenerator.cs" />

@@ -9,7 +9,6 @@
     using System.Threading.Tasks;
     using Clickless;
     using Clickless.src;
-    using Clickless.src.edge;
     using NUnit.Framework;
     using static Util.MathUtil;
 
@@ -21,7 +20,7 @@
         {
             EdgeDetectComputeShader edgeDetecteCompute = new EdgeDetectComputeShader();
             var bitmap = ScreenController.CaptureDesktopBitmap();
-            IEnumerable ret = edgeDetecteCompute.GetBitmapEdges(bitmap);
+            IEnumerable ret = edgeDetecteCompute.GetEdges(bitmap);
 
             Assert.IsNotNull(ret);
             int count = 0;

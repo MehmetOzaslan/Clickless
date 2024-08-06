@@ -19,7 +19,7 @@
         public void TestConversion()
         {
             var bitmap =  ScreenController.CaptureDesktopBitmap();
-            var mat = MLClientOpenCVSharp.BitmapToMat(bitmap);
+            var mat = EdgeDetectOpenCVSharp.BitmapToMat(bitmap);
 
             Assert.IsTrue( mat.SaveImage("Conversion From Bitmap to OpenCV Mat.png"));
             bitmap.Dispose();
@@ -29,8 +29,7 @@
         public void TestCapture()
         {
             var bitmap = ScreenController.CaptureDesktopBitmap();
-            var mat = MLClientOpenCVSharp.BitmapToMat(bitmap);
-            var bboxes = MLClientOpenCVSharp.GetBboxes(mat);
+            var bboxes = MLClient.GetBboxes(bitmap);
             Assert.GreaterOrEqual(1, bboxes.Count);
         }
     }
