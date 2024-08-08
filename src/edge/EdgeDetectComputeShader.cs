@@ -22,6 +22,7 @@ using System.Diagnostics;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Dbscan;
 using System.Linq;
+using System.Windows.Markup;
 
 namespace Clickless.src
 {
@@ -31,6 +32,13 @@ namespace Clickless.src
         private ComputeShader computeShader;
         private DeviceContext context;
         private Texture2D inputTexture;
+        private Buffer outputBuffer;
+        private Buffer outputCounter;
+        private int bufferSize = 0;
+
+        UnorderedAccessView outputBufferUav;
+        UnorderedAccessView outputCounterUAV;
+
 
         ShaderResourceView shaderResourceView;
         UnorderedAccessView unorderedAccessView;
@@ -49,6 +57,46 @@ namespace Clickless.src
             context.ComputeShader.Set(computeShader);
         }
 
+        private Buffer GetOutputBuffer()
+        {
+            if (bufferSize != inputTexture.Description.Height * inputTexture.Description.Width || outputBuffer == null)
+            {
+                bufferSize = inputTexture.Description.Height * inputTexture.Description.Width;
+                outputBuffer = new Buffer(device, new BufferDescription
+                {
+                    SizeInBytes = sizeof(int) * 2 * bufferSize,
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.UnorderedAccess,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.BufferStructured,
+                    StructureByteStride = sizeof(int) * 2,
+                });
+                outputBufferUav = new UnorderedAccessView(device, outputBuffer);
+            }
+
+            return outputBuffer;
+        }
+        
+        private Buffer GetCounterBuffer()
+        {
+            if (outputCounter == null)
+            {
+                outputCounter = new Buffer(device, new BufferDescription
+                {
+                    SizeInBytes = sizeof(int),
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.UnorderedAccess,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.BufferStructured,
+                    StructureByteStride = sizeof(int),
+                });
+
+                outputCounterUAV = new UnorderedAccessView(device, outputCounter);
+            }
+            return outputCounter;
+        }
+
+
 
         public IEnumerable<IPointData> GetEdges(Bitmap bitmap)
         {
@@ -61,46 +109,18 @@ namespace Clickless.src
             TimeSpan timespan = timer.Elapsed;
             Console.WriteLine("Copying to Gpu took: " + timespan.TotalMilliseconds);
 
-            timer = Stopwatch.StartNew();
-
-            int bufferSize = inputTexture.Description.Height * inputTexture.Description.Width;
-
-            var outputBuffer = new Buffer(device, new BufferDescription
-            {
-                SizeInBytes = sizeof(int) * 2 * bufferSize,
-                Usage = ResourceUsage.Default,
-                BindFlags = BindFlags.UnorderedAccess,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.BufferStructured,
-                StructureByteStride = sizeof(int) * 2,
-            });
-
-            var outputCounter = new Buffer(device, new BufferDescription
-            {
-                SizeInBytes = sizeof(int),
-                Usage = ResourceUsage.Default,
-                BindFlags = BindFlags.UnorderedAccess,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.BufferStructured,
-                StructureByteStride = sizeof(int),
-            });
-
-            timer.Stop();
-            timespan = timer.Elapsed;
-            Console.WriteLine("Output Texture Took: " + timespan.TotalMilliseconds);
-
+            var outputBuffer = GetOutputBuffer();
+            var outputCounter = GetCounterBuffer();
 
             timer = Stopwatch.StartNew();
 
-            var outputBufferUav = new UnorderedAccessView(device, outputBuffer);
-            var outputCounterUav = new UnorderedAccessView(device, outputCounter);
             shaderResourceView = new ShaderResourceView(device, inputTexture);
 
 
             context.ComputeShader.SetShaderResource(0, shaderResourceView);
             //context.ComputeShader.SetUnorderedAccessView(0, unorderedAccessView, 0);
             context.ComputeShader.SetUnorderedAccessView(0, outputBufferUav);
-            context.ComputeShader.SetUnorderedAccessView(1, outputCounterUav);
+            context.ComputeShader.SetUnorderedAccessView(1, outputCounterUAV);
 
             int[] initialCounter = { 0 };
             context.UpdateSubresource(initialCounter, outputCounter);
@@ -140,7 +160,7 @@ namespace Clickless.src
                 StructureByteStride = sizeof(int),
             });
 
-            
+
             context.CopyResource(outputBuffer, stagingBuffer);
             context.CopyResource(outputCounter, resCounterBuffer);
 
@@ -162,9 +182,9 @@ namespace Clickless.src
             dataStream.ReadRange(results, 0, validEntries);
             context.UnmapSubresource(stagingBuffer, 0);
 
-            ConcurrentBag<IPointData> edges = new ConcurrentBag<Dbscan.IPointData>();
+            ConcurrentBag<IPointData> edges = new ConcurrentBag<IPointData>();
 
-            var ret= results.Cast<IPointData>();
+            var ret = results.Cast<IPointData>();
 
             timer.Stop();
             timespan = timer.Elapsed;
@@ -174,11 +194,6 @@ namespace Clickless.src
             timer = Stopwatch.StartNew();
 
             dataStream.Dispose();
-            outputBuffer.Dispose();
-            stagingBuffer.Dispose();
-            outputCounter.Dispose();
-            outputBufferUav.Dispose();
-            outputCounterUav.Dispose();
             shaderResourceView.Dispose();
 
             timer.Stop();
@@ -192,7 +207,7 @@ namespace Clickless.src
             //{
             //    edges.Add(new EdgePt(item.X, item.Y));
             //} );
-            
+
             //foreach (var coord in results)
             //{
             //    if (coord.X != 0 || coord.Y != 0)
@@ -207,7 +222,7 @@ namespace Clickless.src
             public int X;
             public int Y;
 
-            public Dbscan.Point Point => new Dbscan.Point(X,Y);
+            public Dbscan.Point Point => new Dbscan.Point(X, Y);
         }
 
 
@@ -246,8 +261,8 @@ namespace Clickless.src
                     Height = bitmap.Height,
                     ArraySize = 1,
                     BindFlags = BindFlags.ShaderResource,
-                    Usage = ResourceUsage.Immutable,
-                    CpuAccessFlags = CpuAccessFlags.None,
+                    Usage = ResourceUsage.Dynamic,
+                    CpuAccessFlags = CpuAccessFlags.Write,
                     Format = Format.B8G8R8A8_UNorm, //TODO: Can probaly change this to B8G8R8 or similar if it exists, might need to recompile the hlsl file too.
                     MipLevels = 1,
                     OptionFlags = ResourceOptionFlags.None,
@@ -270,16 +285,24 @@ namespace Clickless.src
             else
             {
                 var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                DataBox dataBox = context.MapSubresource(inputTexture, 0, MapMode.WriteDiscard, MapFlags.None);
 
-                // Create DataBox with the bitmap data
-                var dataBox = new DataBox(bitmapData.Scan0, bitmapData.Stride, 0);
+                //Copy data to the GPU using marshal.
+                int dataSize = bitmapData.Stride * bitmap.Height;
 
-                // Update the texture with the new data
-                context.UpdateSubresource(dataBox, inputTexture, 0);
+                // Create a managed array to hold the bitmap data
+                byte[] data = new byte[dataSize];
+
+                // Copy the bitmap data to the managed array
+                Marshal.Copy(bitmapData.Scan0, data, 0, dataSize);
+                Marshal.Copy(data, 0, dataBox.DataPointer, dataSize);
+                context.UnmapSubresource(inputTexture, 0);
+
                 bitmap.UnlockBits(bitmapData);
             }
         }
 
+        
 
 
         ////Form used to debug.

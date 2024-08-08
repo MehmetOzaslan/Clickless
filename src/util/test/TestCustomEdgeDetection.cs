@@ -14,7 +14,7 @@
     using static Util.MathUtil;
 
     [TestFixture]
-    public class EdgeDetectionTests
+    public class EdgeDetectionTests 
     {
 
         private Bitmap bitmap;
@@ -53,10 +53,5 @@
             Console.WriteLine("Image Size:" + 1920 * 1080);
             Console.WriteLine("Edge Pixel Count: " +  count);
         }
-
-
-
-
     }
-
 }

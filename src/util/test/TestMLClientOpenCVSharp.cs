@@ -37,8 +37,16 @@
         }
 
         [Test]
-        [Repeat(10)]
         public void TestEdgeDetection()
+        {
+            Stopwatch total_timer = Stopwatch.StartNew();
+            var bboxes = edgeDetecteCompute.GetEdges(bitmap);
+            Console.WriteLine("Total time took: " + total_timer.Elapsed.TotalMilliseconds);
+        }
+
+        [Test]
+        [Repeat(10)]
+        public void TestEdgeDetectionPerformance()
         {
             Stopwatch total_timer = Stopwatch.StartNew();
             var bboxes = edgeDetecteCompute.GetEdges(bitmap);
