@@ -100,28 +100,20 @@ namespace Clickless.src
 
         public IEnumerable<IPointData> GetEdges(Bitmap bitmap)
         {
-
-            Stopwatch timer = Stopwatch.StartNew();
-
             CopyCapturedBitmapToGPUTexture(bitmap);
 
-            timer.Stop();
-            TimeSpan timespan = timer.Elapsed;
-            Console.WriteLine("Copying to Gpu took: " + timespan.TotalMilliseconds);
 
             var outputBuffer = GetOutputBuffer();
             var outputCounter = GetCounterBuffer();
 
-            timer = Stopwatch.StartNew();
-
             shaderResourceView = new ShaderResourceView(device, inputTexture);
-
 
             context.ComputeShader.SetShaderResource(0, shaderResourceView);
             //context.ComputeShader.SetUnorderedAccessView(0, unorderedAccessView, 0);
             context.ComputeShader.SetUnorderedAccessView(0, outputBufferUav);
             context.ComputeShader.SetUnorderedAccessView(1, outputCounterUAV);
 
+            //Reset the counter for the buffer.
             int[] initialCounter = { 0 };
             context.UpdateSubresource(initialCounter, outputCounter);
 
@@ -129,14 +121,6 @@ namespace Clickless.src
             int threadGroupX = (inputTexture.Description.Width + 15) / 16;
             int threadGroupY = (inputTexture.Description.Height + 15) / 16;
             context.Dispatch(threadGroupX, threadGroupY, 1);
-
-            timer.Stop();
-            timespan = timer.Elapsed;
-            Console.WriteLine("Compute Took: " + timespan.TotalMilliseconds);
-
-
-            timer = Stopwatch.StartNew();
-
 
             // Create a staging buffer for reading data back
             var stagingBuffer = new Buffer(device, new BufferDescription
@@ -166,55 +150,22 @@ namespace Clickless.src
 
 
             //Get the buffer size.
-            DataStream counterSize;
-            context.MapSubresource(resCounterBuffer, MapMode.Read, MapFlags.None, out counterSize);
+            context.MapSubresource(resCounterBuffer, MapMode.Read, MapFlags.None, out var counterSize);
             int[] counterResult = new int[1];
             counterSize.ReadRange(counterResult, 0, 1);
             context.UnmapSubresource(resCounterBuffer, 0);
 
             int validEntries = counterResult[0];
-            Console.WriteLine("EdgeCt: " + validEntries + " Maximum Should be " + bufferSize);
 
-
-            DataStream dataStream;
-            context.MapSubresource(stagingBuffer, MapMode.Read, MapFlags.None, out dataStream);
+            context.MapSubresource(stagingBuffer, MapMode.Read, MapFlags.None, out var dataStream);
             var results = new BufferedInt2[validEntries];
             dataStream.ReadRange(results, 0, validEntries);
             context.UnmapSubresource(stagingBuffer, 0);
-
-            ConcurrentBag<IPointData> edges = new ConcurrentBag<IPointData>();
-
             var ret = results.Cast<IPointData>();
-
-            timer.Stop();
-            timespan = timer.Elapsed;
-            Console.WriteLine("Edge Movement Took: " + timespan.TotalMilliseconds);
-
-
-            timer = Stopwatch.StartNew();
 
             dataStream.Dispose();
             shaderResourceView.Dispose();
-
-            timer.Stop();
-            timespan = timer.Elapsed;
-            Console.WriteLine("Cleanup Took: " + timespan.TotalMilliseconds);
-
-
-
             return ret;
-            //Parallel.ForEach(results, (item)=>
-            //{
-            //    edges.Add(new EdgePt(item.X, item.Y));
-            //} );
-
-            //foreach (var coord in results)
-            //{
-            //    if (coord.X != 0 || coord.Y != 0)
-            //    {
-            //        Console.WriteLine($"Pixel coordinate: ({coord.X}, {coord.Y})");
-            //    }
-            //}
         }
 
         public struct BufferedInt2 : IPointData
@@ -277,8 +228,6 @@ namespace Clickless.src
         private void CopyCapturedBitmapToGPUTexture(Bitmap bitmap)
         {
             if (inputTexture == null || inputTexture.Description.Width != bitmap.Width || inputTexture.Description.Height != bitmap.Height) {
-
-                Console.WriteLine("Initializing gpu.");
                 InitializeTexture2D(bitmap);
             }
 
