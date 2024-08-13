@@ -26,57 +26,180 @@ using System.Windows.Markup;
 
 namespace Clickless.src
 {
+
+    // Parameters to send to the GPU
+    [StructLayout(LayoutKind.Sequential)]
+    struct Params
+    {
+        public uint m;
+        public uint epsilon;
+        public uint iterations;
+        public uint padding;
+    };
+
+    // Data to and from the GPU
+    // NOTE: for resolutions larger than 32k pixels this needs to be changed.
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BufferedPoint : IPointData
+    {
+        public int X;
+        public int Y;
+        public uint CLUSTER_LABEL;
+        public uint EDGE_COUNT;
+
+        public Dbscan.Point Point => new Dbscan.Point(X, Y);
+    }
+
     class EdgeDetectComputeShader : IEdgeProvider
     {
         private Device device;
-        private ComputeShader computeShader;
+        private ComputeShader sobelShader;
+        private ComputeShader dbScan;
+
         private DeviceContext context;
         private Texture2D inputTexture;
         private Buffer outputBuffer;
         private Buffer outputCounter;
-        private int bufferSize = 0;
+        private Buffer paramBuffer;
 
-        UnorderedAccessView outputBufferUav;
+        private int bufferSize = 0;
+        private const int bufferSizeScalarReduction = 4;
+
+        UnorderedAccessView outputBufferUAV;
         UnorderedAccessView outputCounterUAV;
 
+        ShaderResourceView inputTextureSRV;
 
-        ShaderResourceView shaderResourceView;
-        UnorderedAccessView unorderedAccessView;
-
-        private string computeFilePath { get => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resources", "SobelFilter.cso"); }
+        private string SobelFilterFilePath { get => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resources", "SobelFilter.cso"); }
+        private string DBScanFilePath { get => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resources", "DBScan.cso"); }
 
         public EdgeDetectComputeShader()
         {
             device = new Device(DriverType.Hardware, DeviceCreationFlags.None);
             context = device.ImmediateContext;
 
-            //Load the bytecode.
-            var shaderBytecode = File.ReadAllBytes(computeFilePath);
-            computeShader = new ComputeShader(device, shaderBytecode);
-            // Set compute shader and resources
-            context.ComputeShader.Set(computeShader);
+            //Load in the bytecode for the shaders.
+            sobelShader = new ComputeShader(device, File.ReadAllBytes(SobelFilterFilePath));
+            dbScan = new ComputeShader(device, File.ReadAllBytes(DBScanFilePath));
+        }
+
+
+
+        public IEnumerable<IPointData> GetEdges(Bitmap bitmap)
+        {
+            //Load in user params.
+            InitializeGPUParams();
+            CopyCapturedBitmapToGPUTexture(bitmap);
+
+            //First Pass: Sobel
+            context.ComputeShader.Set(sobelShader);
+
+            outputBuffer = GetOutputBuffer();
+            outputCounter = GetCounterBuffer();
+            inputTextureSRV = new ShaderResourceView(device, inputTexture);
+            context.ComputeShader.SetShaderResource(0, inputTextureSRV);
+            context.ComputeShader.SetUnorderedAccessView(0, outputBufferUAV);
+            context.ComputeShader.SetUnorderedAccessView(1, outputCounterUAV);
+
+            int threadGroupX = (inputTexture.Description.Width + 15) / 16;
+            int threadGroupY = (inputTexture.Description.Height + 15) / 16;
+            context.Dispatch(threadGroupX, threadGroupY, 1);
+
+            context.ComputeShader.SetShaderResource(0, null);
+            context.ComputeShader.SetUnorderedAccessView(0, null);
+            context.ComputeShader.SetUnorderedAccessView(1, null);
+            context.ComputeShader.SetShaderResource(1, null);
+            context.Flush();
+
+            // Squash the buffer down.
+            SquashBuffer(out var newSize);
+
+            var tempBuffer = new Buffer(device, new BufferDescription
+            {
+                SizeInBytes = Utilities.SizeOf<BufferedPoint>() * bufferSize,
+                Usage = ResourceUsage.Default,
+                BindFlags = BindFlags.ShaderResource,
+                CpuAccessFlags = CpuAccessFlags.None,
+                OptionFlags = ResourceOptionFlags.BufferStructured,
+                StructureByteStride = Utilities.SizeOf<BufferedPoint>(),
+            });
+
+            //context.CopyResource(outputBuffer, tempBuffer);
+            context.CopySubresourceRegion(outputBuffer, 0, new ResourceRegion(0, 0, 0, newSize * Utilities.SizeOf<BufferedPoint>(), 1, 1), tempBuffer, 0);
+
+
+            outputBufferUAV?.Dispose();
+            outputBufferUAV = new UnorderedAccessView(device, outputBuffer);
+            var tempBufferSRV = new ShaderResourceView(device, tempBuffer);
+
+            // Second pass: DBScan
+            context.ComputeShader.SetShaderResource(0, tempBufferSRV);
+            context.ComputeShader.SetUnorderedAccessView(0, outputBufferUAV);
+            context.ComputeShader.SetUnorderedAccessView(1, outputCounterUAV);
+
+            context.ComputeShader.Set(dbScan);
+
+            int threadsPerGroup = 256;
+            int threadGroups = (int)Math.Ceiling((double)newSize / threadsPerGroup);
+            context.Dispatch(threadGroups, 1, 1);
+
+
+
+            context.ComputeShader.SetShaderResource(0, null);
+            context.ComputeShader.SetUnorderedAccessView(0, null);
+
+            IEnumerable<IPointData> ret = GetEdgeDetectionResult(newSize);
+
+            inputTextureSRV?.Dispose();
+            ResetCounterBuffer();
+
+            return ret;
+        }
+
+        private void InitializeGPUParams()
+        {
+            if(paramBuffer != null)
+            {
+                paramBuffer.Dispose();
+            }
+
+            paramBuffer = new Buffer(device, new BufferDescription
+            {
+                SizeInBytes = Utilities.SizeOf<Params>(),
+                Usage = ResourceUsage.Default,
+                BindFlags = BindFlags.ConstantBuffer,
+                CpuAccessFlags = CpuAccessFlags.None,
+                OptionFlags = ResourceOptionFlags.None
+            });
+
+            //Use the parameters.
+            var dbscanParams = new Params { epsilon = 10, m = 3, iterations = 100 };
+            context.ComputeShader.SetConstantBuffer(0, paramBuffer);
+            context.UpdateSubresource(ref dbscanParams, paramBuffer);
         }
 
         private Buffer GetOutputBuffer()
         {
-            if (bufferSize != inputTexture.Description.Height * inputTexture.Description.Width || outputBuffer == null)
+            int currBufferSize = (inputTexture.Description.Height * inputTexture.Description.Width) / bufferSizeScalarReduction;
+            if (bufferSize != currBufferSize || outputBuffer == null)
             {
-                bufferSize = inputTexture.Description.Height * inputTexture.Description.Width;
+                bufferSize = currBufferSize;
+                outputBuffer?.Dispose();
                 outputBuffer = new Buffer(device, new BufferDescription
                 {
-                    SizeInBytes = sizeof(int) * 2 * bufferSize,
+                    SizeInBytes = Utilities.SizeOf<BufferedPoint>() * bufferSize,
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.UnorderedAccess,
                     CpuAccessFlags = CpuAccessFlags.None,
                     OptionFlags = ResourceOptionFlags.BufferStructured,
-                    StructureByteStride = sizeof(int) * 2,
+                    StructureByteStride = Utilities.SizeOf<BufferedPoint>(),
                 });
-                outputBufferUav = new UnorderedAccessView(device, outputBuffer);
+                outputBufferUAV?.Dispose();
+                outputBufferUAV = new UnorderedAccessView(device, outputBuffer);
             }
-
             return outputBuffer;
         }
-        
+
         private Buffer GetCounterBuffer()
         {
             if (outputCounter == null)
@@ -97,43 +220,15 @@ namespace Clickless.src
         }
 
 
-
-        public IEnumerable<IPointData> GetEdges(Bitmap bitmap)
+        private void ResetCounterBuffer()
         {
-            CopyCapturedBitmapToGPUTexture(bitmap);
-
-
-            var outputBuffer = GetOutputBuffer();
-            var outputCounter = GetCounterBuffer();
-
-            shaderResourceView = new ShaderResourceView(device, inputTexture);
-
-            context.ComputeShader.SetShaderResource(0, shaderResourceView);
-            //context.ComputeShader.SetUnorderedAccessView(0, unorderedAccessView, 0);
-            context.ComputeShader.SetUnorderedAccessView(0, outputBufferUav);
-            context.ComputeShader.SetUnorderedAccessView(1, outputCounterUAV);
-
-            //Reset the counter for the buffer.
             int[] initialCounter = { 0 };
             context.UpdateSubresource(initialCounter, outputCounter);
-
-            // Dispatch compute shader
-            int threadGroupX = (inputTexture.Description.Width + 15) / 16;
-            int threadGroupY = (inputTexture.Description.Height + 15) / 16;
-            context.Dispatch(threadGroupX, threadGroupY, 1);
-
-            // Create a staging buffer for reading data back
-            var stagingBuffer = new Buffer(device, new BufferDescription
-            {
-                SizeInBytes = Utilities.SizeOf<BufferedInt2>() * bufferSize,
-                Usage = ResourceUsage.Staging,
-                BindFlags = BindFlags.None,
-                CpuAccessFlags = CpuAccessFlags.Read,
-                OptionFlags = ResourceOptionFlags.BufferStructured,
-                StructureByteStride = Utilities.SizeOf<BufferedInt2>(),
-            });
+        }
 
 
+        private int GetEdgeDetectionCount()
+        {
             var resCounterBuffer = new Buffer(device, new BufferDescription
             {
                 SizeInBytes = sizeof(int),
@@ -144,12 +239,7 @@ namespace Clickless.src
                 StructureByteStride = sizeof(int),
             });
 
-
-            context.CopyResource(outputBuffer, stagingBuffer);
             context.CopyResource(outputCounter, resCounterBuffer);
-
-
-            //Get the buffer size.
             context.MapSubresource(resCounterBuffer, MapMode.Read, MapFlags.None, out var counterSize);
             int[] counterResult = new int[1];
             counterSize.ReadRange(counterResult, 0, 1);
@@ -157,25 +247,51 @@ namespace Clickless.src
 
             int validEntries = counterResult[0];
 
+            resCounterBuffer.Dispose();
+            return validEntries;
+        }
+
+        private void SquashBuffer(out int newSize)
+        {
+            newSize = GetEdgeDetectionCount();
+            outputBuffer = new BufferResizer(device).ResizeBuffer<BufferedPoint>(outputBuffer, newSize);
+        }
+
+        IEnumerable<IPointData> GetEdgeDetectionResult(int count)
+        {
+            // Create a staging buffer for reading data back
+            var stagingBuffer = new Buffer(device, new BufferDescription
+            {
+                SizeInBytes = Utilities.SizeOf<BufferedPoint>() * count,
+                Usage = ResourceUsage.Staging,
+                BindFlags = BindFlags.None,
+                CpuAccessFlags = CpuAccessFlags.Read,
+                OptionFlags = ResourceOptionFlags.BufferStructured,
+                StructureByteStride = Utilities.SizeOf<BufferedPoint>(),
+            });
+
+            context.CopyResource(outputBuffer, stagingBuffer);
+
+
+            //Get the pixels obtained through the compute shader.
             context.MapSubresource(stagingBuffer, MapMode.Read, MapFlags.None, out var dataStream);
-            var results = new BufferedInt2[validEntries];
-            dataStream.ReadRange(results, 0, validEntries);
+            var results = new BufferedPoint[count];
+            dataStream.ReadRange(results, 0, count);
             context.UnmapSubresource(stagingBuffer, 0);
+
+            for (int i = 0; i < 10; i++)
+            {
+                var res = results[i];
+                Console.WriteLine($"XY:({res.X},{res.Y}) Edges:{res.EDGE_COUNT} ID:{res.CLUSTER_LABEL} ");
+            }
             var ret = results.Cast<IPointData>();
 
+
+            //Cleanup.
             dataStream.Dispose();
-            shaderResourceView.Dispose();
+            stagingBuffer.Dispose();
             return ret;
         }
-
-        public struct BufferedInt2 : IPointData
-        {
-            public int X;
-            public int Y;
-
-            public Dbscan.Point Point => new Dbscan.Point(X, Y);
-        }
-
 
         /// <summary>
         /// Changes the flags to allow the cpu to read the result texture and copies it over.
@@ -195,9 +311,7 @@ namespace Clickless.src
 
             // Copy data from the GPU gpuSrcTexture to the staging gpuSrcTexture
             device.ImmediateContext.CopyResource(gpuSrcTexture, cpuDestinationTexture);
-
         }
-
 
         private void InitializeTexture2D(Bitmap bitmap)
         {
@@ -250,61 +364,55 @@ namespace Clickless.src
                 bitmap.UnlockBits(bitmapData);
             }
         }
+    }
 
-        
 
 
-        ////Form used to debug.
-        //private static void DisplayBitmap(Bitmap bitmap)
-        //{
-        //    // Gather system information
-        //    string systemInfo = $"OS: {Environment.OSVersion}\n" +
-        //                        $"64-bit OS: {Environment.Is64BitOperatingSystem}\n" +
-        //                        $"64-bit Process: {Environment.Is64BitProcess}\n" +
-        //                        $"Processor Count: {Environment.ProcessorCount}\n" +
-        //                        $"Machine Name: {Environment.MachineName}\n" +
-        //                        $"User Name: {Environment.UserName}\n" +
-        //                        $"System Directory: {Environment.SystemDirectory}\n" +
-        //                        $"Current Directory: {Environment.CurrentDirectory}\n" +
-        //                        $"Memory Usage: {Environment.WorkingSet / 1024 / 1024} MB";
+    public class BufferResizer : IDisposable
+    {
+        private Device device;
+        private DeviceContext context;
 
-        //    Form form = new Form
-        //    {
-        //        Text = "Processed Image",
-        //        ClientSize = new Size(bitmap.Width, bitmap.Height)
-        //    };
+        public BufferResizer(Device device)
+        {
+            this.device = device;
+            this.context = device.ImmediateContext;
+        }
 
-        //    PictureBox pictureBox = new PictureBox
-        //    {
-        //        Dock = DockStyle.Fill,
-        //        Image = bitmap,
-        //        SizeMode = PictureBoxSizeMode.Zoom
-        //    };
+        public Buffer ResizeBuffer<T>(Buffer oldBuffer, int newSize) where T : struct
+        {
+            // Create a new buffer with the desired size
+            var newBuffer = new Buffer(device, new BufferDescription
+            {
+                SizeInBytes = Utilities.SizeOf<T>() * newSize,
+                Usage = oldBuffer.Description.Usage,
+                BindFlags = oldBuffer.Description.BindFlags,
+                CpuAccessFlags = oldBuffer.Description.CpuAccessFlags,
+                OptionFlags = oldBuffer.Description.OptionFlags,
+                StructureByteStride = oldBuffer.Description.StructureByteStride
+            });
 
-        //    Label infoLabel = new Label
-        //    {
-        //        Text = systemInfo,
-        //        AutoSize = true,
-        //        BackColor = System.Drawing.Color.FromArgb(200, 255, 255, 255), // semi-transparent white background
-        //        ForeColor = System.Drawing.Color.Black,
-        //        TextAlign = ContentAlignment.BottomRight,
-        //        Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
-        //        Padding = new Padding(5)
-        //    };
+            // Determine the number of elements to copy
+            int oldSize = oldBuffer.Description.SizeInBytes / Utilities.SizeOf<T>();
+            int elementsToCopy = Math.Min(oldSize, newSize);
 
-        //    form.Controls.Add(pictureBox);
-        //    form.Controls.Add(infoLabel);
+            // Copy data from the old buffer to the new buffer
+            if (elementsToCopy > 0)
+            {
+                context.CopySubresourceRegion(oldBuffer, 0, new ResourceRegion(0, 0, 0, elementsToCopy * Utilities.SizeOf<T>(), 1, 1), newBuffer, 0);
+            }
 
-        //    // Position the label in the bottom right corner
-        //    infoLabel.Location = new Point(form.ClientSize.Width - infoLabel.Width - 10, form.ClientSize.Height - infoLabel.Height - 10);
+            // Release the old buffer
+            oldBuffer.Dispose();
 
-        //    // Handle form resize to reposition the label
-        //    form.Resize += (sender, e) =>
-        //    {
-        //        infoLabel.Location = new Point(form.ClientSize.Width - infoLabel.Width - 10, form.ClientSize.Height - infoLabel.Height - 10);
-        //    };
+            return newBuffer;
+        }
 
-        //    Application.Run(form);
-        //}
+        public void Dispose()
+        {
+            context?.ClearState();
+            context?.Flush();
+            device?.Dispose();
+        }
     }
 }

@@ -75,7 +75,6 @@ namespace Clickless.src
             }
             catch (Exception ex)
             {
-
                 Console.Error.WriteLine(ex.Message);
                 Console.WriteLine("Compute Shader not supported, switching to CPU implementation");
                 Instance.edgeProvider = new EdgeDetectOpenCVSharp();
@@ -85,6 +84,7 @@ namespace Clickless.src
 
 
             var st = Stopwatch.StartNew();
+
 
             var clusters = DbscanRBush.CalculateClusters(
                 edgeEnumerator,

@@ -1,15 +1,24 @@
 Texture2D<float> inputTexture : register(t0);
-//RWTexture2D<float> outputTexture : register(u0);
+
+
+struct BufferedPoint
+{
+    int X;
+    int Y;
+    uint CLUSTER_LABEL;
+    uint EDGE_COUNT;
+};
+
+RWStructuredBuffer<BufferedPoint> OutputBuffer : register(u0);
+RWStructuredBuffer<uint> OutputCounter : register(u1);
 
 SamplerState samplerState : register(s0);
 
-RWStructuredBuffer<int2> OutputBuffer : register(u0);
-RWStructuredBuffer<uint> OutputCounter : register(u1);
 
 [numthreads(16, 16, 1)]
 void CSMain(uint3 DTid : SV_DispatchThreadID)
 {
-    int2 coord = int2(DTid.xy);
+    uint2 coord = int2(DTid.xy);
     
     //Downsample
     if (coord[0] % 2 >0) {
@@ -50,6 +59,14 @@ void CSMain(uint3 DTid : SV_DispatchThreadID)
         // Atomically increment the counter and get the index to store the pixel coordinates
         uint index = 0;
         InterlockedAdd(OutputCounter[0], 1, index);
-        OutputBuffer[index] = coord;
+
+
+        //No need to initialize other parameters other than the texture coordinates, this will be done in the second pass.
+        BufferedPoint ret;
+        ret.X = coord.x;
+        ret.Y = coord.y;
+        ret.CLUSTER_LABEL = 0;
+        ret.EDGE_COUNT = 0;
+        OutputBuffer[index] = ret;
     }
 }

@@ -44,6 +44,10 @@
     <None Include="App.config" />
     <None Include="app.manifest" />
     <None Include="packages.config" />
+    <None Include="resources\DBScan.cso">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="resources\DBScanFirstPass.cso" />
     <None Include="resources\SobelFilter.cso">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -297,6 +301,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="resources\DBScan.hlsl" />
     <Content Include="resources\SobelFilter.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
