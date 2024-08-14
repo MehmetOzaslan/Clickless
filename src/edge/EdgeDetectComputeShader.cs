@@ -120,31 +120,11 @@ namespace Clickless.src
             // Squash the buffer down.
             SquashBuffer(out var newSize);
 
-            var tempBuffer = new Buffer(device, new BufferDescription
-            {
-                SizeInBytes = Utilities.SizeOf<BufferedPoint>() * bufferSize,
-                Usage = ResourceUsage.Default,
-                BindFlags = BindFlags.ShaderResource,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.BufferStructured,
-                StructureByteStride = Utilities.SizeOf<BufferedPoint>(),
-            });
-
-            //context.CopyResource(outputBuffer, tempBuffer);
-            context.CopySubresourceRegion(outputBuffer, 0, new ResourceRegion(0, 0, 0, newSize * Utilities.SizeOf<BufferedPoint>(), 1, 1), tempBuffer, 0);
-
 
             outputBufferUAV?.Dispose();
             outputBufferUAV = new UnorderedAccessView(device, outputBuffer);
-            var tempBufferSRV = new ShaderResourceView(device, tempBuffer);
-
-
-            //outputTextureUAV?.Dispose();
-            //outputTextureUAV = new UnorderedAccessView(device, outputTexture);
-
 
             // Second pass: DBScan
-            context.ComputeShader.SetShaderResource(0, tempBufferSRV);
             context.ComputeShader.SetUnorderedAccessView(0, outputBufferUAV);
             context.ComputeShader.SetUnorderedAccessView(1, outputCounterUAV);
             context.ComputeShader.SetUnorderedAccessView(2, outputTextureUAV);

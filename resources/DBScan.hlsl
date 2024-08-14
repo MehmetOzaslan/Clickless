@@ -7,7 +7,6 @@ struct BufferedPoint
 };
 
 //Obtained through the sobel shader.
-StructuredBuffer<BufferedPoint> InputBuffer : register(t0);
 RWStructuredBuffer<BufferedPoint> OutputBuffer : register(u0);
 
 RWStructuredBuffer<uint> PointCount : register(u1);
