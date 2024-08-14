@@ -1,6 +1,16 @@
 Texture2D<float> inputTexture : register(t0);
 
 
+//Constants
+cbuffer Params : register(b0)
+{
+    int m;
+    int epsilon;
+    int iterations;
+    int padding;
+};
+
+
 struct BufferedPoint
 {
     int X;
@@ -10,6 +20,11 @@ struct BufferedPoint
 };
 
 RWStructuredBuffer<BufferedPoint> OutputBuffer : register(u0);
+
+//For the dbscan
+RWTexture2D<int2> OutputTexture : register(u2);
+
+
 RWStructuredBuffer<uint> OutputCounter : register(u1);
 
 SamplerState samplerState : register(s0);
@@ -60,7 +75,6 @@ void CSMain(uint3 DTid : SV_DispatchThreadID)
         uint index = 0;
         InterlockedAdd(OutputCounter[0], 1, index);
 
-
         //No need to initialize other parameters other than the texture coordinates, this will be done in the second pass.
         BufferedPoint ret;
         ret.X = coord.x;
@@ -68,5 +82,8 @@ void CSMain(uint3 DTid : SV_DispatchThreadID)
         ret.CLUSTER_LABEL = 0;
         ret.EDGE_COUNT = 0;
         OutputBuffer[index] = ret;
+
+        //Add it to the texture (for passes in DBScan)
+        OutputTexture[coord] = index,0;
     }
 }

@@ -31,10 +31,10 @@ namespace Clickless.src
     [StructLayout(LayoutKind.Sequential)]
     struct Params
     {
-        public uint m;
-        public uint epsilon;
-        public uint iterations;
-        public uint padding;
+        public int m;
+        public int epsilon;
+        public int iterations;
+        public int padding; //Necessary for the buffer
     };
 
     // Data to and from the GPU
@@ -58,6 +58,7 @@ namespace Clickless.src
 
         private DeviceContext context;
         private Texture2D inputTexture;
+        private Texture2D outputTexture;
         private Buffer outputBuffer;
         private Buffer outputCounter;
         private Buffer paramBuffer;
@@ -65,8 +66,10 @@ namespace Clickless.src
         private int bufferSize = 0;
         private const int bufferSizeScalarReduction = 4;
 
-        UnorderedAccessView outputBufferUAV;
-        UnorderedAccessView outputCounterUAV;
+
+        UnorderedAccessView outputTextureUAV;// Register u2
+        UnorderedAccessView outputBufferUAV; // Register u0
+        UnorderedAccessView outputCounterUAV;// Register u1
 
         ShaderResourceView inputTextureSRV;
 
@@ -100,6 +103,7 @@ namespace Clickless.src
             context.ComputeShader.SetShaderResource(0, inputTextureSRV);
             context.ComputeShader.SetUnorderedAccessView(0, outputBufferUAV);
             context.ComputeShader.SetUnorderedAccessView(1, outputCounterUAV);
+            context.ComputeShader.SetUnorderedAccessView(2, outputTextureUAV);
 
             int threadGroupX = (inputTexture.Description.Width + 15) / 16;
             int threadGroupY = (inputTexture.Description.Height + 15) / 16;
@@ -109,6 +113,8 @@ namespace Clickless.src
             context.ComputeShader.SetUnorderedAccessView(0, null);
             context.ComputeShader.SetUnorderedAccessView(1, null);
             context.ComputeShader.SetShaderResource(1, null);
+            context.ComputeShader.SetUnorderedAccessView(2, null);
+
             context.Flush();
 
             // Squash the buffer down.
@@ -132,10 +138,18 @@ namespace Clickless.src
             outputBufferUAV = new UnorderedAccessView(device, outputBuffer);
             var tempBufferSRV = new ShaderResourceView(device, tempBuffer);
 
+
+            //outputTextureUAV?.Dispose();
+            //outputTextureUAV = new UnorderedAccessView(device, outputTexture);
+
+
             // Second pass: DBScan
             context.ComputeShader.SetShaderResource(0, tempBufferSRV);
             context.ComputeShader.SetUnorderedAccessView(0, outputBufferUAV);
             context.ComputeShader.SetUnorderedAccessView(1, outputCounterUAV);
+            context.ComputeShader.SetUnorderedAccessView(2, outputTextureUAV);
+
+
 
             context.ComputeShader.Set(dbScan);
 
@@ -173,7 +187,7 @@ namespace Clickless.src
             });
 
             //Use the parameters.
-            var dbscanParams = new Params { epsilon = 10, m = 3, iterations = 100 };
+            var dbscanParams = new Params { epsilon = 10, m = 10, iterations = 50 };
             context.ComputeShader.SetConstantBuffer(0, paramBuffer);
             context.UpdateSubresource(ref dbscanParams, paramBuffer);
         }
@@ -279,11 +293,16 @@ namespace Clickless.src
             dataStream.ReadRange(results, 0, count);
             context.UnmapSubresource(stagingBuffer, 0);
 
-            for (int i = 0; i < 10; i++)
+
+            Console.WriteLine($"Distinct values: {results.Select(x => x.CLUSTER_LABEL).Distinct().Count()} Total: {count}");
+
+            for (int i = 0; i < 100; i++)
             {
                 var res = results[i];
-                Console.WriteLine($"XY:({res.X},{res.Y}) Edges:{res.EDGE_COUNT} ID:{res.CLUSTER_LABEL} ");
+                Console.WriteLine($"XY:({res.X},{res.Y}) ID:{res.CLUSTER_LABEL} Edges:{res.EDGE_COUNT} ");
             }
+
+
             var ret = results.Cast<IPointData>();
 
 
@@ -319,6 +338,7 @@ namespace Clickless.src
             var dataBox = new DataRectangle(bitmapData.Scan0, bitmapData.Stride);
 
 
+            inputTexture?.Dispose();
             inputTexture = new Texture2D(device,
                 new Texture2DDescription
                 {
@@ -335,6 +355,29 @@ namespace Clickless.src
                 },
                 dataBox
             );
+
+
+            outputTexture?.Dispose();
+            outputTexture = new Texture2D(device,
+                new Texture2DDescription
+                {
+                    Width = inputTexture.Description.Width,
+                    Height = inputTexture.Description.Height,
+                    ArraySize = inputTexture.Description.ArraySize,
+                    BindFlags = BindFlags.UnorderedAccess,
+                    Usage = ResourceUsage.Default,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    Format = Format.R32G32_SInt, //RWTexture2D<int2> on the GPU
+                    MipLevels = inputTexture.Description.MipLevels,
+                    SampleDescription = new SampleDescription(1, 0)
+                }
+            );
+
+
+            outputTextureUAV?.Dispose();
+            outputTextureUAV = new UnorderedAccessView(device,outputTexture);
+
+
 
             bitmap.UnlockBits(bitmapData);
         }
