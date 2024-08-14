@@ -23,6 +23,7 @@ using Buffer = SharpDX.Direct3D11.Buffer;
 using Dbscan;
 using System.Linq;
 using System.Windows.Markup;
+using Clickless.src.edge;
 
 namespace Clickless.src
 {
@@ -50,8 +51,11 @@ namespace Clickless.src
         public Dbscan.Point Point => new Dbscan.Point(X, Y);
     }
 
-    class EdgeDetectComputeShader : IEdgeProvider
+    class ImageRectDetectComputeShader : ImageToRectProvider
     {
+
+        private Params shaderParams = new Params { epsilon = 10, m = 10, iterations = 50 };
+
         private Device device;
         private ComputeShader sobelShader;
         private ComputeShader dbScan;
@@ -76,7 +80,7 @@ namespace Clickless.src
         private string SobelFilterFilePath { get => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resources", "SobelFilter.cso"); }
         private string DBScanFilePath { get => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resources", "DBScan.cso"); }
 
-        public EdgeDetectComputeShader()
+        public ImageRectDetectComputeShader()
         {
             device = new Device(DriverType.Hardware, DeviceCreationFlags.None);
             context = device.ImmediateContext;
@@ -86,15 +90,8 @@ namespace Clickless.src
             dbScan = new ComputeShader(device, File.ReadAllBytes(DBScanFilePath));
         }
 
-
-
-        public IEnumerable<IPointData> GetEdges(Bitmap bitmap)
+        private void RunSobelPass()
         {
-            //Load in user params.
-            InitializeGPUParams();
-            CopyCapturedBitmapToGPUTexture(bitmap);
-
-            //First Pass: Sobel
             context.ComputeShader.Set(sobelShader);
 
             outputBuffer = GetOutputBuffer();
@@ -116,38 +113,58 @@ namespace Clickless.src
             context.ComputeShader.SetUnorderedAccessView(2, null);
 
             context.Flush();
-
-            // Squash the buffer down.
-            SquashBuffer(out var newSize);
+        }
 
 
+        private void RunDBScanPass()
+        {
             outputBufferUAV?.Dispose();
             outputBufferUAV = new UnorderedAccessView(device, outputBuffer);
 
-            // Second pass: DBScan
             context.ComputeShader.SetUnorderedAccessView(0, outputBufferUAV);
             context.ComputeShader.SetUnorderedAccessView(1, outputCounterUAV);
             context.ComputeShader.SetUnorderedAccessView(2, outputTextureUAV);
 
-
-
             context.ComputeShader.Set(dbScan);
 
             int threadsPerGroup = 256;
-            int threadGroups = (int)Math.Ceiling((double)newSize / threadsPerGroup);
+            int threadGroups = (int)Math.Ceiling((double)bufferSize / threadsPerGroup);
             context.Dispatch(threadGroups, 1, 1);
-
-
 
             context.ComputeShader.SetShaderResource(0, null);
             context.ComputeShader.SetUnorderedAccessView(0, null);
+        }
 
-            IEnumerable<IPointData> ret = GetEdgeDetectionResult(newSize);
+        public override IEnumerable<IPointData> GetEdges(Bitmap bitmap)
+        {
+            InitializeGPUParams();
+            CopyCapturedBitmapToGPUTexture(bitmap);
+            RunSobelPass();
+            SquashBuffer();
+            RunDBScanPass(); // TODO: Remove this (only kept for testing)
+
+
+            IEnumerable<IPointData> ret = GetPointBuffer().Cast<IPointData>();
+
+            inputTextureSRV?.Dispose();
+            ResetCounterBuffer();
+            return ret;
+        }
+
+        public override IEnumerable<Rectangle> GetRects(Bitmap bitmap)
+        {
+            InitializeGPUParams();
+            CopyCapturedBitmapToGPUTexture(bitmap);
+            RunSobelPass();
+            SquashBuffer();
+            RunDBScanPass();
+
+
 
             inputTextureSRV?.Dispose();
             ResetCounterBuffer();
 
-            return ret;
+            return null;
         }
 
         private void InitializeGPUParams()
@@ -167,9 +184,8 @@ namespace Clickless.src
             });
 
             //Use the parameters.
-            var dbscanParams = new Params { epsilon = 10, m = 10, iterations = 50 };
             context.ComputeShader.SetConstantBuffer(0, paramBuffer);
-            context.UpdateSubresource(ref dbscanParams, paramBuffer);
+            context.UpdateSubresource(ref shaderParams, paramBuffer);
         }
 
         private Buffer GetOutputBuffer()
@@ -245,18 +261,18 @@ namespace Clickless.src
             return validEntries;
         }
 
-        private void SquashBuffer(out int newSize)
+        private void SquashBuffer()
         {
-            newSize = GetEdgeDetectionCount();
-            outputBuffer = new BufferResizer(device).ResizeBuffer<BufferedPoint>(outputBuffer, newSize);
+            bufferSize = GetEdgeDetectionCount();
+            outputBuffer = new BufferResizer(device).ResizeBuffer<BufferedPoint>(outputBuffer, bufferSize);
         }
 
-        IEnumerable<IPointData> GetEdgeDetectionResult(int count)
+        BufferedPoint[] GetPointBuffer()
         {
             // Create a staging buffer for reading data back
             var stagingBuffer = new Buffer(device, new BufferDescription
             {
-                SizeInBytes = Utilities.SizeOf<BufferedPoint>() * count,
+                SizeInBytes = Utilities.SizeOf<BufferedPoint>() * bufferSize,
                 Usage = ResourceUsage.Staging,
                 BindFlags = BindFlags.None,
                 CpuAccessFlags = CpuAccessFlags.Read,
@@ -269,12 +285,13 @@ namespace Clickless.src
 
             //Get the pixels obtained through the compute shader.
             context.MapSubresource(stagingBuffer, MapMode.Read, MapFlags.None, out var dataStream);
-            var results = new BufferedPoint[count];
-            dataStream.ReadRange(results, 0, count);
+            var results = new BufferedPoint[bufferSize];
+            dataStream.ReadRange(results, 0, bufferSize);
             context.UnmapSubresource(stagingBuffer, 0);
 
 
-            Console.WriteLine($"Distinct values: {results.Select(x => x.CLUSTER_LABEL).Distinct().Count()} Total: {count}");
+            Console.WriteLine($"Distinct values: {results.Select(x => x.CLUSTER_LABEL).Distinct().Count()} Total: {bufferSize}");
+
 
             for (int i = 0; i < 100; i++)
             {
@@ -282,14 +299,10 @@ namespace Clickless.src
                 Console.WriteLine($"XY:({res.X},{res.Y}) ID:{res.CLUSTER_LABEL} Edges:{res.EDGE_COUNT} ");
             }
 
-
-            var ret = results.Cast<IPointData>();
-
-
-            //Cleanup.
             dataStream.Dispose();
             stagingBuffer.Dispose();
-            return ret;
+
+            return results;
         }
 
         /// <summary>

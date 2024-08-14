@@ -43,7 +43,7 @@ namespace Clickless.src
         {
             try
             {
-                edgeProvider = new EdgeDetectComputeShader();
+                edgeProvider = new ImageRectDetectComputeShader();
             }
             catch (Exception ex) { 
 

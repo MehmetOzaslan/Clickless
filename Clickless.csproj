@@ -55,9 +55,10 @@
   <ItemGroup>
     <Compile Include="src\CommandGenerator.cs" />
     <Compile Include="src\edge\IEdgeProvider.cs" />
+    <Compile Include="src\edge\ImageToRectProvider.cs" />
     <Compile Include="src\edge\MatEnumerator.cs" />
     <Compile Include="src\edge\EdgePt.cs" />
-    <Compile Include="src\edge\EdgeDetectComputeShader.cs" />
+    <Compile Include="src\edge\ImageRectDetectComputeShader.cs" />
     <Compile Include="src\edge\EdgeDetectOpenCVSharp.cs" />
     <Compile Include="src\InputHandler.cs" />
     <Compile Include="src\KeyboardHook.cs" />

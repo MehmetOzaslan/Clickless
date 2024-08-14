@@ -24,7 +24,7 @@
         public void Setup()
         {
             bitmap = ScreenController.CaptureDesktopBitmap();
-            edgeDetecteCompute = new EdgeDetectComputeShader();
+            edgeDetecteCompute = new ImageRectDetectComputeShader();
         }
 
         [Test]
