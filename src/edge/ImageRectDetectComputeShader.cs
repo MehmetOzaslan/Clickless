@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D11;
-using SharpDX.D3DCompiler;
 using SharpDX.DXGI;
 using System;
 using System.IO;
@@ -8,21 +7,13 @@ using SharpDX.Direct3D;
 using System.Runtime.InteropServices;
 using System.Drawing.Imaging;
 using System.Drawing;
-using System.Windows.Forms;
-using System.Windows.Media.TextFormatting;
-using System.Runtime.Remoting.Contexts;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
 
 using Device = SharpDX.Direct3D11.Device;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
-using static Clickless.src.MLClient;
-using System.Diagnostics;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Dbscan;
 using System.Linq;
-using System.Windows.Markup;
 using Clickless.src.edge;
 
 namespace Clickless.src
@@ -89,6 +80,15 @@ namespace Clickless.src
             sobelShader = new ComputeShader(device, File.ReadAllBytes(SobelFilterFilePath));
             dbScan = new ComputeShader(device, File.ReadAllBytes(DBScanFilePath));
         }
+
+        public static bool DeviceSupportsCompute()
+        {
+            var dev= new Device(DriverType.Hardware, DeviceCreationFlags.None);
+            var supports = dev.CheckFeatureSupport(SharpDX.Direct3D11.Feature.ComputeShaders);
+            dev.Dispose();
+            return supports;
+        }
+
 
         private void RunSobelPass()
         {
