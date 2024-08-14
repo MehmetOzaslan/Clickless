@@ -19,12 +19,14 @@ using SharpDX.Direct3D11;
 using SharpDX.D3DCompiler;
 using Dbscan;
 using System.Diagnostics;
+using Clickless.src.edge;
 
 namespace Clickless.src
 {
     public class MLClient
     {
-        IEdgeProvider edgeProvider;
+        ImageToRectEngine Engine;
+        DetectionSettings detectionSettings;
 
         private static MLClient _instance;
         public static MLClient Instance
@@ -41,68 +43,43 @@ namespace Clickless.src
 
         MLClient()
         {
+
+            detectionSettings = new DetectionSettings() {m = 3, cannythresh1 = 100, cannythresh2 = 200, iterations = 100, epsilon = 5 };
+
+            //TODO: Use dx11 to check directly if compute shaders are supported.
             try
             {
-                edgeProvider = new ImageRectDetectComputeShader();
+                Engine = new ImageRectDetectComputeShader();
             }
             catch (Exception ex) { 
 
                 Console.Error.WriteLine(ex.Message);
                 Console.WriteLine("Compute Shader not supported, switching to CPU implementation");
-                edgeProvider = new EdgeDetectOpenCVSharp();
+                Engine = new EdgeDetectOpenCVSharp();
             }
 
         }
 
-
-        private static Rectangle GetClusterRect(Dbscan.Cluster<IPointData> cluster)
-        {
-            int xmin = (int)cluster.Objects.Min(p => p.Point.X);
-            int ymin = (int)cluster.Objects.Min(p => p.Point.Y);
-            int xmax = (int)cluster.Objects.Max(p => p.Point.X);
-            int ymax = (int)cluster.Objects.Max(p => p.Point.Y);
-
-            return new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
-        }
 
         public static List<Rectangle> GetBboxes(Bitmap image)
         {
             IEnumerable<IPointData> edgeEnumerator;
 
-            try
-            {
-                edgeEnumerator = Instance.edgeProvider.GetEdges(image);
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine(ex.Message);
-                Console.WriteLine("Compute Shader not supported, switching to CPU implementation");
-                Instance.edgeProvider = new EdgeDetectOpenCVSharp();
+            //try
+            //{
+            //    edgeEnumerator = Instance.Engine.GetEdges(image);
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.Error.WriteLine(ex.Message);
+            //    Console.WriteLine("Compute Shader not supported, switching to CPU implementation");
+            //    Instance.Engine = new EdgeDetectOpenCVSharp();
 
-                edgeEnumerator = Instance.edgeProvider.GetEdges(image);
-            }
+            //    edgeEnumerator = Instance.Engine.GetEdges(image);
+            //}
+            Instance.Engine.SetDetectionSettings(Instance.detectionSettings);
 
-
-            var st = Stopwatch.StartNew();
-
-
-            var clusters = DbscanRBush.CalculateClusters(
-                edgeEnumerator,
-                epsilon: 5,
-                minimumPointsPerCluster: 5
-            );
-
-            st.Stop();
-
-            Console.WriteLine("DBScan took: " + st.ElapsedMilliseconds);
-
-            List<Rectangle> rects = new List<Rectangle>();
-            foreach (var item in clusters.Clusters)
-            {
-                rects.Add(GetClusterRect(item));
-            }
-
-            return rects;
+            return Instance.Engine.GetRects(image).ToList();
         }
     }
 }

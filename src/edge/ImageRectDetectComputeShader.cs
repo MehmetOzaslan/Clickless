@@ -51,10 +51,10 @@ namespace Clickless.src
         public Dbscan.Point Point => new Dbscan.Point(X, Y);
     }
 
-    class ImageRectDetectComputeShader : ImageToRectProvider
+    class ImageRectDetectComputeShader : ImageToRectEngine
     {
 
-        private Params shaderParams = new Params { epsilon = 10, m = 10, iterations = 50 };
+        private Params shaderParams;
 
         private Device device;
         private ComputeShader sobelShader;
@@ -133,6 +133,8 @@ namespace Clickless.src
 
             context.ComputeShader.SetShaderResource(0, null);
             context.ComputeShader.SetUnorderedAccessView(0, null);
+            context.ComputeShader.SetUnorderedAccessView(1, null);
+            context.ComputeShader.SetUnorderedAccessView(2, null);
         }
 
         public override IEnumerable<IPointData> GetEdges(Bitmap bitmap)
@@ -143,10 +145,8 @@ namespace Clickless.src
             SquashBuffer();
             RunDBScanPass(); // TODO: Remove this (only kept for testing)
 
-
             IEnumerable<IPointData> ret = GetPointBuffer().Cast<IPointData>();
 
-            inputTextureSRV?.Dispose();
             ResetCounterBuffer();
             return ret;
         }
@@ -159,12 +159,27 @@ namespace Clickless.src
             SquashBuffer();
             RunDBScanPass();
 
+            var points = GetPointBuffer();
 
+            Dictionary<uint, List<BufferedPoint>> clusters = new Dictionary<uint, List<BufferedPoint>>();
 
-            inputTextureSRV?.Dispose();
+            foreach (BufferedPoint point in points)
+            {
+                if(!clusters.ContainsKey(point.CLUSTER_LABEL))
+                    clusters[point.CLUSTER_LABEL] = new List<BufferedPoint>();
+                clusters[point.CLUSTER_LABEL].Add(point);
+            }
+
+            //GetClusterRect();
+
+            List<Rectangle> rects = new List<Rectangle>();
+            foreach (var item in clusters)
+            {
+                rects.Add(GetClusterRect(item.Value));
+            }
+
             ResetCounterBuffer();
-
-            return null;
+            return rects;
         }
 
         private void InitializeGPUParams()
@@ -182,6 +197,11 @@ namespace Clickless.src
                 CpuAccessFlags = CpuAccessFlags.None,
                 OptionFlags = ResourceOptionFlags.None
             });
+
+            shaderParams = new Params();
+            shaderParams.iterations = detectionSettings.iterations;
+            shaderParams.m = detectionSettings.m;
+            shaderParams.epsilon = detectionSettings.epsilon;
 
             //Use the parameters.
             context.ComputeShader.SetConstantBuffer(0, paramBuffer);
@@ -369,8 +389,6 @@ namespace Clickless.src
 
             outputTextureUAV?.Dispose();
             outputTextureUAV = new UnorderedAccessView(device,outputTexture);
-
-
 
             bitmap.UnlockBits(bitmapData);
         }

@@ -1,4 +1,6 @@
-﻿using Dbscan;
+﻿using Clickless.src.edge;
+using Dbscan;
+using Dbscan.RBush;
 using OpenCvSharp;
 using System;
 using System.Collections;
@@ -12,7 +14,7 @@ using static Clickless.src.MLClient;
 
 namespace Clickless.src
 {
-    class EdgeDetectOpenCVSharp : IEdgeProvider
+    class EdgeDetectOpenCVSharp : ImageToRectEngine
     {
         //Members held statically to reduce garbage collection.
         private static Mat resizedImage = new Mat();
@@ -47,14 +49,8 @@ namespace Clickless.src
             return mat;
         }
 
-        public IEnumerable<IPointData> GetEdges(Bitmap bitmap)
-        {
-            int blur = 0;
-            int dbDist = 5;
-            int gaussianKernalSize = 5;
-            int cannyThresh1 = 100;
-            int cannyThresh2 = 200;
-
+        public override IEnumerable<IPointData> GetEdges(Bitmap bitmap)
+        {   
             //0.5 to allow for easy bitshifting.
             double scaleFactor = 0.5;
 
@@ -65,10 +61,28 @@ namespace Clickless.src
             Cv2.CvtColor(resizedImage, grayImage, ColorConversionCodes.RGB2GRAY);
 
             //TODO: Find a way to optimize this, either through the GPU or a different call.
-            Cv2.Canny(grayImage, edges, cannyThresh1, cannyThresh2);
+            Cv2.Canny(grayImage, edges, detectionSettings.cannythresh1, detectionSettings.cannythresh2);
 
             return new MatEnumerable(edges);
         }
 
+        public override IEnumerable<Rectangle> GetRects(Bitmap bitmap)
+        {
+
+            var edgeEnumerator = GetEdges(bitmap);
+
+            var clusters = DbscanRBush.CalculateClusters(
+                edgeEnumerator,
+                epsilon: detectionSettings.epsilon,
+                minimumPointsPerCluster: detectionSettings.m
+            );
+
+            List<Rectangle> rects = new List<Rectangle>();
+            foreach (var item in clusters.Clusters)
+            {
+                rects.Add(GetClusterRect(item.Objects));
+            }
+            throw new NotImplementedException();
+        }
     }
 }
