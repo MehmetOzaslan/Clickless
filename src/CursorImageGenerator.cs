@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
-using static Util.MathUtil;
+using static Clickless.MathUtilities;
 
 namespace Clickless
 {

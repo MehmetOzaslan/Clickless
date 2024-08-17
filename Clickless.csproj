@@ -66,17 +66,17 @@
     <Compile Include="src\machine_learning\EdgePt.cs" />
     <Compile Include="src\machine_learning\ImageRectDetectComputeShader.cs" />
     <Compile Include="src\InputHandler.cs" />
-    <Compile Include="src\KeyboardHook.cs" />
-    <Compile Include="src\KeySetComparer.cs" />
+    <Compile Include="src\keyboard\KeyboardHook.cs" />
+    <Compile Include="src\keyboard\KeySetComparer.cs" />
     <Compile Include="src\machine_learning\MLClient.cs" />
     <Compile Include="src\POINT.cs" />
     <Compile Include="src\RECT.cs" />
     <Compile Include="src\CursorImageGenerator.cs" />
-    <Compile Include="src\CursorInfoRetriever.cs" />
+    <Compile Include="src\util\MouseInfoUtilities.cs" />
     <Compile Include="src\CursorStateTracker.cs" />
     <Compile Include="src\ICursorUpdator.cs" />
     <Compile Include="src\main.cs" />
-    <Compile Include="src\MathUtil.cs" />
+    <Compile Include="src\util\MathUtilities.cs" />
     <Compile Include="src\util\MouseUtilities.cs" />
     <Compile Include="src\util\MonitorUtilities.cs" />
     <Compile Include="src\machine_learning\MLClientWebsocket.cs" />
@@ -95,7 +95,7 @@
     <Compile Include="test\WindowTestHelper.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="src\WindowInfoRetriever.cs" />
+    <Compile Include="src\util\WindowInfoUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Dbscan, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">

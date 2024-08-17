@@ -9,20 +9,10 @@ namespace Clickless
     /// <summary>
     /// Utility class intended to differentiate between cursor types when hovering over the desktop.
     /// </summary>
-    public class CursorInfoRetriever
+    public partial class MouseUtilities
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern bool GetIconInfo(IntPtr hIcon, out ICONINFO piconinfo);
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct ICONINFO
-        {
-            public bool fIcon;
-            public int xHotspot;
-            public int yHotspot;
-            public IntPtr hbmMask;
-            public IntPtr hbmColor;
-        }
 
         private static readonly Dictionary<IntPtr, string> SystemCursors = new Dictionary<IntPtr, string>
         {

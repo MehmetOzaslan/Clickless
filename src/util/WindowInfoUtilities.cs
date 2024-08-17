@@ -7,7 +7,7 @@ namespace Clickless
     /// <summary>
     /// Obtains information of windows.
     /// </summary>
-    internal class WindowInfoRetriever
+    public class WindowInfoUtilities
     {
         private const int _windowCharLength = 256;
 

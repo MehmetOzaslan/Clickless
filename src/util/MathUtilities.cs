@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace Util
+namespace Clickless
 {
-    public class MathUtil
+    public class MathUtilities
     {
-
         public struct Vector2
         {
             public float x, y;
@@ -34,8 +33,6 @@ namespace Util
         /// <param name="t"></param>
         /// <returns></returns>
         public static Vector2 lerp(Vector2 a, Vector2 b, float t) { return new Vector2(Lerp(a.x,b.x,t), Lerp(a.y,b.y,t)); }
-
-
 
         public static Vector2[] GenerateCirclePoints(int numPoints, float radius = 1f, float startingOffset = 0f)
         {

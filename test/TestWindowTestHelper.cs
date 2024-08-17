@@ -18,7 +18,7 @@ namespace NUnit.Tests
     using Clickless.src;
     using Clickless.src.util.test;
     using NUnit.Framework;
-    using static Util.MathUtil;
+    using static Clickless.MathUtilities;
 
     [TestFixture]
     public class TestWindowTestHelper

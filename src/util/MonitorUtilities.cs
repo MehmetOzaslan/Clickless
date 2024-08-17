@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
-using Util;
+using Clickless;
 
 namespace Clickless
 {
@@ -27,13 +27,13 @@ namespace Clickless
         /// </summary>
         /// <param name=""></param>
         /// <returns></returns>
-        public static List<MathUtil.Vector2> ObtainGrid(int margins=30, int spacing = 30)
+        public static List<MathUtilities.Vector2> ObtainGrid(int margins=30, int spacing = 30)
         {
             int width = SystemInformation.VirtualScreen.Width;
             int height = SystemInformation.VirtualScreen.Height;
             int numRow = (width - margins * 2) / spacing;
             int numCol = (height - margins * 2) / spacing;
-            List<MathUtil.Vector2> outList = new List<MathUtil.Vector2>();
+            List<MathUtilities.Vector2> outList = new List<MathUtilities.Vector2>();
 
             float dx = 1.0f / numRow;
             float dy = 1.0f / numCol;
@@ -43,15 +43,15 @@ namespace Clickless
             {
                 for (float j = 0; j <= 1; j += dy)
                 {
-                    float x = MathUtil.Lerp(margins, width - margins, i);
-                    float y = MathUtil.Lerp(margins, height - margins, j);
-                    outList.Add(new MathUtil.Vector2(x, y));
+                    float x = MathUtilities.Lerp(margins, width - margins, i);
+                    float y = MathUtilities.Lerp(margins, height - margins, j);
+                    outList.Add(new MathUtilities.Vector2(x, y));
                 }
             }
             return outList;
         }
 
-        public static List<MathUtil.Vector2> ObtainGrid(RECT rect, int margins = 30, int spacing = 30)
+        public static List<MathUtilities.Vector2> ObtainGrid(RECT rect, int margins = 30, int spacing = 30)
         {
             int width = Math.Abs(rect.Left-rect.Right);
             int height = Math.Abs(rect.Top-rect.Bottom);
@@ -60,7 +60,7 @@ namespace Clickless
 
             int numRow = (width - margins * 2) / spacing;
             int numCol = (height - margins * 2) / spacing;
-            List<MathUtil.Vector2> outList = new List<MathUtil.Vector2>();
+            List<MathUtilities.Vector2> outList = new List<MathUtilities.Vector2>();
 
             float dx = 1.0f / numRow;
             float dy = 1.0f / numCol;
@@ -70,9 +70,9 @@ namespace Clickless
             {
                 for (float j = 0; j <= 1; j += dy)
                 {
-                    float x = MathUtil.Lerp(margins, width - margins, i) + leftOffset;
-                    float y = MathUtil.Lerp(margins, height - margins, j) + bottomOffset;
-                    outList.Add(new MathUtil.Vector2(x, y));
+                    float x = MathUtilities.Lerp(margins, width - margins, i) + leftOffset;
+                    float y = MathUtilities.Lerp(margins, height - margins, j) + bottomOffset;
+                    outList.Add(new MathUtilities.Vector2(x, y));
                 }
             }
             return outList;

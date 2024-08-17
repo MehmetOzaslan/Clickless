@@ -9,7 +9,7 @@
     using Clickless;
     using Clickless.src;
     using NUnit.Framework;
-    using static Util.MathUtil;
+    using static Clickless.MathUtilities;
 
     [TestFixture]
     public class MouseTests
