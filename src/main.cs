@@ -1,19 +1,8 @@
-﻿using Clickless.src.UI;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Drawing.Printing;
-using System.Linq;
-using System.Net.WebSockets;
-using System.Text;
+﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Util;
 
-
-
-namespace Clickless.src
+namespace Clickless
 {
     public class Program
     {

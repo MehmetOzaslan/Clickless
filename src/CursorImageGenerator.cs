@@ -7,12 +7,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static Clickless.MouseController;
 using static Util.MathUtil;
 
-namespace Clickless.src
+namespace Clickless
 {
 
     /// <summary>

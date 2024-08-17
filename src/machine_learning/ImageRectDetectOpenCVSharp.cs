@@ -1,12 +1,11 @@
-﻿using Clickless.src.edge;
-using Dbscan;
+﻿using Dbscan;
 using Dbscan.RBush;
 using OpenCvSharp;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace Clickless.src
+namespace Clickless
 {
     class ImageRectDetectOpenCVSharp : ImageToRectEngine
     {

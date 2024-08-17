@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using Util;
-using System.Windows.Forms;
 using System.Drawing;
-using Clickless.src;
-
 
 namespace Clickless
 {
-
-    
     public class MouseController
     {
 

@@ -3,18 +3,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 using System.Windows.Forms;
-using System.Windows.Media.Imaging;
 using Util;
-using static Clickless.MouseController;
 
-namespace Clickless.src
+namespace Clickless
 {
     public static class ScreenController
     {

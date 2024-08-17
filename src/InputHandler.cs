@@ -4,9 +4,8 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Clickless.src.UI;
 
-namespace Clickless.src
+namespace Clickless
 {
     public class InputHandler
     {

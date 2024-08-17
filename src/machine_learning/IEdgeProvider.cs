@@ -1,13 +1,8 @@
 ﻿using Dbscan;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Clickless.src.MLClient;
 
-namespace Clickless.src
+namespace Clickless
 {
     public interface IEdgeProvider
     {

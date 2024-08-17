@@ -1,21 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using Util;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Cryptography;
 using static Clickless.MouseController;
-using System.IO;
 using static Util.MathUtil;
 using System.Collections.Concurrent;
 
-namespace Clickless.src
+namespace Clickless
 {
     /// <summary>
     /// Tracks the state of the cursor across coordinates. 

@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Drawing;
-using Clickless.src.UI;
 using System.Linq;
 
-namespace Clickless.src
+namespace Clickless
 {
     /// <summary>
     /// Zips rects and commands together.

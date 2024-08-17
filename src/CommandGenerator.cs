@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Clickless.src
+namespace Clickless
 {
     /// <summary>
     /// Given n objects, creates a distinct string starting with A, B, C, D... Z then AB, AC, ensuring that prefixes aren't

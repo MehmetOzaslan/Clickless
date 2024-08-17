@@ -14,9 +14,8 @@ using MapFlags = SharpDX.Direct3D11.MapFlags;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Dbscan;
 using System.Linq;
-using Clickless.src.edge;
 
-namespace Clickless.src
+namespace Clickless
 {
 
     // Parameters to send to the GPU

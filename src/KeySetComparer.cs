@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Clickless.src
+namespace Clickless
 {
     /// <summary>
     /// Ensures that the dictionary is consistent whenever we put in a hashset. 

@@ -1,4 +1,4 @@
-﻿namespace Clickless.src
+﻿namespace Clickless
 {
     public struct EdgePt : Dbscan.IPointData
     {

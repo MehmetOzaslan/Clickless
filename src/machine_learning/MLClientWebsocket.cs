@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Drawing;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace Clickless.src
+namespace Clickless
 {
     public class MLClientWebsocket
     {

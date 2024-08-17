@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-using Clickless.src.edge;
-
-namespace Clickless.src
+namespace Clickless
 {
     public class MLClient
     {
