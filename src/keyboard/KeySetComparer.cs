@@ -5,7 +5,7 @@ using System.Windows.Forms;
 namespace Clickless
 {
     /// <summary>
-    /// Ensures that the dictionary is consistent whenever we put in a hashset. 
+    /// Comparer class to ensure that a keyset dictionary is consistent. 
     /// </summary>
     public class KeySetComparer : IEqualityComparer<HashSet<Keys>>
     {
