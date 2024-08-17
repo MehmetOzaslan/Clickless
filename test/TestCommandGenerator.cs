@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Clickless;
+using NUnit.Framework;
+
 namespace NUnit.Tests
 {
-    using System.Linq;
-    using Clickless.src;
-    using NUnit.Framework;
 
     [TestFixture]
     internal class TestCommandGenerator

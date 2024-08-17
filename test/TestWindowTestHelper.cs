@@ -1,25 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using Clickless.test;
+using NUnit.Framework;
 
 namespace NUnit.Tests
 {
-    using System;
-    using System.Drawing;
-    using System.IO;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using System.Windows.Forms;
-    using Clickless;
-    using Clickless.src;
-    using Clickless.src.util.test;
-    using NUnit.Framework;
-    using static Clickless.MathUtilities;
-
     [TestFixture]
     public class TestWindowTestHelper
     {

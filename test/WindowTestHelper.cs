@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Clickless.src.util.test
+namespace Clickless.test
 {
     /// <summary>
     /// Helper class used to test window related operations 

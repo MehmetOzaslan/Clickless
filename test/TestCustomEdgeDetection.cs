@@ -1,17 +1,11 @@
-﻿namespace NUnit.Tests
+﻿using System;
+using System.Collections;
+using System.Diagnostics;
+using System.Drawing;
+using Clickless;
+using NUnit.Framework;
+namespace NUnit.Tests
 {
-    using System;
-    using System.Collections;
-    using System.Diagnostics;
-    using System.Drawing;
-    using System.IO;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Clickless;
-    using Clickless.src;
-    using NUnit.Framework;
-    using static Clickless.MathUtilities;
 
     [TestFixture]
     public class EdgeDetectionTests 

@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Drawing;
-using System.IO;
+using Clickless;
+using NUnit.Framework;
 using System.Net.WebSockets;
-using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Clickless.src;
-using Clickless.src.UI;
-using Clickless.src.util.test;
-using NUnit.Framework;
-using static Clickless.src.WindowInfoRetriever;
 using Image = System.Drawing.Image;
 
 namespace NUnit.Tests
@@ -113,7 +107,7 @@ namespace NUnit.Tests
             await websocket.ConnectAsync(new Uri(echoBytesURL));
             Assert.AreEqual(WebSocketState.Open, websocket.Client.State);
 
-            Image img = ScreenController.CaptureDesktop();
+            Image img = MonitorUtilities.CaptureDesktop();
 
             await websocket.SendImageAsync(img);
 
@@ -129,7 +123,7 @@ namespace NUnit.Tests
             await websocket.ConnectAsync(new Uri(imagemlURL));
             Assert.AreEqual(WebSocketState.Open, websocket.Client.State);
 
-            Image img = ScreenController.CaptureDesktop();
+            Image img = MonitorUtilities.CaptureDesktop();
 
             await websocket.SendImageAsync(img);
             string result = await websocket.ReceiveMessageAsync();
@@ -155,7 +149,7 @@ namespace NUnit.Tests
             await websocket.ConnectAsync(new Uri(imageSaveURL));
             Assert.AreEqual(WebSocketState.Open, websocket.Client.State);
 
-            Image img = ScreenController.CaptureDesktop();
+            Image img = MonitorUtilities.CaptureDesktop();
 
             await websocket.SendImageAsync(img);
 

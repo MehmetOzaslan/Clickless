@@ -1,16 +1,12 @@
-﻿namespace NUnit.Tests
-{
-    using System;
-    using System.Drawing;
-    using System.IO;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Clickless;
-    using Clickless.src;
-    using NUnit.Framework;
-    using static Clickless.MathUtilities;
+﻿using System;
+using System.Drawing;
+using System.IO;
+using Clickless;
+using NUnit.Framework;
+using static Clickless.MathUtilities;
 
+namespace NUnit.Tests
+{
     [TestFixture]
     public class MouseTests
     {

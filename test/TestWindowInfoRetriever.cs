@@ -1,8 +1,8 @@
 ﻿using System;
-using Clickless.src;
-using Clickless.src.util.test;
+using Clickless;
+using Clickless.test;
 using NUnit.Framework;
-using static Clickless.src.WindowInfoRetriever;
+using static Clickless.WindowInfoUtilities;
 
 namespace NUnit.Tests
 {
