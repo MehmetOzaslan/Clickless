@@ -195,23 +195,14 @@ namespace Clickless
                 paramBuffer.Dispose();
             }
 
-            paramBuffer = new Buffer(device, new BufferDescription
-            {
-                SizeInBytes = Utilities.SizeOf<Params>(),
-                Usage = ResourceUsage.Default,
-                BindFlags = BindFlags.ConstantBuffer,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None
-            });
+            shaderParams = new Params() { 
+                iterations = detectionSettings.iterations,
+                m = detectionSettings.m,
+                epsilon = detectionSettings.epsilon };
 
-            shaderParams = new Params();
-            shaderParams.iterations = detectionSettings.iterations;
-            shaderParams.m = detectionSettings.m;
-            shaderParams.epsilon = detectionSettings.epsilon;
-
-            //Use the parameters.
-            context.ComputeShader.SetConstantBuffer(0, paramBuffer);
-            context.UpdateSubresource(ref shaderParams, paramBuffer);
+            paramBuffer = BufferCreate.InitializeConstantBuffer<Params>(device)
+                                        .SetConstantBufferData(shaderParams, context)
+                                        .GetBuffer();
         }
 
         private Buffer GetOutputBuffer()
@@ -221,15 +212,10 @@ namespace Clickless
             {
                 bufferSize = currBufferSize;
                 outputBuffer?.Dispose();
-                outputBuffer = new Buffer(device, new BufferDescription
-                {
-                    SizeInBytes = Utilities.SizeOf<BufferedPoint>() * bufferSize,
-                    Usage = ResourceUsage.Default,
-                    BindFlags = BindFlags.UnorderedAccess,
-                    CpuAccessFlags = CpuAccessFlags.None,
-                    OptionFlags = ResourceOptionFlags.BufferStructured,
-                    StructureByteStride = Utilities.SizeOf<BufferedPoint>(),
-                });
+
+                outputBuffer = BufferCreate.InitializeRWBuffer<BufferedPoint>(device, currBufferSize)
+                                            .GetBuffer();
+
                 outputBufferUAV?.Dispose();
                 outputBufferUAV = new UnorderedAccessView(device, outputBuffer);
             }
@@ -240,16 +226,11 @@ namespace Clickless
         {
             if (outputCounter == null)
             {
-                outputCounter = new Buffer(device, new BufferDescription
-                {
-                    SizeInBytes = sizeof(int),
-                    Usage = ResourceUsage.Default,
-                    BindFlags = BindFlags.UnorderedAccess,
-                    CpuAccessFlags = CpuAccessFlags.None,
-                    OptionFlags = ResourceOptionFlags.BufferStructured,
-                    StructureByteStride = sizeof(int),
-                });
+                outputCounter?.Dispose();
+                outputCounter = BufferCreate.InitializeRWBuffer<int> (device, 1)
+                                .GetBuffer();
 
+                outputCounterUAV?.Dispose();
                 outputCounterUAV = new UnorderedAccessView(device, outputCounter);
             }
             return outputCounter;
@@ -265,15 +246,9 @@ namespace Clickless
 
         private int GetEdgeDetectionCount()
         {
-            var resCounterBuffer = new Buffer(device, new BufferDescription
-            {
-                SizeInBytes = sizeof(int),
-                Usage = ResourceUsage.Staging,
-                BindFlags = BindFlags.None,
-                CpuAccessFlags = CpuAccessFlags.Read,
-                OptionFlags = ResourceOptionFlags.BufferStructured,
-                StructureByteStride = sizeof(int),
-            });
+            var resCounterBuffer = BufferCreate.InitializeStagingBuffer<int>(device, 1)
+                                               .CopyFrom(outputCounter, context)
+                                               .GetBuffer();
 
             context.CopyResource(outputCounter, resCounterBuffer);
             context.MapSubresource(resCounterBuffer, MapMode.Read, MapFlags.None, out var counterSize);
@@ -290,40 +265,20 @@ namespace Clickless
         private void SquashBuffer()
         {
             bufferSize = GetEdgeDetectionCount();
-            outputBuffer = new BufferResizer(device).ResizeBuffer<BufferedPoint>(outputBuffer, bufferSize);
+            outputBuffer = BufferCreate.ResizeBuffer<BufferedPoint>(device, context, outputBuffer, bufferSize);
         }
 
         BufferedPoint[] GetPointBuffer()
         {
-            // Create a staging buffer for reading data back
-            var stagingBuffer = new Buffer(device, new BufferDescription
-            {
-                SizeInBytes = Utilities.SizeOf<BufferedPoint>() * bufferSize,
-                Usage = ResourceUsage.Staging,
-                BindFlags = BindFlags.None,
-                CpuAccessFlags = CpuAccessFlags.Read,
-                OptionFlags = ResourceOptionFlags.BufferStructured,
-                StructureByteStride = Utilities.SizeOf<BufferedPoint>(),
-            });
-
-            context.CopyResource(outputBuffer, stagingBuffer);
-
+            var stagingBuffer = BufferCreate.InitializeStagingBuffer<BufferedPoint>(device, bufferSize)
+                                            .CopyFrom(outputBuffer, context)
+                                            .GetBuffer();
 
             //Get the pixels obtained through the compute shader.
             context.MapSubresource(stagingBuffer, MapMode.Read, MapFlags.None, out var dataStream);
             var results = new BufferedPoint[bufferSize];
             dataStream.ReadRange(results, 0, bufferSize);
             context.UnmapSubresource(stagingBuffer, 0);
-
-
-            Console.WriteLine($"Distinct values: {results.Select(x => x.CLUSTER_LABEL).Distinct().Count()} Total: {bufferSize}");
-
-
-            for (int i = 0; i < 100; i++)
-            {
-                var res = results[i];
-                Console.WriteLine($"XY:({res.X},{res.Y}) ID:{res.CLUSTER_LABEL} Edges:{res.EDGE_COUNT} ");
-            }
 
             dataStream.Dispose();
             stagingBuffer.Dispose();
@@ -423,56 +378,6 @@ namespace Clickless
 
                 bitmap.UnlockBits(bitmapData);
             }
-        }
-    }
-
-
-
-    public class BufferResizer : IDisposable
-    {
-        private Device device;
-        private DeviceContext context;
-
-        public BufferResizer(Device device)
-        {
-            this.device = device;
-            this.context = device.ImmediateContext;
-        }
-
-        public Buffer ResizeBuffer<T>(Buffer oldBuffer, int newSize) where T : struct
-        {
-            // Create a new buffer with the desired size
-            var newBuffer = new Buffer(device, new BufferDescription
-            {
-                SizeInBytes = Utilities.SizeOf<T>() * newSize,
-                Usage = oldBuffer.Description.Usage,
-                BindFlags = oldBuffer.Description.BindFlags,
-                CpuAccessFlags = oldBuffer.Description.CpuAccessFlags,
-                OptionFlags = oldBuffer.Description.OptionFlags,
-                StructureByteStride = oldBuffer.Description.StructureByteStride
-            });
-
-            // Determine the number of elements to copy
-            int oldSize = oldBuffer.Description.SizeInBytes / Utilities.SizeOf<T>();
-            int elementsToCopy = Math.Min(oldSize, newSize);
-
-            // Copy data from the old buffer to the new buffer
-            if (elementsToCopy > 0)
-            {
-                context.CopySubresourceRegion(oldBuffer, 0, new ResourceRegion(0, 0, 0, elementsToCopy * Utilities.SizeOf<T>(), 1, 1), newBuffer, 0);
-            }
-
-            // Release the old buffer
-            oldBuffer.Dispose();
-
-            return newBuffer;
-        }
-
-        public void Dispose()
-        {
-            context?.ClearState();
-            context?.Flush();
-            device?.Dispose();
         }
     }
 }

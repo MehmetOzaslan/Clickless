@@ -59,7 +59,7 @@
   <ItemGroup>
     <Compile Include="src\CommandGenerator.cs" />
     <Compile Include="src\ML\DetectionSettings.cs" />
-    <Compile Include="src\ML\DXBufferWrapper.cs" />
+    <Compile Include="src\ML\BufferCreate.cs" />
     <Compile Include="src\ML\IEdgeProvider.cs" />
     <Compile Include="src\ML\ImageRectDetectOpenCVSharp.cs" />
     <Compile Include="src\ML\ImageToRectEngine.cs" />
