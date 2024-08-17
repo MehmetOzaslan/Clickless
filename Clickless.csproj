@@ -58,17 +58,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\CommandGenerator.cs" />
-    <Compile Include="src\machine_learning\DetectionSettings.cs" />
-    <Compile Include="src\machine_learning\IEdgeProvider.cs" />
-    <Compile Include="src\machine_learning\ImageRectDetectOpenCVSharp.cs" />
-    <Compile Include="src\machine_learning\ImageToRectEngine.cs" />
-    <Compile Include="src\machine_learning\MatEnumerator.cs" />
-    <Compile Include="src\machine_learning\EdgePt.cs" />
-    <Compile Include="src\machine_learning\ImageRectDetectComputeShader.cs" />
+    <Compile Include="src\ML\DetectionSettings.cs" />
+    <Compile Include="src\ML\IEdgeProvider.cs" />
+    <Compile Include="src\ML\ImageRectDetectOpenCVSharp.cs" />
+    <Compile Include="src\ML\ImageToRectEngine.cs" />
+    <Compile Include="src\ML\MatEnumerator.cs" />
+    <Compile Include="src\ML\EdgePt.cs" />
+    <Compile Include="src\ML\ImageRectDetectComputeShader.cs" />
     <Compile Include="src\InputHandler.cs" />
     <Compile Include="src\keyboard\KeyboardHook.cs" />
     <Compile Include="src\keyboard\KeySetComparer.cs" />
-    <Compile Include="src\machine_learning\MLClient.cs" />
+    <Compile Include="src\ML\MLClient.cs" />
     <Compile Include="src\POINT.cs" />
     <Compile Include="src\RECT.cs" />
     <Compile Include="src\CursorImageGenerator.cs" />
@@ -79,7 +79,7 @@
     <Compile Include="src\util\MathUtilities.cs" />
     <Compile Include="src\util\MouseUtilities.cs" />
     <Compile Include="src\util\MonitorUtilities.cs" />
-    <Compile Include="src\machine_learning\MLClientWebsocket.cs" />
+    <Compile Include="src\ML\MLClientWebsocket.cs" />
     <Compile Include="src\TextRectGenerator.cs" />
     <Compile Include="src\UI\TextRect.cs" />
     <Compile Include="src\UI\TransparentForm.cs">
