@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="src\CommandGenerator.cs" />
     <Compile Include="src\ML\DetectionSettings.cs" />
+    <Compile Include="src\ML\DXBufferWrapper.cs" />
     <Compile Include="src\ML\IEdgeProvider.cs" />
     <Compile Include="src\ML\ImageRectDetectOpenCVSharp.cs" />
     <Compile Include="src\ML\ImageToRectEngine.cs" />
@@ -66,21 +67,21 @@
     <Compile Include="src\ML\EdgePt.cs" />
     <Compile Include="src\ML\ImageRectDetectComputeShader.cs" />
     <Compile Include="src\InputHandler.cs" />
-    <Compile Include="src\keyboard\KeyboardHook.cs" />
-    <Compile Include="src\keyboard\KeySetComparer.cs" />
+    <Compile Include="src\util\keyboard\KeyboardHook.cs" />
+    <Compile Include="src\util\keyboard\KeySetComparer.cs" />
     <Compile Include="src\ML\MLClient.cs" />
     <Compile Include="src\POINT.cs" />
     <Compile Include="src\RECT.cs" />
-    <Compile Include="src\CursorImageGenerator.cs" />
-    <Compile Include="src\util\MouseInfoUtilities.cs" />
-    <Compile Include="src\CursorStateTracker.cs" />
-    <Compile Include="src\ICursorUpdator.cs" />
+    <Compile Include="src\util\mouse\CursorImageGenerator.cs" />
+    <Compile Include="src\util\mouse\MouseInfoUtilities.cs" />
+    <Compile Include="src\util\mouse\CursorStateTracker.cs" />
+    <Compile Include="src\util\mouse\ICursorUpdator.cs" />
     <Compile Include="src\main.cs" />
     <Compile Include="src\util\MathUtilities.cs" />
-    <Compile Include="src\util\MouseUtilities.cs" />
+    <Compile Include="src\util\mouse\MouseUtilities.cs" />
     <Compile Include="src\util\MonitorUtilities.cs" />
     <Compile Include="src\ML\MLClientWebsocket.cs" />
-    <Compile Include="src\TextRectGenerator.cs" />
+    <Compile Include="src\UI\TextRectGenerator.cs" />
     <Compile Include="src\UI\TextRect.cs" />
     <Compile Include="src\UI\TransparentForm.cs">
       <SubType>Form</SubType>

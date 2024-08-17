@@ -169,7 +169,6 @@ namespace Clickless
 
             foreach (BufferedPoint point in points)
             {
-
                 if(point.CLUSTER_LABEL == NOISE || point.Y <= NOISE_PADDING || point.Y >= inputTexture.Description.Height- NOISE_PADDING || point.X <= NOISE_PADDING || point.X >= inputTexture.Description.Width- NOISE_PADDING) continue;
 
                 if(!clusters.ContainsKey(point.CLUSTER_LABEL))
