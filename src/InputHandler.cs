@@ -73,7 +73,7 @@ namespace Clickless.src
             return;
         }
 
-        private void UpdateRects()
+        private async void UpdateRects()
         {
             //Update the rects on the display
             var rects = transparentForm.Rects;
@@ -86,7 +86,11 @@ namespace Clickless.src
                     CloseWindow();
                     break;
                 case 1:
-                    ClickRect();
+                    
+                    //Used to avoid inputting keyboard command, due to it not being captured for some reason.
+                    await Task.Delay(20);
+                    CloseWindow();
+                    ClickRect(rects.First().Rectangle);
                     break;
                 default:
                     transparentForm.Rects = rects;
@@ -139,12 +143,10 @@ namespace Clickless.src
             pattern_typed = "";
         }
 
-        public void ClickRect()
+        public void ClickRect(Rectangle rect_selected)
         {
-            var rect_selected = transparentForm.Rects.FirstOrDefault(x => x.Text == this.pattern_typed).Rectangle;
             if(rect_selected != null)
             {
-                CloseWindow();
                 MouseController.ClickAtRectCenter(rect_selected);
             }
         }

@@ -24,13 +24,13 @@
         public void Setup()
         {
             bitmap = ScreenController.CaptureDesktopBitmap();
-            edgeDetecteCompute = new EdgeDetectOpenCVSharp();
+            edgeDetecteCompute = new ImageRectDetectOpenCVSharp();
         }
 
         [Test]
         public void TestConversion()
         {
-            var mat = EdgeDetectOpenCVSharp.BitmapToMat(bitmap);
+            var mat = ImageRectDetectOpenCVSharp.BitmapToMat(bitmap);
 
             Assert.IsTrue( mat.SaveImage("Conversion From Bitmap to OpenCV Mat.png"));
             bitmap.Dispose();

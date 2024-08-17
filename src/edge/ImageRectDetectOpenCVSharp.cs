@@ -2,19 +2,13 @@
 using Dbscan;
 using Dbscan.RBush;
 using OpenCvSharp;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Clickless.src.MLClient;
 
 namespace Clickless.src
 {
-    class EdgeDetectOpenCVSharp : ImageToRectEngine
+    class ImageRectDetectOpenCVSharp : ImageToRectEngine
     {
         //Members held statically to reduce garbage collection.
         private static Mat resizedImage = new Mat();
@@ -68,7 +62,6 @@ namespace Clickless.src
 
         public override IEnumerable<Rectangle> GetRects(Bitmap bitmap)
         {
-
             var edgeEnumerator = GetEdges(bitmap);
 
             var clusters = DbscanRBush.CalculateClusters(
@@ -82,7 +75,8 @@ namespace Clickless.src
             {
                 rects.Add(GetClusterRect(item.Objects));
             }
-            throw new NotImplementedException();
+
+            return rects;
         }
     }
 }

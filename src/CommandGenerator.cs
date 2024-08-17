@@ -16,8 +16,9 @@ namespace Clickless.src
 
     public static class CommandGenerator
     {
-        private const int ASCII_A = 65;
-        static readonly char[] chars = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+        static readonly char[] _chars = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+
+        static readonly char[] _lhsChars = { 'Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F', 'Z', 'X', 'C', 'V', 'B'};
 
         private static HashSet<string> ConstructCommands(int amount)
         {
@@ -25,6 +26,7 @@ namespace Clickless.src
             HashSet<string> commands = new HashSet<string>();
 
             Queue<(string, char)> prefixQueue = new Queue<(string, char)>();
+            char[] chars = _lhsChars;
 
             //Initialize the queue
             foreach (char ch in chars)

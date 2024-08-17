@@ -162,9 +162,17 @@ namespace Clickless.src
             var points = GetPointBuffer();
 
             Dictionary<uint, List<BufferedPoint>> clusters = new Dictionary<uint, List<BufferedPoint>>();
+            
+            //Some points marked as noise
+            int NOISE = 0;
+            int NOISE_PADDING = 10;
+
 
             foreach (BufferedPoint point in points)
             {
+
+                if(point.CLUSTER_LABEL == NOISE || point.Y <= NOISE_PADDING || point.Y >= inputTexture.Description.Height- NOISE_PADDING || point.X <= NOISE_PADDING || point.X >= inputTexture.Description.Width- NOISE_PADDING) continue;
+
                 if(!clusters.ContainsKey(point.CLUSTER_LABEL))
                     clusters[point.CLUSTER_LABEL] = new List<BufferedPoint>();
                 clusters[point.CLUSTER_LABEL].Add(point);
@@ -331,10 +339,10 @@ namespace Clickless.src
         /// <param name="gpuSrcDesc"></param>
         /// <param name="gpuSrcTexture"></param>
         /// <param name="cpuDestinationTexture"></param>
-        private void MoveTextureToCPU(Texture2DDescription gpuSrcDesc, Texture2D gpuSrcTexture, out Texture2D cpuDestinationTexture)
+        private void MoveTextureToCPU(Texture2D gpuSrcTexture, out Texture2D cpuDestinationTexture)
         {
             Texture2DDescription cpuDescription;
-            cpuDescription = gpuSrcDesc;
+            cpuDescription = gpuSrcTexture.Description;
             cpuDescription.Usage = ResourceUsage.Staging;
             cpuDescription.BindFlags = BindFlags.None;
             cpuDescription.CpuAccessFlags = CpuAccessFlags.Read;

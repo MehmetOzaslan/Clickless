@@ -8,7 +8,8 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{4F48344E-DBF9-4CAE-93D4-86F797740BBB}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <RuntimeIdentifier>win</RuntimeIdentifier>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>Clickless</RootNamespace>
     <AssemblyName>Clickless</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
@@ -40,6 +41,9 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="app.manifest" />
@@ -56,11 +60,11 @@
     <Compile Include="src\CommandGenerator.cs" />
     <Compile Include="src\edge\DetectionSettings.cs" />
     <Compile Include="src\edge\IEdgeProvider.cs" />
+    <Compile Include="src\edge\ImageRectDetectOpenCVSharp.cs" />
     <Compile Include="src\edge\ImageToRectEngine.cs" />
     <Compile Include="src\edge\MatEnumerator.cs" />
     <Compile Include="src\edge\EdgePt.cs" />
     <Compile Include="src\edge\ImageRectDetectComputeShader.cs" />
-    <Compile Include="src\edge\EdgeDetectOpenCVSharp.cs" />
     <Compile Include="src\InputHandler.cs" />
     <Compile Include="src\KeyboardHook.cs" />
     <Compile Include="src\KeySetComparer.cs" />

@@ -34,15 +34,8 @@ SamplerState samplerState : register(s0);
 void CSMain(uint3 DTid : SV_DispatchThreadID)
 {
     uint2 coord = int2(DTid.xy);
-    
-    //Downsample
-    if (coord[0] % 2 >0) {
-        return;
-    }
 
-    if (coord[1] % 2 > 0) {
-        return;
-    }
+    
 
     float3 sobel_x[3];
     sobel_x[0] = float3(-1, 0, 1);
