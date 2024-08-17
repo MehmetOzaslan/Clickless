@@ -58,17 +58,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\CommandGenerator.cs" />
-    <Compile Include="src\edge\DetectionSettings.cs" />
-    <Compile Include="src\edge\IEdgeProvider.cs" />
-    <Compile Include="src\edge\ImageRectDetectOpenCVSharp.cs" />
-    <Compile Include="src\edge\ImageToRectEngine.cs" />
-    <Compile Include="src\edge\MatEnumerator.cs" />
-    <Compile Include="src\edge\EdgePt.cs" />
-    <Compile Include="src\edge\ImageRectDetectComputeShader.cs" />
+    <Compile Include="src\machine_learning\DetectionSettings.cs" />
+    <Compile Include="src\machine_learning\IEdgeProvider.cs" />
+    <Compile Include="src\machine_learning\ImageRectDetectOpenCVSharp.cs" />
+    <Compile Include="src\machine_learning\ImageToRectEngine.cs" />
+    <Compile Include="src\machine_learning\MatEnumerator.cs" />
+    <Compile Include="src\machine_learning\EdgePt.cs" />
+    <Compile Include="src\machine_learning\ImageRectDetectComputeShader.cs" />
     <Compile Include="src\InputHandler.cs" />
     <Compile Include="src\KeyboardHook.cs" />
     <Compile Include="src\KeySetComparer.cs" />
-    <Compile Include="src\edge\MLClient.cs" />
+    <Compile Include="src\machine_learning\MLClient.cs" />
     <Compile Include="src\POINT.cs" />
     <Compile Include="src\RECT.cs" />
     <Compile Include="src\CursorImageGenerator.cs" />
@@ -79,20 +79,20 @@
     <Compile Include="src\MathUtil.cs" />
     <Compile Include="src\MouseController.cs" />
     <Compile Include="src\ScreenController.cs" />
-    <Compile Include="src\edge\MLClientWebsocket.cs" />
+    <Compile Include="src\machine_learning\MLClientWebsocket.cs" />
     <Compile Include="src\TextRectGenerator.cs" />
     <Compile Include="src\UI\TextRect.cs" />
     <Compile Include="src\UI\TransparentForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="src\util\test\TestCommandGenerator.cs" />
-    <Compile Include="src\util\test\TestCustomEdgeDetection.cs" />
-    <Compile Include="src\util\test\TestMLClientOpenCVSharp.cs" />
-    <Compile Include="src\util\test\TestMLWebsocketClient.cs" />
-    <Compile Include="src\util\test\TestWindowInfoRetriever.cs" />
-    <Compile Include="src\util\test\TestController.cs" />
-    <Compile Include="src\util\test\TestWindowTestHelper.cs" />
-    <Compile Include="src\util\test\WindowTestHelper.cs">
+    <Compile Include="test\TestCommandGenerator.cs" />
+    <Compile Include="test\TestCustomEdgeDetection.cs" />
+    <Compile Include="test\TestMLClientOpenCVSharp.cs" />
+    <Compile Include="test\TestMLWebsocketClient.cs" />
+    <Compile Include="test\TestWindowInfoRetriever.cs" />
+    <Compile Include="test\TestController.cs" />
+    <Compile Include="test\TestWindowTestHelper.cs" />
+    <Compile Include="test\WindowTestHelper.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="src\WindowInfoRetriever.cs" />
@@ -300,9 +300,10 @@
     <Folder Include="images\" />
     <Folder Include="python\" />
     <Folder Include="src\images\" />
+    <Folder Include="src\util\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="src\util\test\WindowTestHelper.resx">
+    <EmbeddedResource Include="test\WindowTestHelper.resx">
       <DependentUpon>WindowTestHelper.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
