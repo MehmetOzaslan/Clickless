@@ -10,7 +10,6 @@ namespace Clickless
 {
     public class KeyboardHook
     {
-
         private static readonly object lockObject = new object(); // Lock object for thread safety
 
         private static KeyboardHook _instance;
@@ -79,7 +78,6 @@ namespace Clickless
             }
         }
 
-
         static protected void OnKeyUp(KeyPressedEventArgs e)
         {
             lock (lockObject)
@@ -121,7 +119,6 @@ namespace Clickless
                 return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
             }
         }
-
         private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
             if (nCode >= 0)
@@ -143,15 +140,6 @@ namespace Clickless
             }
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
         }
-
-        //More for testing than anything. There's some odd stuff going on with the threads.
-        //public static void Run()
-        //{
-        //    _hookID = SetHook(_proc);
-        //    Application.Run();
-        //    UnhookWindowsHookEx(_hookID);
-        //}
-
     }
 
 }

@@ -77,8 +77,8 @@
     <Compile Include="src\ICursorUpdator.cs" />
     <Compile Include="src\main.cs" />
     <Compile Include="src\MathUtil.cs" />
-    <Compile Include="src\MouseController.cs" />
-    <Compile Include="src\ScreenController.cs" />
+    <Compile Include="src\util\MouseUtilities.cs" />
+    <Compile Include="src\util\MonitorUtilities.cs" />
     <Compile Include="src\machine_learning\MLClientWebsocket.cs" />
     <Compile Include="src\TextRectGenerator.cs" />
     <Compile Include="src\UI\TextRect.cs" />
@@ -300,7 +300,6 @@
     <Folder Include="images\" />
     <Folder Include="python\" />
     <Folder Include="src\images\" />
-    <Folder Include="src\util\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="test\WindowTestHelper.resx">

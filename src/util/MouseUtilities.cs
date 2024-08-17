@@ -7,20 +7,20 @@ using System.Drawing;
 
 namespace Clickless
 {
-    public class MouseController
+    public class MouseUtilities
     {
 
-        private static MouseController instance = null;
+        private static MouseUtilities instance = null;
         private static readonly object padlock = new object();
         const uint OCR_NORMAL = 32512;
         private static IntPtr originalCursor;
 
 
-        MouseController()
+        MouseUtilities()
         {
         }
 
-        public static MouseController Instance
+        public static MouseUtilities Instance
         {
             get
             {
@@ -28,7 +28,7 @@ namespace Clickless
                 {
                     if (instance == null)
                     {
-                        instance = new MouseController();
+                        instance = new MouseUtilities();
                     }
                     return instance;
                 }

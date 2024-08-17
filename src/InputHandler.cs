@@ -111,7 +111,7 @@ namespace Clickless
 
         private async Task<List<TextRect>> RunML()
         {
-            Bitmap img = ScreenController.CaptureDesktopBitmap();
+            Bitmap img = MonitorUtilities.CaptureDesktopBitmap();
             var bboxes = await Task.Run(() => MLClient.GetBboxes(img));
             var rects = TextRectGenerator.GenerateBoxesFromRects(bboxes);
             img.Dispose();
@@ -146,7 +146,7 @@ namespace Clickless
         {
             if(rect_selected != null)
             {
-                MouseController.ClickAtRectCenter(rect_selected);
+                MouseUtilities.ClickAtRectCenter(rect_selected);
             }
         }
     }

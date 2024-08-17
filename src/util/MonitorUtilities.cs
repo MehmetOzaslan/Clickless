@@ -8,7 +8,7 @@ using Util;
 
 namespace Clickless
 {
-    public static class ScreenController
+    public static class MonitorUtilities
     {
         public static Size GetSize() { return SystemInformation.VirtualScreen.Size; }
         public static int GetLeft() { return SystemInformation.VirtualScreen.Left; }
@@ -24,7 +24,6 @@ namespace Clickless
 
         /// <summary>
         /// Provides a list of points across the screen in a grid pattern. 
-        /// TODO: This can be cached.
         /// </summary>
         /// <param name=""></param>
         /// <returns></returns>

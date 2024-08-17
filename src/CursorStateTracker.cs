@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Clickless.MouseController;
+using static Clickless.MouseUtilities;
 using static Util.MathUtil;
 using System.Collections.Concurrent;
 

@@ -23,7 +23,7 @@
         [OneTimeSetUp]
         public void Setup()
         {
-            bitmap = ScreenController.CaptureDesktopBitmap();
+            bitmap = MonitorUtilities.CaptureDesktopBitmap();
             edgeDetecteCompute = new ImageRectDetectComputeShader();
         }
 

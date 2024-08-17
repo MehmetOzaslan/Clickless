@@ -1,5 +1,5 @@
 ﻿using Util;
-using static Clickless.MouseController;
+using static Clickless.MouseUtilities;
 
 namespace Clickless
 {

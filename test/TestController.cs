@@ -20,8 +20,8 @@
             for (int i = 0; i < 100; i+=10) {
                 for (int j = 0; j < 100; j += 10)
                 {
-                    MouseController.MoveCursor(i, i);
-                    var inf = MouseController.GetCursorInfo();
+                    MouseUtilities.MoveCursor(i, i);
+                    var inf = MouseUtilities.GetCursorInfo();
                     Assert.AreEqual(i, inf.ptScreenPos.x);
                     Assert.AreEqual(i, inf.ptScreenPos.y);
                 }
@@ -34,9 +34,9 @@
 
             //Test random points.
             var pos = new[] { new Vector2(0, 0), new Vector2(10, 10), new Vector2(20, 20), new Vector2(11,11) };
-            MouseController.IterateOverLocations(pos, 
-                (vec) => { Assert.AreNotEqual(MouseController.GetCursorInfo().ptScreenPos.x, (int)vec.x); },
-                (vec) => { Assert.AreEqual(MouseController.GetCursorInfo().ptScreenPos.x, (int)vec.x); });
+            MouseUtilities.IterateOverLocations(pos, 
+                (vec) => { Assert.AreNotEqual(MouseUtilities.GetCursorInfo().ptScreenPos.x, (int)vec.x); },
+                (vec) => { Assert.AreEqual(MouseUtilities.GetCursorInfo().ptScreenPos.x, (int)vec.x); });
         }
 
         [Test]
@@ -45,17 +45,17 @@
             int error = 4;
 
             //Test the screen.
-            var screenGrid = ScreenController.ObtainGrid(10,10);
-            MouseController.IterateOverLocations(screenGrid,
+            var screenGrid = MonitorUtilities.ObtainGrid(10,10);
+            MouseUtilities.IterateOverLocations(screenGrid,
                 (vec) =>
                 {
                     //ScreenController.CaptureSquare((int)vec.x,(int)vec.y,10);
-                    Assert.AreNotEqual(vec.y, MouseController.GetCursorInfo().ptScreenPos.y);
+                    Assert.AreNotEqual(vec.y, MouseUtilities.GetCursorInfo().ptScreenPos.y);
                 },
                 (vec) =>
                 {
                     //ScreenController.CaptureSquare((int)vec.x, (int)vec.y, 10);
-                    Assert.AreEqual(vec.y, MouseController.GetCursorInfo().ptScreenPos.y, error);
+                    Assert.AreEqual(vec.y, MouseUtilities.GetCursorInfo().ptScreenPos.y, error);
                 });
         }
 
@@ -65,16 +65,16 @@
             int error = 4;
 
             //Test the screen.
-            var screenGrid = ScreenController.ObtainGrid(10, 100).ToArray();
+            var screenGrid = MonitorUtilities.ObtainGrid(10, 100).ToArray();
             
-            MouseController.IterateOverLocations(screenGrid,
+            MouseUtilities.IterateOverLocations(screenGrid,
                 (vec) =>
                 {
-                    ScreenController.CaptureSquare((int)vec.x,(int)vec.y, 32);
+                    MonitorUtilities.CaptureSquare((int)vec.x,(int)vec.y, 32);
                 },
                 (vec) =>
                 {
-                    ScreenController.CaptureSquare((int)vec.x, (int)vec.y, 32);
+                    MonitorUtilities.CaptureSquare((int)vec.x, (int)vec.y, 32);
                 },
                 parallel: true
                 );
@@ -85,8 +85,8 @@
             int error = 4;
 
             //Test the screen.
-            var screenGrid = ScreenController.ObtainGrid(10, 10);
-            MouseController.IterateOverLocations(screenGrid,
+            var screenGrid = MonitorUtilities.ObtainGrid(10, 10);
+            MouseUtilities.IterateOverLocations(screenGrid,
                 (vec) =>
                 {
                 },
@@ -104,14 +104,14 @@
             CursorStateTracker stateTracker = new CursorStateTracker();
 
             //Test the screen.
-            var screenGrid = ScreenController.ObtainGrid(10, 100);
-            MouseController.IterateOverLocations(screenGrid,
+            var screenGrid = MonitorUtilities.ObtainGrid(10, 100);
+            MouseUtilities.IterateOverLocations(screenGrid,
                 (vec) =>
                 {
                 },
                 (vec) =>
                 {
-                    var info = MouseController.GetCursorInfo();
+                    var info = MouseUtilities.GetCursorInfo();
                     stateTracker.Update(vec, info);
                 });
 
@@ -125,14 +125,14 @@
             CursorStateTracker stateTracker = new CursorStateTracker();
 
             //Test the screen.
-            var screenGrid = ScreenController.ObtainGrid(10, 10);
-            MouseController.IterateOverLocations(screenGrid,
+            var screenGrid = MonitorUtilities.ObtainGrid(10, 10);
+            MouseUtilities.IterateOverLocations(screenGrid,
                 preAction: (vec) =>
                 {
                 },
                 postAction: (vec) =>
                 {
-                    var info = MouseController.GetCursorInfo();
+                    var info = MouseUtilities.GetCursorInfo();
                     stateTracker.Update(vec, info);
                 },
                 parallel : false
@@ -159,7 +159,7 @@
         [Test]
         public void TestCapture()
         {
-            Image img = ScreenController.CaptureDesktop();
+            Image img = MonitorUtilities.CaptureDesktop();
             Assert.That(img, Is.Not.Null);
                 Assert.Greater(img.Width, 0);
                 Assert.Greater(img.Height, 0);
@@ -168,8 +168,8 @@
         [Test]
         public void TestCaptureSave()
         {
-            Image img = ScreenController.CaptureDesktop();
-            ScreenController.SaveImage(img);
+            Image img = MonitorUtilities.CaptureDesktop();
+            MonitorUtilities.SaveImage(img);
 
             Assert.That(img, Is.Not.Null);
             Assert.Greater(img.Width, 0);
@@ -181,7 +181,7 @@
         [Test]
         public void TestDesktopResolution()
         {
-            var size = ScreenController.GetSize();
+            var size = MonitorUtilities.GetSize();
             Assert.AreEqual(1920, size.Width);
             Assert.AreEqual(1080, size.Height);
         }
@@ -189,8 +189,8 @@
         [Test]
         public void TestCaptureSaveDesktopResolution()
         {
-            Image img = ScreenController.CaptureDesktop();
-            ScreenController.SaveImage(img);
+            Image img = MonitorUtilities.CaptureDesktop();
+            MonitorUtilities.SaveImage(img);
 
             Assert.That(img, Is.Not.Null);
             Assert.AreEqual(1920, img.Width);
@@ -202,7 +202,7 @@
         [Test]
         public void TestGrid()
         {
-            var grid = ScreenController.ObtainGrid(30,30);
+            var grid = MonitorUtilities.ObtainGrid(30,30);
             Assert.That(grid, Is.Not.Null);
             
             //Ensure there are actually elements in here.
