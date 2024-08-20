@@ -9,7 +9,6 @@ namespace Clickless
 {
     public class InputHandler
     {
-        private MLClientWebsocket websocket;
         private TransparentForm transparentForm = new TransparentForm();
         string pattern_typed = "";
 
@@ -19,7 +18,6 @@ namespace Clickless
 
         Dictionary<HashSet<Keys>, Action> Commands;
 
-        public MLClientWebsocket Websocket { get => websocket; set => websocket = value; }
 
         public void AddCommand(Keys[] keys, Action action)
         {
