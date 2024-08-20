@@ -11,7 +11,6 @@ using Device = SharpDX.Direct3D11.Device;
 
 using SharpDX.DXGI;
 using System.Runtime.CompilerServices;
-using System.Runtime.Remoting.Contexts;
 
 
 namespace Clickless
