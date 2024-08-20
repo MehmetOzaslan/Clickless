@@ -67,6 +67,7 @@
     <Compile Include="src\ML\EdgePt.cs" />
     <Compile Include="src\ML\ImageRectDetectComputeShader.cs" />
     <Compile Include="src\InputHandler.cs" />
+    <Compile Include="src\ML\TextureCreate.cs" />
     <Compile Include="src\util\keyboard\KeyboardHook.cs" />
     <Compile Include="src\util\keyboard\KeySetComparer.cs" />
     <Compile Include="src\ML\MLClient.cs" />

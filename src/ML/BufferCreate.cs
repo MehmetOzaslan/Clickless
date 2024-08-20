@@ -21,7 +21,6 @@ namespace Clickless
     public static class TypeSize<T>
     {
         public readonly static int Size;
-
         static TypeSize()
         {
             var dm = new DynamicMethod("SizeOfType", typeof(int), new Type[] { });
@@ -36,39 +35,34 @@ namespace Clickless
 
     public class BufferCreate
     {
-        private Device Device;
-        private Buffer Buffer;
+        private Device _device;
+        private Buffer _buffer;
 
-        public class BufferCreation
+        private BufferCreate(Device device, Buffer buffer)
         {
-            private Device _device;
-            private Buffer _buffer;
-            public BufferCreation(Device device, Buffer buffer)
-            {
-                _device = device;
-                _buffer = buffer;
-            }
-
-            public Buffer GetBuffer()
-            {
-                return _buffer;
-            }
-
-            public BufferCreation SetConstantBufferData<T>(T data, DeviceContext context) where T : struct
-            {
-                context.ComputeShader.SetConstantBuffer(0, _buffer);
-                context.UpdateSubresource(ref data, _buffer);
-                return this;
-            }
-
-            public BufferCreation CopyFrom(Buffer buffer, DeviceContext context)
-            {
-                context.CopyResource(buffer, _buffer);
-                return this;
-            }
+            _device = device;
+            _buffer = buffer;
         }
 
-        public static BufferCreation InitializeRWBuffer<T>(Device device, int count) 
+        public Buffer GetBuffer()
+        {
+            return _buffer;
+        }
+
+
+        public BufferCreate SetConstantBufferData<T>(T data, DeviceContext context) where T : struct
+        {
+            context.ComputeShader.SetConstantBuffer(0, _buffer);
+            context.UpdateSubresource(ref data, _buffer);
+            return this;
+        }
+        public BufferCreate CopyFrom(Buffer buffer, DeviceContext context)
+        {
+            context.CopyResource(buffer, _buffer);
+            return this;
+        }
+
+        public static BufferCreate InitializeRWBuffer<T>(Device device, int count) 
         {
             var buffer =  new Buffer(device, new BufferDescription
             {
@@ -80,10 +74,10 @@ namespace Clickless
                 StructureByteStride = TypeSize<T>.Size,
             });
 
-            return new BufferCreation(device, buffer);
+            return new BufferCreate(device, buffer);
         }
 
-        public static BufferCreation InitializeConstantBuffer<T>(Device device)
+        public static BufferCreate InitializeConstantBuffer<T>(Device device)
         {
             var buffer = new Buffer(device, new BufferDescription
             {
@@ -94,10 +88,10 @@ namespace Clickless
                 OptionFlags = ResourceOptionFlags.None
             });
 
-            return new BufferCreation(device, buffer);
+            return new BufferCreate(device, buffer);
         }
 
-        public static BufferCreation InitializeStagingBuffer<T>(Device device, int size)
+        public static BufferCreate InitializeStagingBuffer<T>(Device device, int size)
         {
             var buffer = new Buffer(device, new BufferDescription
             {
@@ -109,7 +103,7 @@ namespace Clickless
                 StructureByteStride = TypeSize<T>.Size,
             });
 
-            return new BufferCreation(device, buffer);
+            return new BufferCreate(device, buffer);
         }
 
         public static Buffer ResizeBuffer<T>(Device device, DeviceContext context, Buffer oldBuffer, int newSize) where T : struct

@@ -29,7 +29,6 @@ namespace Clickless
     };
 
     // Data to and from the GPU
-    // NOTE: for resolutions larger than 32k pixels this needs to be changed.
     [StructLayout(LayoutKind.Sequential)]
     public struct BufferedPoint : IPointData
     {
@@ -176,8 +175,6 @@ namespace Clickless
                 clusters[point.CLUSTER_LABEL].Add(point);
             }
 
-            //GetClusterRect();
-
             List<Rectangle> rects = new List<Rectangle>();
             foreach (var item in clusters)
             {
@@ -244,13 +241,12 @@ namespace Clickless
         }
 
 
-        private int GetEdgeDetectionCount()
+        private int GetDetectionCount()
         {
             var resCounterBuffer = BufferCreate.InitializeStagingBuffer<int>(device, 1)
                                                .CopyFrom(outputCounter, context)
                                                .GetBuffer();
 
-            context.CopyResource(outputCounter, resCounterBuffer);
             context.MapSubresource(resCounterBuffer, MapMode.Read, MapFlags.None, out var counterSize);
             int[] counterResult = new int[1];
             counterSize.ReadRange(counterResult, 0, 1);
@@ -264,7 +260,7 @@ namespace Clickless
 
         private void SquashBuffer()
         {
-            bufferSize = GetEdgeDetectionCount();
+            bufferSize = GetDetectionCount();
             outputBuffer = BufferCreate.ResizeBuffer<BufferedPoint>(device, context, outputBuffer, bufferSize);
         }
 
@@ -286,72 +282,20 @@ namespace Clickless
             return results;
         }
 
-        /// <summary>
-        /// Changes the flags to allow the cpu to read the result texture and copies it over.
-        /// </summary>
-        /// <param name="gpuSrcDesc"></param>
-        /// <param name="gpuSrcTexture"></param>
-        /// <param name="cpuDestinationTexture"></param>
-        private void MoveTextureToCPU(Texture2D gpuSrcTexture, out Texture2D cpuDestinationTexture)
-        {
-            Texture2DDescription cpuDescription;
-            cpuDescription = gpuSrcTexture.Description;
-            cpuDescription.Usage = ResourceUsage.Staging;
-            cpuDescription.BindFlags = BindFlags.None;
-            cpuDescription.CpuAccessFlags = CpuAccessFlags.Read;
 
-            cpuDestinationTexture = new Texture2D(device, cpuDescription);
-
-            // Copy data from the GPU gpuSrcTexture to the staging gpuSrcTexture
-            device.ImmediateContext.CopyResource(gpuSrcTexture, cpuDestinationTexture);
-        }
 
         private void InitializeTexture2D(Bitmap bitmap)
         {
-            var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-            var dataBox = new DataRectangle(bitmapData.Scan0, bitmapData.Stride);
-
-
             inputTexture?.Dispose();
-            inputTexture = new Texture2D(device,
-                new Texture2DDescription
-                {
-                    Width = bitmap.Width,
-                    Height = bitmap.Height,
-                    ArraySize = 1,
-                    BindFlags = BindFlags.ShaderResource,
-                    Usage = ResourceUsage.Dynamic,
-                    CpuAccessFlags = CpuAccessFlags.Write,
-                    Format = Format.B8G8R8A8_UNorm, //TODO: Can probaly change this to B8G8R8 or similar if it exists, might need to recompile the hlsl file too.
-                    MipLevels = 1,
-                    OptionFlags = ResourceOptionFlags.None,
-                    SampleDescription = new SampleDescription(1, 0)
-                },
-                dataBox
-            );
-
+            inputTexture = TextureCreate.CreateGPUResourceFromBitmap(device, bitmap, Format.B8G8R8A8_UNorm)
+                                        .GetTexture();
 
             outputTexture?.Dispose();
-            outputTexture = new Texture2D(device,
-                new Texture2DDescription
-                {
-                    Width = inputTexture.Description.Width,
-                    Height = inputTexture.Description.Height,
-                    ArraySize = inputTexture.Description.ArraySize,
-                    BindFlags = BindFlags.UnorderedAccess,
-                    Usage = ResourceUsage.Default,
-                    CpuAccessFlags = CpuAccessFlags.None,
-                    Format = Format.R32G32_SInt, //RWTexture2D<int2> on the GPU
-                    MipLevels = inputTexture.Description.MipLevels,
-                    SampleDescription = new SampleDescription(1, 0)
-                }
-            );
 
-
+            //RWTexture2D<int2> on the GPU
+            outputTexture = TextureCreate.CreateRWTexture(device, bitmap.Width, bitmap.Height, Format.R32G32_SInt).GetTexture();
             outputTextureUAV?.Dispose();
             outputTextureUAV = new UnorderedAccessView(device,outputTexture);
-
-            bitmap.UnlockBits(bitmapData);
         }
 
         private void CopyCapturedBitmapToGPUTexture(Bitmap bitmap)
@@ -362,21 +306,7 @@ namespace Clickless
 
             else
             {
-                var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-                DataBox dataBox = context.MapSubresource(inputTexture, 0, MapMode.WriteDiscard, MapFlags.None);
-
-                //Copy data to the GPU using marshal.
-                int dataSize = bitmapData.Stride * bitmap.Height;
-
-                // Create a managed array to hold the bitmap data
-                byte[] data = new byte[dataSize];
-
-                // Copy the bitmap data to the managed array
-                Marshal.Copy(bitmapData.Scan0, data, 0, dataSize);
-                Marshal.Copy(data, 0, dataBox.DataPointer, dataSize);
-                context.UnmapSubresource(inputTexture, 0);
-
-                bitmap.UnlockBits(bitmapData);
+                TextureCreate.UpdateFromBitmap(context, inputTexture, bitmap);
             }
         }
     }
