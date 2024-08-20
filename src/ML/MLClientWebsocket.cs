@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Clickless
 {
+    [Obsolete("Latency is too large over websockets")]
     public class MLClientWebsocket
     {
         public readonly static string echoTextURL = "ws://localhost:8210/echotext";
