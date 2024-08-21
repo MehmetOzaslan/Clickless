@@ -6,10 +6,9 @@ namespace Clickless
 {
     public class Program
     {
-        public const int loopDelay = 1000;
 
         [STAThread]
-        static void Main(string[] args)
+        public static void Run()
         {
             Thread messageThread = new Thread(RunMessageLoop);
 

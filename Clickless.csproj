@@ -81,8 +81,13 @@
 
   <ItemGroup>
     <Folder Include="images\" />
-    <Folder Include="python\" />
+    <Folder Include="Models\" />
+    <Folder Include="ViewModels\" />
     <Folder Include="src\images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="App.xaml" />
   </ItemGroup>
 
 </Project>
