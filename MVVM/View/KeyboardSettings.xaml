@@ -1,0 +1,94 @@
+﻿<UserControl x:Class="Clickless.MVVM.View.KeyboardSettings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Clickless.MVVM.View"
+             xmlns:svg="http://sharpvectors.codeplex.com/svgc/"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <Style TargetType="RadioButton" x:Key="ImageRadioButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border CornerRadius="10"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                Padding="10">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                <ContentPresenter HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- Change Background Color When Checked -->
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="#FF87CEEB"/>
+                            </Trigger>
+                            <!-- Change Background Color When Not Checked -->
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter Property="Background" Value="#FF4682B4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <!-- Default colors for non-selected state -->
+            <Setter Property="Background" Value="#FF87CEEB"/>
+            <!-- Light desaturated blue -->
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Style>
+
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+
+
+
+        <RadioButton VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0"
+                     Style="{StaticResource ImageRadioButton}" IsChecked="True">
+            <RadioButton.Content>
+                <StackPanel Orientation="Vertical">
+                    <Image Source="/Clickless;component/Resources/Images/LeftKeyboardOnly.png" Width="100" Height="100"/>
+                    <TextBlock Text="L" HorizontalAlignment="Center" Foreground="Black"  VerticalAlignment="Center" FontSize="24"/>
+                </StackPanel>
+            </RadioButton.Content>
+        </RadioButton>
+
+        <RadioButton VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1"
+                     Style="{StaticResource ImageRadioButton}">
+            <RadioButton.Content>
+                <StackPanel Orientation="Vertical">
+                    <Image Source="/Clickless;component/Resources/Images/EntireKeyboard.png" Width="100" Height="100"/>
+                    <TextBlock Text="L + R" HorizontalAlignment="Center" Foreground="Black"  VerticalAlignment="Center" FontSize="24"/>
+                </StackPanel>
+            </RadioButton.Content>
+        </RadioButton>
+
+        <RadioButton VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="2"
+                     Style="{StaticResource ImageRadioButton}">
+            <RadioButton.Content>
+                <StackPanel Orientation="Vertical">
+                    <Image Source="/Clickless;component/Resources/Images/RightKeyboardOnly.png" Width="100" Height="100"/>
+                    <TextBlock Text="R" HorizontalAlignment="Center" Foreground="Black"  VerticalAlignment="Center" FontSize="24"/>
+                </StackPanel>
+            </RadioButton.Content>
+        </RadioButton>
+
+        <TextBlock Grid.ColumnSpan="3" Grid.Row="1" Text="Control which sections of the keyboard are used in search." HorizontalAlignment="Center" Foreground="White"  VerticalAlignment="Center" FontSize="24"/>
+        
+    </Grid>
+</UserControl>

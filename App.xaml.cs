@@ -1,5 +1,4 @@
-﻿using Clickless.Views;
-using System.Windows;
+﻿using System.Windows;
 
 namespace Clickless
 {
@@ -10,9 +9,6 @@ namespace Clickless
             base.OnStartup(e);
 
             Program.Run();
-            //// Optionally, show the main window if needed
-            //MainWindow mainWindow = new MainWindow();
-            //mainWindow.Show();
         }
     }
 }

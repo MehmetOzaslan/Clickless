@@ -1,9 +1,11 @@
-﻿<Window x:Class="Clickless.Views.MainWindow"
+﻿<Window x:Class="Clickless.MVVM.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Clickless.Views"
+        xmlns:local="clr-namespace:Clickless.MVVM.View"
+        xmlns:viewModel="clr-namespace:Clickless.MVVM.ViewModel"
+        xmlns:view="clr-namespace:Clickless.MVVM.View"
         mc:Ignorable="d"
         Height="600"
         Width="920"
@@ -12,6 +14,11 @@
         Background="Transparent"
         AllowsTransparency="True"
         >
+
+    <Window.DataContext>
+        <viewModel:MainWindowViewModel/>
+    </Window.DataContext>
+    
     <Border Background="#272537"
             CornerRadius="20">
         <Grid>
@@ -25,10 +32,14 @@
             </Grid.RowDefinitions>
 
 
+            <Border Grid.ColumnSpan="2" 
+                    Background="#1c1b28" 
+                    MouseDown="DragArea_MouseDown"/>
+
             <StackPanel Grid.Column="1" Grid.Row="0"  Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="_" Width="30" Click="MinimizeWindow"/>
-                <Button Content="☐" Width="30" Click="MaximizeWindow"/>
-                <Button Content="X" Width="30" Click="CloseWindow"/>
+                <Button Content="_" Width="30" Height="30" Click="MinimizeWindow" Foreground="White" Style="{StaticResource RoundedButton}"/>
+                <Button Content="☐" Width="30" Height="30" Click="MaximizeWindow" Foreground="White" Style="{StaticResource RoundedButton}"/>
+                <Button Content="X" Width="30" Height="30" Click="CloseWindow" Foreground="White" Style="{StaticResource RoundedButton}"/>
             </StackPanel>
 
             <TextBlock Text="Clickless" 
@@ -44,18 +55,23 @@
                              Height="50"
                              FontSize="14"
                              Style="{StaticResource MenuButtonTheme}"
-                             >
+                             Command="{Binding DetectionSettingViewCommand}"
+                             IsChecked="True">
                 </RadioButton>
-                <!--<RadioButton Content="Keyboard Settings"
+                <RadioButton Content="Keyboard Settings"
                              Foreground="White"
                              Height="50"
                              FontSize="14"
                              Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding KeyboardSettingViewCommand}"
                              >
-                </RadioButton>-->
+                </RadioButton>
             </StackPanel>
-            
-            
+
+            <ContentControl Grid.Row="1" Grid.Column="1" Margin="10"
+                            Content="{Binding CurrentView}"/>
+
+
         </Grid>
     </Border>
 </Window>

@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace Clickless.Views
+namespace Clickless.MVVM.View
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -28,7 +28,7 @@ namespace Clickless.Views
         {
             this.WindowState = WindowState.Minimized;
         }
-
+        
         private void MaximizeWindow(object sender, RoutedEventArgs e)
         {
             if (this.WindowState == WindowState.Maximized)
@@ -40,6 +40,13 @@ namespace Clickless.Views
         private void CloseWindow(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+        private void DragArea_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                this.DragMove();
+            }
         }
 
     }

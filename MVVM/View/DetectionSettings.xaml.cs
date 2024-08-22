@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Clickless.Views
+namespace Clickless.MVVM.View
 {
     /// <summary>
     /// Interaction logic for DetectionSettings.xaml
@@ -56,8 +56,7 @@ namespace Clickless.Views
 
         private static bool IsTextNumeric(string text)
         {
-            Regex regex = new Regex("^[0-9]+$"); // Allow integers
-            return !regex.IsMatch(text);
+            return int.TryParse(text, out int res);
         }
     }
 }
