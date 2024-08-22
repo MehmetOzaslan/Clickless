@@ -5,12 +5,13 @@ using System.Linq;
 
 namespace Clickless
 {
-    abstract class ImageToRectEngine : IEdgeProvider
+    abstract class ImageToRectEngine : IEdgeProvider, IImagePassesProvider
     {
         public DetectionSettings detectionSettings = new DetectionSettings() { cannythresh1 = 100, cannythresh2 = 100, epsilon = 5, iterations = 10, m = 10 };
 
         public abstract IEnumerable<IPointData> GetEdges(Bitmap bitmap);
         public abstract IEnumerable<Rectangle> GetRects(Bitmap bitmap);
+        public abstract Bitmap[] GetImagePasses();
 
         public void SetDetectionSettings(DetectionSettings settings)
         {
@@ -26,7 +27,6 @@ namespace Clickless
 
             return new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
         }
-
 
     }
 }

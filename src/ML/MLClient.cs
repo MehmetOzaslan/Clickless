@@ -36,10 +36,20 @@ namespace Clickless
             }
         }
 
+        public static void UpdateSettings(DetectionSettings settings)
+        {
+            Instance.detectionSettings = settings;
+        }
+
         public static List<Rectangle> GetBboxes(Bitmap image)
         {
             Instance.Engine.SetDetectionSettings(Instance.detectionSettings);
             return Instance.Engine.GetRects(image).ToList();
+        }
+
+        public static Bitmap[] GetEngineImagePasses()
+        {
+            return Instance.Engine.GetImagePasses();
         }
     }
 }

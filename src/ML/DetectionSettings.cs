@@ -1,6 +1,6 @@
 ﻿namespace Clickless
 {
-    class DetectionSettings
+    public class DetectionSettings
     {
         public int m;
         public int epsilon;

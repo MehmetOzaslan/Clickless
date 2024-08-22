@@ -40,7 +40,7 @@ namespace Clickless
         public Dbscan.Point Point => new Dbscan.Point(X, Y);
     }
 
-    class ImageRectDetectComputeShader : ImageToRectEngine
+    class ImageRectDetectComputeShader : ImageToRectEngine, IImagePassesProvider
     {
 
         private Params shaderParams;
@@ -282,8 +282,6 @@ namespace Clickless
             return results;
         }
 
-
-
         private void InitializeTexture2D(Bitmap bitmap)
         {
             inputTexture?.Dispose();
@@ -308,6 +306,18 @@ namespace Clickless
             {
                 TextureCreate.UpdateFromBitmap(context, inputTexture, bitmap);
             }
+        }
+
+        public override Bitmap[] GetImagePasses()
+        {
+            Bitmap[] ret = new Bitmap[1];
+
+            GetRects(MonitorUtilities.CaptureDesktopBitmap());
+            TextureCreate.CopyToBitmap(device, outputTexture, out Bitmap result);
+            ret[0] = result;
+                
+
+            return ret;
         }
     }
 }

@@ -28,7 +28,7 @@
                                 BorderBrush="{TemplateBinding BorderBrush}" 
                                 BorderThickness="0"
                                 CornerRadius="4"
-                                Height="20"
+                                Height="50"
                             Padding="5">
                         </Border>
                     </ControlTemplate>
@@ -54,12 +54,22 @@
 
         <Label Content="Density:" Grid.Row="0" Grid.Column="0" Margin="10" VerticalAlignment="Center" Foreground="White"/>
         <TextBox x:Name="DensityInput" Grid.Row="0" Grid.Column="1" Margin="10" HorizontalAlignment="Left"  VerticalAlignment="Center" Width="50" 
-                 PreviewTextInput="NumericOnly" Style="{StaticResource RoundedTextBox}"  />
+                 PreviewTextInput="NumericOnly" 
+                 IsEnabled="True"
+                 Text="10"
+                 BorderThickness="0"
+                 TextAlignment="Center"
+                 Background="#474465" />
         
         <Label Content="Distance:" Grid.Row="0" Grid.Column="2" Margin="10" VerticalAlignment="Center" Foreground="White"/>
         
         <TextBox x:Name="DistanceInput" Grid.Row="0" Grid.Column="3" Margin="10" HorizontalAlignment="Left" VerticalAlignment="Center" Width="50" 
-                 PreviewTextInput="NumericOnly" Style="{StaticResource RoundedTextBox}"  />
+                 PreviewTextInput="NumericOnly"
+                 IsEnabled="True"
+                 Text="10"
+                 BorderThickness="0"
+                 TextAlignment="Center"
+                 Background="#474465"/>
 
         <Button Content="Update" Grid.Row="0" Grid.Column="4" Margin="10" VerticalAlignment="Center" Click="UpdateButton_Click"
                 Style="{StaticResource RoundedButton}" />

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -26,26 +28,49 @@ namespace Clickless.MVVM.View
             InitializeComponent();
         }
 
+        BitmapImage BitmapToImageSource(Bitmap bitmap)
+        {
+            using (MemoryStream memory = new MemoryStream())
+            {
+                bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                memory.Position = 0;
+                BitmapImage bitmapimage = new BitmapImage();
+                bitmapimage.BeginInit();
+                bitmapimage.StreamSource = memory;
+                bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapimage.EndInit();
+
+                return bitmapimage;
+            }
+        }
 
 
         // Event handler for the Update button
         private void UpdateButton_Click(object sender, RoutedEventArgs e)
         {
-            // Parse input values
-            if (double.TryParse(DensityInput.Text, out double density) &&
-                double.TryParse(DistanceInput.Text, out double distance))
-            {
-                // Example: Generate or update the image based on density and distance
-                // This is where you would implement your image processing logic.
-                // For this example, we'll just display a placeholder image.
 
-                BitmapImage bitmapImage = new BitmapImage(new Uri("pack://application:,,,/YourPlaceholderImage.png"));
-                ResultImage.Source = bitmapImage;
-            }
-            else
-            {
-                MessageBox.Show("Please enter valid numeric values for Density and Distance.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+
+
+            int.TryParse(DistanceInput.Text, out var distance);
+            int.TryParse(DensityInput.Text, out var density);
+
+            MLClient.UpdateSettings(new Clickless.DetectionSettings() { m = density, cannythresh1 = 100, cannythresh2 = 200, iterations = 20, epsilon = distance });
+            ResultImage.Source = BitmapToImageSource(MLClient.GetEngineImagePasses()[0]);
+
+            
+
+            //// Parse input values
+            //if (double.TryParse(DensityInput.Text, out double density) &&
+            //    double.TryParse(DistanceInput.Text, out double distance))
+            //{
+
+            //    BitmapImage bitmapImage = new BitmapImage(new Uri("pack://application:,,,/YourPlaceholderImage.png"));
+            //    ResultImage.Source = bitmapImage;
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Please enter valid numeric values for Density and Distance.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            //}
         }
 
         // Event handler to ensure only numeric input in the TextBoxes

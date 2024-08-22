@@ -59,6 +59,11 @@ namespace Clickless
             return new MatEnumerable(edges);
         }
 
+        public override Bitmap[] GetImagePasses()
+        {
+            return null;
+        }
+
         public override IEnumerable<Rectangle> GetRects(Bitmap bitmap)
         {
             var edgeEnumerator = GetEdges(bitmap);
