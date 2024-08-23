@@ -25,7 +25,14 @@ namespace Clickless
 
         MLClient()
         {
-            detectionSettings = new DetectionSettings() {m = 20, cannythresh1 = 100, cannythresh2 = 200, iterations = 20, epsilon = 5 };
+            detectionSettings = new DetectionSettings() { m = 20,
+                cannythresh1 = 100,
+                cannythresh2 = 200,
+                iterations = 20,
+                epsilon = 5,
+                minimumarea = 100,
+                minimumheight = 5,
+                minimumwidth = 5};
 
             if (ImageRectDetectComputeShader.DeviceSupportsCompute()){
                 Engine = new ImageRectDetectComputeShader();
@@ -38,7 +45,7 @@ namespace Clickless
 
         public static void UpdateSettings(DetectionSettings settings)
         {
-            Instance.detectionSettings = settings;
+            Instance.Engine.SetDetectionSettings(settings);
         }
 
         public static List<Rectangle> GetBboxes(Bitmap image)

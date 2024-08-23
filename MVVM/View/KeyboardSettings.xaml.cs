@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 namespace Clickless.MVVM.View
 {
     /// <summary>
-    /// Interaction logic for KeyboardSettings.xaml
+    /// Interaction logic for KeyboardSettingsModel.xaml
     /// </summary>
     public partial class KeyboardSettings : UserControl
     {

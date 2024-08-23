@@ -48,14 +48,11 @@ namespace Clickless.MVVM.View
         // Event handler for the Update button
         private void UpdateButton_Click(object sender, RoutedEventArgs e)
         {
-
-
-
             int.TryParse(DistanceInput.Text, out var distance);
             int.TryParse(DensityInput.Text, out var density);
 
-            MLClient.UpdateSettings(new Clickless.DetectionSettings() { m = density, cannythresh1 = 100, cannythresh2 = 200, iterations = 20, epsilon = distance });
-            ResultImage.Source = BitmapToImageSource(MLClient.GetEngineImagePasses()[0]);
+            MLClient.UpdateSettings(new Clickless.DetectionSettings() { m = density, cannythresh1 = 100, cannythresh2 = 200, iterations = 100, epsilon = distance });
+            ResultImage.ImageSource = BitmapToImageSource(MLClient.GetEngineImagePasses()[0]);
 
             
 

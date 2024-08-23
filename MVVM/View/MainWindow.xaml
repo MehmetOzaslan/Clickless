@@ -7,10 +7,12 @@
         xmlns:viewModel="clr-namespace:Clickless.MVVM.ViewModel"
         xmlns:view="clr-namespace:Clickless.MVVM.View"
         mc:Ignorable="d"
+        MinHeight="600"
+        MinWidth="920"
         Height="600"
         Width="920"
         WindowStyle="None"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
         Background="Transparent"
         AllowsTransparency="True"
         >

@@ -14,6 +14,7 @@ using MapFlags = SharpDX.Direct3D11.MapFlags;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Dbscan;
 using System.Linq;
+using SharpDX.Mathematics.Interop;
 
 namespace Clickless
 {
@@ -139,6 +140,7 @@ namespace Clickless
         {
             InitializeGPUParams();
             CopyCapturedBitmapToGPUTexture(bitmap);
+            ResetOutputTexture(bitmap);
             RunSobelPass();
             SquashBuffer();
             RunDBScanPass(); // TODO: Remove this (only kept for testing)
@@ -153,6 +155,7 @@ namespace Clickless
         {
             InitializeGPUParams();
             CopyCapturedBitmapToGPUTexture(bitmap);
+            ResetOutputTexture(bitmap);
             RunSobelPass();
             SquashBuffer();
             RunDBScanPass();
@@ -178,7 +181,12 @@ namespace Clickless
             List<Rectangle> rects = new List<Rectangle>();
             foreach (var item in clusters)
             {
-                rects.Add(GetClusterRect(item.Value));
+                var rect = GetClusterRect(item.Value);
+                if((rect.Width * rect.Height) > detectionSettings.minimumarea
+                    && rect.Width > detectionSettings.minimumwidth
+                    && rect.Height > detectionSettings.minimumheight){
+                    rects.Add(rect);        
+                }
             }
 
             ResetCounterBuffer();
@@ -256,6 +264,16 @@ namespace Clickless
 
             resCounterBuffer.Dispose();
             return validEntries;
+        }
+
+        private void ResetOutputTexture(Bitmap bitmap)
+        {
+            //RWTexture2D<int2> on the GPU
+            //outputTexture = TextureCreate.CreateRWTexture(device, bitmap.Width, bitmap.Height, Format.R32G32_SInt).GetTexture();
+
+            int[] clearColor = new int[] { 0, 0 };
+            context.ClearUnorderedAccessView(outputTextureUAV, new RawInt4(0,0,0,0));
+
         }
 
         private void SquashBuffer()

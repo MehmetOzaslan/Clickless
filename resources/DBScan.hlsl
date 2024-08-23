@@ -60,6 +60,10 @@ void CSMain(uint3 DTid : SV_DispatchThreadID)
 	//Second pass to get the cores and edges.
 	//NOTE: Noise is labeled as 0 here.
 	int clusterLabel = 0;
+	if (edgeCount >= m) {
+		clusterLabel = ID;
+	}
+
 	for (int y2 = -epsilon; y2 <= epsilon; y2++)
 	{
 		for (int x2 = -epsilon; x2 <= epsilon; x2++)
