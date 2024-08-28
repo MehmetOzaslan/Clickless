@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Clickless.MVVM.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace Clickless
 {
     
 
-    class DetectionSettingsModel
+    class DetectionSettingsModel : IFileNameProvider
     {
         public static readonly string settingsFile = "detectionsettings.json";
         public int m { get; set; }
@@ -17,5 +18,10 @@ namespace Clickless
         public int iterations { get; set; }
         public int cannythresh1 { get; set; }
         public int cannythresh2 { get; set; }
+
+        public string GetFileName()
+        {
+            return settingsFile;
+        }
     }
 }

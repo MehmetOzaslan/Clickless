@@ -6,16 +6,23 @@ using System.Threading.Tasks;
 
 namespace Clickless.MVVM.Models
 {
-    public class KeyboardSettingsModel
+    public class KeyboardSettingsModel : IFileNameProvider
     {
+        public static readonly string settingsFile = "keyboardsettings.json";
+
         public enum KeyboardSpan
         {
-            LEFT,
-            ALL,
-            RIGHT,
-            CUSTOM
+            LEFT = 1,
+            ALL = 2,
+            RIGHT = 3,
+            CUSTOM = 4
         }
 
-        KeyboardSpan _chosenSetting {  get; set; }
+        public KeyboardSpan chosenSetting {  get; set; }
+
+        public string GetFileName()
+        {
+            return settingsFile;
+        }
     }
 }

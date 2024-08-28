@@ -23,7 +23,6 @@ namespace Clickless
         {
             var keyboardHook = KeyboardHook.Instance;
             InputHandler keyMatcher = new InputHandler();
-
             keyboardHook.KeyDown += (sender, e) => {
                 var keys = KeyboardHook.Instance.CurrentlyPressedKeys;
                 Console.WriteLine("====== KEYS =====");

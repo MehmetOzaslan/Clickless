@@ -50,10 +50,7 @@ namespace Clickless
             var image = BitmapToMat(bitmap);
 
             Cv2.Resize(image, resizedImage, new OpenCvSharp.Size(), scaleFactor, scaleFactor);
-            //Cv2.GaussianBlur(resizedImage, blurredImage, new OpenCvSharp.Size(gaussianKernalSize, gaussianKernalSize), blur);
             Cv2.CvtColor(resizedImage, grayImage, ColorConversionCodes.RGB2GRAY);
-
-            //TODO: Find a way to optimize this, either through the GPU or a different call.
             Cv2.Canny(grayImage, edges, detectionSettings.cannythresh1, detectionSettings.cannythresh2);
 
             return new MatEnumerable(edges);

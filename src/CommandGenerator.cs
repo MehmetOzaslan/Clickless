@@ -15,9 +15,20 @@ namespace Clickless
 
     public static class CommandGenerator
     {
-        static readonly char[] _chars = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
 
-        static readonly char[] _lhsChars = { 'Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F', 'Z', 'X', 'C', 'V', 'B'};
+        public static readonly char[] allChars = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+
+        public static readonly char[] lhsChars = { 'Q', 'W', 'E', 'R', 'T', 'A', 'S', 'D', 'F', 'G', 'Z', 'X', 'C', 'V', 'B' };
+
+        public static readonly char[] rhsChars = { 'Y', 'U', 'I', 'O', 'P', 'H', 'J', 'K', 'L', 'N', 'M' };
+
+        public static char[] chosenCharset = allChars;
+
+        public static void SetCharset(char[] chars)
+        {
+            chosenCharset = chars;
+        }
+
 
         private static HashSet<string> ConstructCommands(int amount)
         {
@@ -25,10 +36,9 @@ namespace Clickless
             HashSet<string> commands = new HashSet<string>();
 
             Queue<(string, char)> prefixQueue = new Queue<(string, char)>();
-            char[] chars = _lhsChars;
 
             //Initialize the queue
-            foreach (char ch in chars)
+            foreach (char ch in chosenCharset)
             {
                 prefixQueue.Enqueue(("", ch));
             }
@@ -51,7 +61,7 @@ namespace Clickless
                 }
                 
                 //Add the next sequence of commands.
-                foreach (char ch in chars)
+                foreach (char ch in chosenCharset)
                 {
                     prefixQueue.Enqueue((combined, ch));
                 }

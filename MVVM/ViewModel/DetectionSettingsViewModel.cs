@@ -98,8 +98,6 @@ namespace Clickless.MVVM.ViewModel
         public DetectionSettingsViewModel()
         {
             DetectionSettings = LoadSettings();
-            
-
             SaveSettingsCommand = new RelayCommand((obj) => { SaveSettings(); }, (obj) => { return true; });
         }
 
