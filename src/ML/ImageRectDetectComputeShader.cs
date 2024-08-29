@@ -332,6 +332,8 @@ namespace Clickless
 
             GetRects(MonitorUtilities.CaptureDesktopBitmap());
             TextureCreate.CopyToBitmap(device, outputTexture, out Bitmap result);
+
+            result.Save("imagepass1.png");
             ret[0] = result;
                 
 

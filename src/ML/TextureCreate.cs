@@ -13,6 +13,7 @@ using Device = SharpDX.Direct3D11.Device;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
 using SharpDX.DXGI;
 using Format = SharpDX.DXGI.Format;
+using System.Text.RegularExpressions;
 
 namespace Clickless
 {
@@ -141,19 +142,52 @@ namespace Clickless
                                     ImageLockMode.WriteOnly,
                                     format);
 
-
             DataBox dataBox = device.ImmediateContext.MapSubresource(cpuTex, 0, MapMode.Read, MapFlags.None);
 
-            // Copy the data from the CPU texture to the bitmap
             IntPtr srcPtr = dataBox.DataPointer;
             IntPtr dstPtr = bmpData.Scan0;
+            Texture2DDescription textureDesc = cpuTex.Description;
 
-            for (int y = 0; y < cpuTex.Description.Height; y++)
+            switch (textureDesc.Format)
             {
-                Utilities.CopyMemory(dstPtr, srcPtr, cpuTex.Description.Width * 4); // 4 bytes per pixel (32bpp)
-                srcPtr = IntPtr.Add(srcPtr, dataBox.RowPitch); // Advance the source pointer by the row pitch
-                dstPtr = IntPtr.Add(dstPtr, bmpData.Stride);   // Advance the destination pointer by the stride
-            }
+                case Format.R32G32_SInt:
+
+                    //Applies random color.
+                    var colorMap = new Dictionary<int, Color>();
+                    colorMap[0] = Color.Black;
+                    Random random = new Random();
+
+                    for (int y = 0; y < textureDesc.Height; y++)
+                    {
+                        for (int x = 0; x < textureDesc.Width; x++)
+                        {
+                            int value1 = Marshal.ReadInt32(srcPtr, (x * 8) + 0); // First 
+                            int value2 = Marshal.ReadInt32(srcPtr, (x * 8) + 4); // Second int
+
+                            //Random byte mappings.
+                            if (!colorMap.ContainsKey(value1))
+                            {
+                                colorMap[value1] = Color.FromArgb(255, random.Next(256), random.Next(256), random.Next(256));
+                            }
+
+                            Color color = colorMap[value1];
+
+                            Marshal.WriteInt32(dstPtr, (x * 4), BitConverter.ToInt32(new byte[] { color.B, color.G, color.R, color.A }, 0));
+                        }
+                        srcPtr = IntPtr.Add(srcPtr, dataBox.RowPitch);
+                        dstPtr = IntPtr.Add(dstPtr, bmpData.Stride);
+                    }
+
+                    break;
+                default:
+                    for (int y = 0; y < cpuTex.Description.Height; y++)
+                    {
+                        Utilities.CopyMemory(dstPtr, srcPtr, cpuTex.Description.Width * 8); // 4 bytes per pixel (32bpp)
+                        srcPtr = IntPtr.Add(srcPtr, dataBox.RowPitch); // Advance the source pointer by the row pitch
+                        dstPtr = IntPtr.Add(dstPtr, bmpData.Stride);   // Advance the destination pointer by the stride
+                    }
+                    break;
+            };
 
             device.ImmediateContext.UnmapSubresource(cpuTex, 0);
 
