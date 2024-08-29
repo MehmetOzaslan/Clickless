@@ -182,11 +182,7 @@ namespace Clickless
             foreach (var item in clusters)
             {
                 var rect = GetClusterRect(item.Value);
-                if((rect.Width * rect.Height) > detectionSettings.minimumarea
-                    && rect.Width > detectionSettings.minimumwidth
-                    && rect.Height > detectionSettings.minimumheight){
-                    rects.Add(rect);        
-                }
+                rects.Add(rect);        
             }
 
             ResetCounterBuffer();

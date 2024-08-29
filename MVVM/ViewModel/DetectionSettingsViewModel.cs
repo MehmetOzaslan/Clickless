@@ -12,10 +12,10 @@ namespace Clickless.MVVM.ViewModel
     class DetectionSettingsViewModel : ObservableObject
     {
 
-        private DetectionSettingsModel _detectionSettings;
+        private DetectionSettings _detectionSettings;
         public RelayCommand SaveSettingsCommand;
 
-        public DetectionSettingsModel DetectionSettings
+        public DetectionSettings DetectionSettings
         {
             get => _detectionSettings;
             set
@@ -101,10 +101,10 @@ namespace Clickless.MVVM.ViewModel
             SaveSettingsCommand = new RelayCommand((obj) => { SaveSettings(); }, (obj) => { return true; });
         }
 
-        private DetectionSettingsModel LoadSettings()
+        private DetectionSettings LoadSettings()
         {
-            return ObjectSerializer.LoadDataOrDefault<DetectionSettingsModel>()
-                   ?? new DetectionSettingsModel()
+            return ObjectSerializer.LoadDataOrDefault<DetectionSettings>()
+                   ?? new DetectionSettings()
                             {
                                 m = 20,
                                 cannythresh1 = 100,
@@ -116,7 +116,7 @@ namespace Clickless.MVVM.ViewModel
 
         private void SaveSettings()
         {  
-            ObjectSerializer.SaveData(DetectionSettings, DetectionSettingsModel.settingsFile);
+            ObjectSerializer.SaveData(DetectionSettings, DetectionSettings.settingsFile);
         }
     }
 }

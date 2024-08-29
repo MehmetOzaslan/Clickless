@@ -28,5 +28,16 @@ namespace Clickless
             return new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
         }
 
+        public void FilterRects(List<Rectangle> rectangles)
+        {
+            rectangles = RectangleOverlapRemover.RemoveContainingRectangles(rectangles);
+            rectangles = rectangles.Where((rect) =>
+            {
+                return
+                    (rect.Width * rect.Height) > detectionSettings.minimumArea
+                    && rect.Width > detectionSettings.minimumWidth
+                    && rect.Height > detectionSettings.minimumHeight;
+            }).ToList();
+        }
     }
 }

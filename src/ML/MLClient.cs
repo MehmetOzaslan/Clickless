@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Windows;
 
 namespace Clickless
 {
@@ -30,9 +31,9 @@ namespace Clickless
                 cannythresh2 = 200,
                 iterations = 20,
                 epsilon = 5,
-                minimumarea = 100,
-                minimumheight = 5,
-                minimumwidth = 5};
+                minimumArea = 100,
+                minimumHeight = 5,
+                minimumWidth = 5};
 
             if (ImageRectDetectComputeShader.DeviceSupportsCompute()){
                 Engine = new ImageRectDetectComputeShader();
@@ -43,6 +44,8 @@ namespace Clickless
             }
         }
 
+
+
         public static void UpdateSettings(DetectionSettings settings)
         {
             Instance.Engine.SetDetectionSettings(settings);
@@ -51,7 +54,9 @@ namespace Clickless
         public static List<Rectangle> GetBboxes(Bitmap image)
         {
             Instance.Engine.SetDetectionSettings(Instance.detectionSettings);
-            return Instance.Engine.GetRects(image).ToList();
+            var rects = Instance.Engine.GetRects(image).ToList();
+            Instance.Engine.FilterRects(rects);
+            return rects;
         }
 
         public static Bitmap[] GetEngineImagePasses()
