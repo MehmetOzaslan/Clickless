@@ -103,7 +103,7 @@ namespace Clickless.MVVM.ViewModel
 
         private DetectionSettingsModel LoadSettings()
         {
-            return ObjectSerializer.LoadDataOrDefault<DetectionSettingsModel>(DetectionSettingsModel.settingsFile)
+            return ObjectSerializer.LoadDataOrDefault<DetectionSettingsModel>()
                    ?? new DetectionSettingsModel()
                             {
                                 m = 20,

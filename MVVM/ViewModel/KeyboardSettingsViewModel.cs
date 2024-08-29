@@ -26,16 +26,12 @@ namespace Clickless.MVVM.ViewModel
 
         private KeyboardSettingsModel LoadSettings()
         {
-            return ObjectSerializer.LoadDataOrDefault<KeyboardSettingsModel>(settingsFile)
-                   ?? new KeyboardSettingsModel()
-                   {
-                       chosenSetting = KeyboardSpan.ALL,
-                   };
+            return ObjectSerializer.LoadDataOrDefault<KeyboardSettingsModel>();
         }
 
         private void SaveSettings()
         {
-            ObjectSerializer.SaveData(keyboardSettingsModel, settingsFile);
+            ObjectSerializer.SaveData(keyboardSettingsModel);
         }
 
         private KeyboardSpan _selectedSpan;
@@ -49,7 +45,7 @@ namespace Clickless.MVVM.ViewModel
                     _selectedSpan = value;
                     keyboardSettingsModel.chosenSetting = value;
                     SaveSettings();
-                    OnPropertyChanged(nameof(SelectedSpan));
+                    OnPropertyChanged();
                 }
             }
         }

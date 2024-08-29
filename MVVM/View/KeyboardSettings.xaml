@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Clickless.MVVM.View"
              xmlns:viewModel="clr-namespace:Clickless.MVVM.ViewModel"
+             xmlns:models="clr-namespace:Clickless.MVVM.Models"
              xmlns:svg="http://sharpvectors.codeplex.com/svgc/"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -36,9 +37,7 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <!-- Default colors for non-selected state -->
             <Setter Property="Background" Value="#FF87CEEB"/>
-            <!-- Light desaturated blue -->
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
         </Style>
@@ -66,9 +65,10 @@
             <local:ComparisonConverter x:Key="ComparisonConverter"/>
         </Grid.Resources>
 
-        <RadioButton VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0"
+        <RadioButton GroupName="Group 1" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0"
                      Style="{StaticResource ImageRadioButton}" Name="LEFT_KEYS_RADIOBUTTON"
-                     IsChecked="{Binding Path=SelectedSpan, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static local:KeyboardSpan.LEFT}}">
+                     IsChecked="{Binding SelectedSpan, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static models:KeyboardSpan.LEFT}}">
+            
             <RadioButton.Content>
                 <StackPanel Orientation="Vertical">
                     <Image Source="/Clickless;component/Resources/Images/LeftKeyboardOnly.png" Width="100" Height="100"/>
@@ -77,10 +77,10 @@
             </RadioButton.Content>
         </RadioButton>
 
-        <RadioButton VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1"
+        <RadioButton GroupName="Group 1" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1"
                      Style="{StaticResource ImageRadioButton}" Name="ALL_KEYS_RADIOBUTTON"
-                     IsChecked="{Binding Path=SelectedSpan, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static local:KeyboardSpan.ALL}}">
-            <RadioButton.Content>
+                     IsChecked="{Binding SelectedSpan, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static models:KeyboardSpan.ALL}}">
+        <RadioButton.Content>
                 <StackPanel Orientation="Vertical">
                     <Image Source="/Clickless;component/Resources/Images/EntireKeyboard.png" Width="100" Height="100"/>
                     <TextBlock Text="L + R" HorizontalAlignment="Center" Foreground="Black"  VerticalAlignment="Center" FontSize="24"/>
@@ -88,9 +88,9 @@
             </RadioButton.Content>
         </RadioButton>
 
-        <RadioButton VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="2"
+        <RadioButton GroupName="Group 1" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="2"
                      Style="{StaticResource ImageRadioButton}" Name="RIGHT_KEYS_RADIOBUTTON"
-                     IsChecked="{Binding Path=SelectedSpan, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static local:KeyboardSpan.RIGHT}}">
+                     IsChecked="{Binding SelectedSpan, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static models:KeyboardSpan.RIGHT}}">
 
             <RadioButton.Content>
                 <StackPanel Orientation="Vertical">

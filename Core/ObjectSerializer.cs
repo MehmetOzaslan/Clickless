@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Clickless.MVVM.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,8 +30,38 @@ namespace Clickless.Core
             File.WriteAllText(path, jsonData);
         }
 
+        public static void SaveData<T>(T data) where T : IFileNameProvider
+        {
+            var path = Path.Combine(appDataPath, data.GetFileName());
+            if (!Directory.Exists(appDataPath))
+            {
+                Directory.CreateDirectory(appDataPath);
+            }
+            if (!File.Exists(path))
+            {
+                File.Create(path);
+            }
 
-        
+            string jsonData = JsonConvert.SerializeObject(data, Formatting.Indented);
+            File.WriteAllText(path, jsonData);
+        }
+
+        public static T LoadDataOrDefault<T>() where T: IFileNameProvider, new()
+        {
+            var data = new T();
+
+            var filePath = Path.Combine(appDataPath, data.GetFileName());
+
+            if (File.Exists(filePath))
+            {
+                string jsonData = File.ReadAllText(filePath);
+                data = JsonConvert.DeserializeObject<T>(jsonData);
+                return data;
+            }
+
+            return default(T);
+        }
+
         public static T LoadDataOrDefault<T>(string filePath)
         {
             filePath = Path.Combine(appDataPath, filePath);
