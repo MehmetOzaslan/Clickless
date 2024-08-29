@@ -77,6 +77,8 @@ namespace Clickless
                 rects.Add(GetClusterRect(item.Objects));
             }
 
+            FilterRects(rects);
+
             return rects;
         }
     }

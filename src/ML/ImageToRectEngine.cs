@@ -11,6 +11,7 @@ namespace Clickless
 
         public abstract IEnumerable<IPointData> GetEdges(Bitmap bitmap);
         public abstract IEnumerable<Rectangle> GetRects(Bitmap bitmap);
+
         public abstract Bitmap[] GetImagePasses();
 
         public void SetDetectionSettings(DetectionSettings settings)
@@ -30,14 +31,16 @@ namespace Clickless
 
         public void FilterRects(List<Rectangle> rectangles)
         {
-            rectangles = RectangleOverlapRemover.RemoveContainingRectangles(rectangles);
-            rectangles = rectangles.Where((rect) =>
-            {
-                return
-                    (rect.Width * rect.Height) > detectionSettings.minimumArea
-                    && rect.Width > detectionSettings.minimumWidth
-                    && rect.Height > detectionSettings.minimumHeight;
-            }).ToList();
+            RectangleFilters.RemoveSmallRectangles(rectangles, detectionSettings);
+            RectangleFilters.RemoveContainingRectangles(rectangles);
+        }
+
+        public Bitmap ApplyRectResultToBmp(List<Rectangle> rectangles, Bitmap bmp)
+        {
+            using (Graphics g = Graphics.FromImage(bmp)) { 
+                g.DrawRectangles(new (new SolidBrush(Color.FromArgb(180, 255,0,0 ) ), 4), rectangles.ToArray());
+            }
+            return bmp;
         }
     }
 }

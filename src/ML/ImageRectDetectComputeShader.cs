@@ -186,6 +186,8 @@ namespace Clickless
             }
 
             ResetCounterBuffer();
+
+            FilterRects(rects);
             return rects;
         }
 
@@ -326,10 +328,10 @@ namespace Clickless
         {
             Bitmap[] ret = new Bitmap[1];
 
-            GetRects(MonitorUtilities.CaptureDesktopBitmap());
+            var rects = GetRects(MonitorUtilities.CaptureDesktopBitmap());
             TextureCreate.CopyToBitmap(device, outputTexture, out Bitmap result);
+            ApplyRectResultToBmp(rects.ToList(), result);
 
-            result.Save("imagepass1.png");
             ret[0] = result;
                 
 

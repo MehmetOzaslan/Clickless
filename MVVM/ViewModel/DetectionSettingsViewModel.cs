@@ -11,7 +11,6 @@ namespace Clickless.MVVM.ViewModel
 {
     class DetectionSettingsViewModel : ObservableObject
     {
-
         private DetectionSettings _detectionSettings;
         public RelayCommand SaveSettingsCommand;
 

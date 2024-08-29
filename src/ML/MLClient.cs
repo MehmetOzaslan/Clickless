@@ -44,8 +44,6 @@ namespace Clickless
             }
         }
 
-
-
         public static void UpdateSettings(DetectionSettings settings)
         {
             Instance.Engine.SetDetectionSettings(settings);
@@ -55,7 +53,6 @@ namespace Clickless
         {
             Instance.Engine.SetDetectionSettings(Instance.detectionSettings);
             var rects = Instance.Engine.GetRects(image).ToList();
-            Instance.Engine.FilterRects(rects);
             return rects;
         }
 
