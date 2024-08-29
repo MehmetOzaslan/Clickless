@@ -102,15 +102,7 @@ namespace Clickless.MVVM.ViewModel
 
         private DetectionSettings LoadSettings()
         {
-            return ObjectSerializer.LoadDataOrDefault<DetectionSettings>()
-                   ?? new DetectionSettings()
-                            {
-                                m = 20,
-                                cannythresh1 = 100,
-                                cannythresh2 = 200,
-                                iterations = 20,
-                                epsilon = 5,
-                            };
+            return ObjectSerializer.LoadDataOrDefault<DetectionSettings>();
         }
 
         private void SaveSettings()

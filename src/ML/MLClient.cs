@@ -31,9 +31,9 @@ namespace Clickless
                 cannythresh2 = 200,
                 iterations = 20,
                 epsilon = 5,
-                minimumArea = 100,
-                minimumHeight = 5,
-                minimumWidth = 5};
+                minimumRectArea = 100,
+                minimumRectHeight = 5,
+                minimumRectWidth = 5};
 
             if (ImageRectDetectComputeShader.DeviceSupportsCompute()){
                 Engine = new ImageRectDetectComputeShader();

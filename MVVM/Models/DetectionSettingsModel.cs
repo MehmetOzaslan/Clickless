@@ -10,10 +10,23 @@ namespace Clickless
             return settingsFile;
         }
 
+        //Defaults
+        public DetectionSettings()
+        {
+            m = 20;
+            cannythresh1 = 100;
+            cannythresh2 = 200;
+            iterations = 20;
+            epsilon = 5;
+            minimumRectArea = 20;
+            minimumRectHeight = 5;
+            minimumRectWidth = 5;
+        }
+
         public int m { get; set; }
-        public int minimumArea { get; set; }
-        public int minimumHeight { get; set; }
-        public int minimumWidth { get; set; }
+        public int minimumRectArea { get; set; }
+        public int minimumRectHeight { get; set; }
+        public int minimumRectWidth { get; set; }
         public int epsilon { get; set; }
         public int iterations { get; set; }
         public int cannythresh1 { get; set; }

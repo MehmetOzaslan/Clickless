@@ -16,9 +16,9 @@ namespace Clickless
             rectangles = rectangles.Where((rect) =>
             {
                 return
-                    (rect.Width * rect.Height) > detectionSettings.minimumArea
-                    && rect.Width > detectionSettings.minimumWidth
-                    && rect.Height > detectionSettings.minimumHeight;
+                    (rect.Width * rect.Height) > detectionSettings.minimumRectArea
+                    && rect.Width > detectionSettings.minimumRectWidth
+                    && rect.Height > detectionSettings.minimumRectHeight;
             }).ToList();
         }
         public static void RemoveContainingRectangles(List<Rectangle> rectangles)
