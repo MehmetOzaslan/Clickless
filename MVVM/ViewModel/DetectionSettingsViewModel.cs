@@ -1,102 +1,50 @@
 ﻿using Clickless.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using PropertyChanged;
+using System.Drawing;
+using System.IO;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Drawing.Printing;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Clickless.MVVM.ViewModel
 {
-    class DetectionSettingsViewModel : ObservableObject
+    [AddINotifyPropertyChangedInterface]
+    class DetectionSettingsViewModel
     {
         private DetectionSettings _detectionSettings;
-        public RelayCommand SaveSettingsCommand;
+        public RelayCommand SaveSettingsCommand { get; set; }
 
+        public ImageSource ResultImage { get; set; }
         public DetectionSettings DetectionSettings
         {
             get => _detectionSettings;
             set
             {
                 _detectionSettings = value;
-                OnPropertyChanged();
+                MLClient.UpdateSettings(_detectionSettings);
+                SaveSettings();
             }
         }
+        public WindowState WindowState {  get; set; }
 
-        public int M
+        private void Minimize()
         {
-            get => DetectionSettings.m;
-            set
-            {
-                if (DetectionSettings.m != value)
-                {
-                    DetectionSettings.m = value;
-                    SaveSettings();
-                    OnPropertyChanged();
-                }
-            }
+            WindowState = WindowState.Minimized;
         }
 
-        public int Epsilon
+        private void Restore()
         {
-            get => DetectionSettings.epsilon;
-            set
+            if (WindowState == WindowState.Minimized)
             {
-                if (DetectionSettings.epsilon != value)
-                {
-                    DetectionSettings.epsilon = value;
-                    SaveSettings();
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public int Iterations
-        {
-            get => DetectionSettings.iterations;
-            set
-            {
-                if (DetectionSettings.iterations != value)
-                {
-                    DetectionSettings.iterations = value;
-                    SaveSettings();
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public int CannyThresh1
-        {
-            get => DetectionSettings.cannythresh1;
-            set
-            {
-                if (DetectionSettings.cannythresh1 != value)
-                {
-                    DetectionSettings.cannythresh1 = value;
-                    SaveSettings();
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public int CannyThresh2
-        {
-            get => DetectionSettings.cannythresh2;
-            set
-            {
-                if (DetectionSettings.cannythresh2 != value)
-                {
-                    DetectionSettings.cannythresh2 = value;
-                    SaveSettings();
-                    OnPropertyChanged();
-                }
+                WindowState = WindowState.Normal;
             }
         }
 
         public DetectionSettingsViewModel()
         {
-            DetectionSettings = LoadSettings();
+            _detectionSettings = LoadSettings();
+            MLClient.UpdateSettings(_detectionSettings);
             SaveSettingsCommand = new RelayCommand((obj) => { SaveSettings(); }, (obj) => { return true; });
         }
 
@@ -105,9 +53,35 @@ namespace Clickless.MVVM.ViewModel
             return ObjectSerializer.LoadDataOrDefault<DetectionSettings>();
         }
 
+        private void CaptureBGExcludeForm()
+        {
+            Minimize();
+            MonitorUtilities.CaptureDesktopBitmap();
+            MLClient.GetBboxes(MonitorUtilities.CaptureDesktopBitmap());
+            Restore();
+        }
+
         private void SaveSettings()
-        {  
-            ObjectSerializer.SaveData(DetectionSettings, DetectionSettings.settingsFile);
+        {
+            //GetRects(MonitorUtilities.CaptureDesktopBitmap());
+            CaptureBGExcludeForm();
+            ResultImage = BitmapToImageSource( MLClient.GetEngineImagePasses()[0]);
+            ObjectSerializer.SaveData(_detectionSettings);
+        }
+
+        BitmapImage BitmapToImageSource(Bitmap bitmap)
+        {
+            using (MemoryStream memory = new MemoryStream())
+            {
+                bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                memory.Position = 0;
+                BitmapImage bitmapimage = new BitmapImage();
+                bitmapimage.BeginInit();
+                bitmapimage.StreamSource = memory;
+                bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapimage.EndInit();
+                return bitmapimage;
+            }
         }
     }
 }

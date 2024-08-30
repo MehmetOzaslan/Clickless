@@ -19,7 +19,11 @@ cbuffer Params : register(b0)
 	int m;
 	int epsilon;
 	int iterations;
-	int padding;
+	float edgeThreshold;
+	int padding1;
+	int padding2;
+	int padding3;
+	int padding4;
 };
 
 

@@ -21,6 +21,8 @@ namespace Clickless
             minimumRectArea = 20;
             minimumRectHeight = 5;
             minimumRectWidth = 5;
+            maximumAspectRatio = 500;
+            lowerEdgeDetectionThreshold = 0.001f;
         }
 
         public int m { get; set; }
@@ -31,5 +33,7 @@ namespace Clickless
         public int iterations { get; set; }
         public int cannythresh1 { get; set; }
         public int cannythresh2 { get; set; }
+        public int maximumAspectRatio { get; set; }
+        public float lowerEdgeDetectionThreshold {  get; set; }
     }
 }

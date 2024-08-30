@@ -28,31 +28,6 @@ namespace Clickless.MVVM.View
             InitializeComponent();
         }
 
-        BitmapImage BitmapToImageSource(Bitmap bitmap)
-        {
-            using (MemoryStream memory = new MemoryStream())
-            {
-                bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                memory.Position = 0;
-                BitmapImage bitmapimage = new BitmapImage();
-                bitmapimage.BeginInit();
-                bitmapimage.StreamSource = memory;
-                bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapimage.EndInit();
-                return bitmapimage;
-            }
-        }
-
-        // Event handler for the Update button
-        private void UpdateButton_Click(object sender, RoutedEventArgs e)
-        {
-            if( int.TryParse(DistanceInput.Text, out var distance) && int.TryParse(DensityInput.Text, out var density))
-            {
-                MLClient.UpdateSettings(new Clickless.DetectionSettings() { m = density, cannythresh1 = 100, cannythresh2 = 200, iterations = 100, epsilon = distance });
-
-                ResultImage.ImageSource = BitmapToImageSource(MLClient.GetEngineImagePasses()[0]);
-            }
-        }
 
         // Event handler to ensure only numeric input in the TextBoxes
         private void NumericOnly(object sender, TextCompositionEventArgs e)

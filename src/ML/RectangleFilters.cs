@@ -11,7 +11,7 @@ namespace Clickless
     public class RectangleFilters
     {
 
-        public static void RemoveSmallRectangles(List<Rectangle> rectangles, DetectionSettings detectionSettings)
+        public static void RemoveSmallRectangles(ref List<Rectangle> rectangles, DetectionSettings detectionSettings)
         {
             rectangles = rectangles.Where((rect) =>
             {
@@ -21,7 +21,16 @@ namespace Clickless
                     && rect.Height > detectionSettings.minimumRectHeight;
             }).ToList();
         }
-        public static void RemoveContainingRectangles(List<Rectangle> rectangles)
+
+        public static void RemoveRectanglesWithLargeAspectRatio(ref List<Rectangle> rectangles, DetectionSettings detectionSettings)
+        {
+            rectangles = rectangles.Where((rect) =>
+            {
+                return (rect.Width / rect.Height) < detectionSettings.maximumAspectRatio && (rect.Height / rect.Width) < detectionSettings.maximumAspectRatio;
+            }).ToList();
+        }
+
+        public static void RemoveContainingRectangles(ref List<Rectangle> rectangles)
         {
             var sortedRectangles = rectangles.OrderBy(r => r.Left).ToList();
 

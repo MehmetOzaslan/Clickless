@@ -13,8 +13,8 @@
                         <Border Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}" 
                                 BorderThickness="0"
-                                CornerRadius="3"  
-                            Padding="5">
+                                CornerRadius="2"  
+                            Padding="2">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
@@ -47,45 +47,120 @@
     <Grid>
         
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
 
         </Grid.ColumnDefinitions>
 
-        <Label Content="Density:" Grid.Row="0" Grid.Column="0" Margin="10" VerticalAlignment="Center" Foreground="White"/>
-        <TextBox x:Name="DensityInput" Grid.Row="0" Grid.Column="1" Margin="10" HorizontalAlignment="Left"  VerticalAlignment="Center" Width="50" 
-                 PreviewTextInput="NumericOnly" 
-                 IsEnabled="True"
-                 Foreground="White"
-                 Text="{Binding M}"
-                 BorderThickness="0"
-                 TextAlignment="Center"
-                 Background="#474465" />
+
+        <Border CornerRadius="5" BorderThickness="1" BorderBrush="#474465" Grid.Column="0" Margin="0">
+            
         
-        <Label Content="Distance:" Grid.Row="0" Grid.Column="2" Margin="10" VerticalAlignment="Center" Foreground="White"/>
-        
-        <TextBox x:Name="DistanceInput" Grid.Row="0" Grid.Column="3" Margin="10" HorizontalAlignment="Left" VerticalAlignment="Center" Width="50" 
-                 PreviewTextInput="NumericOnly"
-                 IsEnabled="True"
+        <StackPanel Orientation="Vertical" Grid.Column="0">
+
+            <Label Content="Density"  VerticalAlignment="Center" Foreground="White"/>
+            <TextBox x:Name="DistanceInput" HorizontalAlignment="Center"  VerticalAlignment="Center" Width="50" 
+                        PreviewTextInput="NumericOnly" 
+                        IsEnabled="True"
+                        Foreground="White"
+                        Text="{Binding DetectionSettings.m, UpdateSourceTrigger=PropertyChanged}"
+                        BorderThickness="0"
+                        TextAlignment="Center"
+                        Background="#474465" />
+                
+            <Label Content="Distance" VerticalAlignment="Center" Foreground="White"/>
+            <TextBox x:Name="DensityInput" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" 
+                     PreviewTextInput="NumericOnly"
+                     IsEnabled="True"
+                        Foreground="White"
+                     Text="{Binding  DetectionSettings.epsilon, UpdateSourceTrigger=PropertyChanged}"
+                     BorderThickness="0"
+                     TextAlignment="Center"
+                     Background="#474465"/>
+            
+            
+            <Label Content="Min Height" VerticalAlignment="Center" Foreground="White"/>
+            <TextBox x:Name="MinHeightInput" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" 
+                     PreviewTextInput="NumericOnly"
+                     IsEnabled="True"
+                        Foreground="White"
+                     Text="{Binding DetectionSettings.minimumRectHeight, UpdateSourceTrigger=PropertyChanged}"
+                     BorderThickness="0"
+                     TextAlignment="Center"
+                     Background="#474465"/>
+
+            <Label Content="Min Width" VerticalAlignment="Center" Foreground="White"/>
+            <TextBox x:Name="MinWidthInput" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" 
+                     PreviewTextInput="NumericOnly"
+                     IsEnabled="True"
+                        Foreground="White"
+                     Text="{Binding DetectionSettings.minimumRectWidth, UpdateSourceTrigger=PropertyChanged}"
+                     BorderThickness="0"
+                     TextAlignment="Center"
+                     Background="#474465"/>
+
+            <Label Content="Min Area" VerticalAlignment="Center" Foreground="White"/>
+            <TextBox x:Name="MinAreaInput" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" 
+                     PreviewTextInput="NumericOnly"
+                     IsEnabled="True"
+                        Foreground="White"
+                     Text="{Binding DetectionSettings.minimumRectArea, UpdateSourceTrigger=PropertyChanged}"
+                     BorderThickness="0"
+                     TextAlignment="Center"
+                     Background="#474465"/>
+
+
+            <Label Content="Iterations" VerticalAlignment="Center" Foreground="White"/>
+            <Slider Name="Iterations"
+            Width="100" Orientation="Horizontal" HorizontalAlignment="Left" 
+            Value="{Binding DetectionSettings.iterations}" Minimum="0" Maximum="100" 
+            SmallChange="1" LargeChange="1"
+            TickPlacement="None" TickFrequency="10"/>
+
+            <TextBox x:Name="Iteration" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" 
+            PreviewTextInput="NumericOnly"
+            IsEnabled="False"
+            Foreground="White"
+            Text="{Binding DetectionSettings.iterations, UpdateSourceTrigger=PropertyChanged}"
+            BorderThickness="0"
+            TextAlignment="Center"
+            Background="#474465"/>
+
+
+
+                <Label Content="Edge Thresh" VerticalAlignment="Center" Foreground="White"/>
+            <Slider Name="RectangleHeight"
+                Width="100" Orientation="Horizontal" HorizontalAlignment="Left" 
+                Value="{Binding DetectionSettings.lowerEdgeDetectionThreshold}" Minimum="0" Maximum="5" 
+                SmallChange="1" LargeChange="1"
+                TickPlacement="None" TickFrequency="10"/>
+
+            <TextBox x:Name="LowerEdgeDetectionThreshold" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" 
+                    PreviewTextInput="NumericOnly"
+                    IsEnabled="False"
                     Foreground="White"
-                 Text="{Binding  Epsilon}"
-                 BorderThickness="0"
-                 TextAlignment="Center"
-                 Background="#474465"/>
+                    Text="{Binding DetectionSettings.lowerEdgeDetectionThreshold, UpdateSourceTrigger=PropertyChanged}"
+                    BorderThickness="0"
+                    TextAlignment="Center"
+                    Background="#474465"/>
 
-        <Button Content="Update" Grid.Row="0" Grid.Column="4" Margin="10" VerticalAlignment="Center" Click="UpdateButton_Click"
-                Style="{StaticResource RoundedButton}" />
+           <Rectangle Height="2" Margin="5,5,5,0" Fill="White" />
 
-        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5">
+            <Button Content="Update" Margin="5" VerticalAlignment="Center" Command="{Binding SaveSettingsCommand}"
+                    Style="{StaticResource RoundedButton}" />
+            
+            
+        </StackPanel>
+
+        </Border>
+
+
+        <Border  Grid.Column="1" Grid.ColumnSpan="5">
             <Border.Background>
-                <ImageBrush x:Name="ResultImage" Stretch="Uniform"/>
+                <ImageBrush x:Name="ResultImageBrush" ImageSource="{Binding ResultImage}" Stretch="Uniform"/>
             </Border.Background>
         </Border>
 

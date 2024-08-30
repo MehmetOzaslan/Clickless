@@ -15,6 +15,7 @@
         ResizeMode="CanResizeWithGrip"
         Background="Transparent"
         AllowsTransparency="True"
+        WindowState="{Binding WindowState, Mode=TwoWay}"
         >
 
     <Window.DataContext>
@@ -39,7 +40,7 @@
                     MouseDown="DragArea_MouseDown"/>
 
             <StackPanel Grid.Column="1" Grid.Row="0"  Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="_" Width="30" Height="30" Click="MinimizeWindow" Foreground="White" Style="{StaticResource RoundedButton}"/>
+                <Button Content="_" Width="30" Height="30" Command="{Binding }" Foreground="White" Style="{StaticResource RoundedButton}"/>
                 <Button Content="☐" Width="30" Height="30" Click="MaximizeWindow" Foreground="White" Style="{StaticResource RoundedButton}"/>
                 <Button Content="X" Width="30" Height="30" Click="CloseWindow" Foreground="White" Style="{StaticResource RoundedButton}"/>
             </StackPanel>
@@ -50,7 +51,7 @@
                        FontSize="24"
                        Foreground="White"
                        Margin="20,0,0,0"/>
-
+            
             <StackPanel Grid.Row="1">
                 <RadioButton Content="Detection Settings"
                              Foreground="White"
@@ -65,8 +66,7 @@
                              Height="50"
                              FontSize="14"
                              Style="{StaticResource MenuButtonTheme}"
-                             Command="{Binding KeyboardSettingViewCommand}"
-                             >
+                             Command="{Binding KeyboardSettingViewCommand}">
                 </RadioButton>
             </StackPanel>
 

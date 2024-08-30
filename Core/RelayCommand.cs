@@ -12,15 +12,19 @@ namespace Clickless.Core
             add { CommandManager.RequerySuggested += value; }
             remove {  CommandManager.RequerySuggested -= value;}
         }
-        
+
         public RelayCommand(Action<object> execute, Func<object, bool> canExecute)
         {
             _execute = execute;
             _canExecute = canExecute;
         }
 
-        public bool CanExecute(object parameter)
-        {
+        public RelayCommand(Action<object> execute){
+            _execute = execute;
+            _canExecute = (o) => { return true; };
+        }
+
+        public bool CanExecute(object parameter){
             return _canExecute == null || _canExecute(parameter);
         }
 

@@ -26,7 +26,11 @@ namespace Clickless
         public int m;
         public int epsilon;
         public int iterations;
-        public int padding; //Necessary for the buffer
+        public float edgeDetectionThreshold;
+        public int padding1;
+        public int padding2;
+        public int padding3;
+        public int padding4;
     };
 
     // Data to and from the GPU
@@ -41,7 +45,7 @@ namespace Clickless
         public Dbscan.Point Point => new Dbscan.Point(X, Y);
     }
 
-    class ImageRectDetectComputeShader : ImageToRectEngine, IImagePassesProvider
+    class ImageRectDetectComputeShader : ImageToRectEngine
     {
 
         private Params shaderParams;
@@ -151,7 +155,7 @@ namespace Clickless
             return ret;
         }
 
-        public override IEnumerable<Rectangle> GetRects(Bitmap bitmap)
+        protected override IEnumerable<Rectangle> GenerateRects(Bitmap bitmap)
         {
             InitializeGPUParams();
             CopyCapturedBitmapToGPUTexture(bitmap);
@@ -164,10 +168,11 @@ namespace Clickless
 
             Dictionary<uint, List<BufferedPoint>> clusters = new Dictionary<uint, List<BufferedPoint>>();
             
-            //Some points marked as noise
+            //Remove points marked as noise
             int NOISE = 0;
-            int NOISE_PADDING = 10;
 
+            //Remove points on the edge of the monitor, labelled as such because of the convolution.
+            int NOISE_PADDING = 10;
 
             foreach (BufferedPoint point in points)
             {
@@ -179,15 +184,13 @@ namespace Clickless
             }
 
             List<Rectangle> rects = new List<Rectangle>();
-            foreach (var item in clusters)
-            {
+            foreach (var item in clusters){
                 var rect = GetClusterRect(item.Value);
                 rects.Add(rect);        
             }
 
             ResetCounterBuffer();
 
-            FilterRects(rects);
             return rects;
         }
 
@@ -199,9 +202,11 @@ namespace Clickless
             }
 
             shaderParams = new Params() { 
-                iterations = detectionSettings.iterations,
                 m = detectionSettings.m,
-                epsilon = detectionSettings.epsilon };
+                epsilon = detectionSettings.epsilon,
+                iterations = detectionSettings.iterations,
+                edgeDetectionThreshold = detectionSettings.lowerEdgeDetectionThreshold
+            };
 
             paramBuffer = BufferCreate.InitializeConstantBuffer<Params>(device)
                                         .SetConstantBufferData(shaderParams, context)
@@ -277,11 +282,18 @@ namespace Clickless
         private void SquashBuffer()
         {
             bufferSize = GetDetectionCount();
-            outputBuffer = BufferCreate.ResizeBuffer<BufferedPoint>(device, context, outputBuffer, bufferSize);
+            if (bufferSize > 0) { 
+                outputBuffer = BufferCreate.ResizeBuffer<BufferedPoint>(device, context, outputBuffer, bufferSize);
+            }
         }
 
         BufferedPoint[] GetPointBuffer()
         {
+            if(bufferSize == 0)
+            {
+                return Array.Empty<BufferedPoint>();
+            }
+
             var stagingBuffer = BufferCreate.InitializeStagingBuffer<BufferedPoint>(device, bufferSize)
                                             .CopyFrom(outputBuffer, context)
                                             .GetBuffer();
@@ -324,17 +336,11 @@ namespace Clickless
             }
         }
 
-        public override Bitmap[] GetImagePasses()
+        protected override Bitmap[] GetImagePasses()
         {
             Bitmap[] ret = new Bitmap[1];
-
-            var rects = GetRects(MonitorUtilities.CaptureDesktopBitmap());
             TextureCreate.CopyToBitmap(device, outputTexture, out Bitmap result);
-            ApplyRectResultToBmp(rects.ToList(), result);
-
             ret[0] = result;
-                
-
             return ret;
         }
     }

@@ -1,10 +1,5 @@
 ﻿using Clickless.Core;
-using Clickless.MVVM.View;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 
 namespace Clickless.MVVM.ViewModel
 {
@@ -12,13 +7,13 @@ namespace Clickless.MVVM.ViewModel
     {
 		public DetectionSettingsViewModel DetectionSettingsVM { get; set; }
         public KeyboardSettingsViewModel KeyboardSettingsVM{ get; set; }
-
-
         public RelayCommand DetectionSettingViewCommand { get; set; }
-
 		public RelayCommand KeyboardSettingViewCommand { get; set; }
-
-		private object _currentView;
+        public RelayCommand RestoreWindowCommand { get; set; }
+        public RelayCommand MinimizeWindowCommand { get; set; }
+        public RelayCommand MaximizeWindowCommand { get; set; }
+        public WindowState WindowState { get; set; }
+        private object _currentView;
 		public object CurrentView
 		{
 			get { return _currentView; }
@@ -33,11 +28,24 @@ namespace Clickless.MVVM.ViewModel
             DetectionSettingsVM = new DetectionSettingsViewModel();
             KeyboardSettingsVM = new KeyboardSettingsViewModel();
             CurrentView = DetectionSettingsVM;
-
-			DetectionSettingViewCommand = new RelayCommand( (o) => { CurrentView = DetectionSettingsVM; }, (o) => { return true; });
-            KeyboardSettingViewCommand = new RelayCommand((o) => { CurrentView = KeyboardSettingsVM; }, (o) => { return true; });
-
-
+			DetectionSettingViewCommand = new RelayCommand( (o) => { CurrentView = DetectionSettingsVM; });
+            KeyboardSettingViewCommand = new RelayCommand((o) => { CurrentView = KeyboardSettingsVM;  });
+            RestoreWindowCommand = new RelayCommand((o) => { RestoreWindow(); });
+            MinimizeWindowCommand = new RelayCommand((o) => { MinimizeWindow(); });
+            MaximizeWindowCommand = new RelayCommand((o) => { MaximizeWindow(); });
+        }
+        
+        public void MinimizeWindow(){
+            WindowState = WindowState.Minimized;
+        }
+        public void MaximizeWindow(){
+            WindowState = WindowState.Maximized;
+        }
+        public void RestoreWindow(){
+            if (WindowState == WindowState.Minimized)
+            {
+                WindowState = WindowState.Normal;
+            }
         }
 
     }

@@ -1,15 +1,17 @@
 Texture2D<float> inputTexture : register(t0);
 
-
 //Constants
 cbuffer Params : register(b0)
 {
     int m;
     int epsilon;
     int iterations;
-    int padding;
+    float edgeThreshold;
+    int padding1;
+    int padding2;
+    int padding3;
+    int padding4;
 };
-
 
 struct BufferedPoint
 {
@@ -23,12 +25,8 @@ RWStructuredBuffer<BufferedPoint> OutputBuffer : register(u0);
 
 //For the dbscan
 RWTexture2D<int2> OutputTexture : register(u2);
-
-
 RWStructuredBuffer<uint> OutputCounter : register(u1);
-
 SamplerState samplerState : register(s0);
-
 
 [numthreads(16, 16, 1)]
 void CSMain(uint3 DTid : SV_DispatchThreadID)
@@ -59,10 +57,10 @@ void CSMain(uint3 DTid : SV_DispatchThreadID)
             color_y += sample * sobel_y[y + 1][x + 1];
         }
     }
-
+    
     float color = color_x * color_x + color_y * color_y;
-
-    if (color > 0.001)
+    int color_thresh = int(color_x * color_x + color_y * color_y);
+    if (color_thresh > edgeThreshold)
     {
         // Atomically increment the counter and get the index to store the pixel coordinates
         uint index = 0;

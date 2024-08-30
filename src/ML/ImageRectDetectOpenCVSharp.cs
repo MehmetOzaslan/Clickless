@@ -56,12 +56,12 @@ namespace Clickless
             return new MatEnumerable(edges);
         }
 
-        public override Bitmap[] GetImagePasses()
+        protected override Bitmap[] GetImagePasses()
         {
             return null;
         }
 
-        public override IEnumerable<Rectangle> GetRects(Bitmap bitmap)
+        protected override IEnumerable<Rectangle> GenerateRects(Bitmap bitmap)
         {
             var edgeEnumerator = GetEdges(bitmap);
 
@@ -76,8 +76,6 @@ namespace Clickless
             {
                 rects.Add(GetClusterRect(item.Objects));
             }
-
-            FilterRects(rects);
 
             return rects;
         }
