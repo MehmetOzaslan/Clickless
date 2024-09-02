@@ -7,7 +7,7 @@ cbuffer Params : register(b0)
     int epsilon;
     int iterations;
     float edgeThreshold;
-    int padding1;
+    float colorThreshold;
     int padding2;
     int padding3;
     int padding4;

@@ -23,6 +23,7 @@ namespace Clickless
             minimumRectWidth = 5;
             maximumAspectRatio = 500;
             lowerEdgeDetectionThreshold = 0.001f;
+            colorClusteringThreshold = 0.001f;
         }
 
         public int m { get; set; }
@@ -35,5 +36,6 @@ namespace Clickless
         public int cannythresh2 { get; set; }
         public int maximumAspectRatio { get; set; }
         public float lowerEdgeDetectionThreshold {  get; set; }
+        public float colorClusteringThreshold { get; set; }
     }
 }

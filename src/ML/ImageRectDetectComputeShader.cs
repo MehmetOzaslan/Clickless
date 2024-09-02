@@ -27,7 +27,7 @@ namespace Clickless
         public int epsilon;
         public int iterations;
         public float edgeDetectionThreshold;
-        public int padding1;
+        public float colorClusteringThreshold;
         public int padding2;
         public int padding3;
         public int padding4;
@@ -95,10 +95,12 @@ namespace Clickless
 
         private void RunSobelPass()
         {
+
             context.ComputeShader.Set(sobelShader);
 
             outputBuffer = GetOutputBuffer();
             outputCounter = GetCounterBuffer();
+            inputTextureSRV?.Dispose();
             inputTextureSRV = new ShaderResourceView(device, inputTexture);
             context.ComputeShader.SetShaderResource(0, inputTextureSRV);
             context.ComputeShader.SetUnorderedAccessView(0, outputBufferUAV);
@@ -124,6 +126,10 @@ namespace Clickless
             outputBufferUAV?.Dispose();
             outputBufferUAV = new UnorderedAccessView(device, outputBuffer);
 
+            inputTextureSRV?.Dispose();
+            inputTextureSRV = new ShaderResourceView(device, inputTexture);
+
+            context.ComputeShader.SetShaderResource(0, inputTextureSRV);
             context.ComputeShader.SetUnorderedAccessView(0, outputBufferUAV);
             context.ComputeShader.SetUnorderedAccessView(1, outputCounterUAV);
             context.ComputeShader.SetUnorderedAccessView(2, outputTextureUAV);
@@ -205,7 +211,8 @@ namespace Clickless
                 m = detectionSettings.m,
                 epsilon = detectionSettings.epsilon,
                 iterations = detectionSettings.iterations,
-                edgeDetectionThreshold = detectionSettings.lowerEdgeDetectionThreshold
+                edgeDetectionThreshold = detectionSettings.lowerEdgeDetectionThreshold,
+                colorClusteringThreshold = detectionSettings.colorClusteringThreshold
             };
 
             paramBuffer = BufferCreate.InitializeConstantBuffer<Params>(device)

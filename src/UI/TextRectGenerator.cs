@@ -10,6 +10,8 @@ namespace Clickless
     /// Zips rects and commands together.
     /// </summary>
     /// 
+
+
     public class TextRectGenerator
     {
         public static List<TextRect> GenerateBoxesFromRects(List<Rectangle> rects)

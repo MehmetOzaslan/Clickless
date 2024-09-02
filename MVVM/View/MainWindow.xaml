@@ -40,17 +40,27 @@
                     MouseDown="DragArea_MouseDown"/>
 
             <StackPanel Grid.Column="1" Grid.Row="0"  Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="_" Width="30" Height="30" Command="{Binding }" Foreground="White" Style="{StaticResource RoundedButton}"/>
+                <Button Content="_" Width="30" Height="30" Click="MinimizeWindow" Foreground="White" Style="{StaticResource RoundedButton}"/>
                 <Button Content="☐" Width="30" Height="30" Click="MaximizeWindow" Foreground="White" Style="{StaticResource RoundedButton}"/>
                 <Button Content="X" Width="30" Height="30" Click="CloseWindow" Foreground="White" Style="{StaticResource RoundedButton}"/>
             </StackPanel>
 
-            <TextBlock Text="Clickless" 
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Left"
-                       FontSize="24"
-                       Foreground="White"
-                       Margin="20,0,0,0"/>
+
+            <StackPanel Orientation="Horizontal">
+
+                <Border Background="#8a86ae" Width="50" Height="50" CornerRadius="10" Margin="20,0,0,0">
+                    <Image Source="/Clickless;component/Resources/Images/clicklessIcon.png" Width="50" Height="50"
+                           />
+                </Border>
+
+                <TextBlock Text="Clickless" 
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"
+                           FontSize="24"
+                           Foreground="White"
+                           Margin="20,0,20,0"/>
+
+            </StackPanel>
             
             <StackPanel Grid.Row="1">
                 <RadioButton Content="Detection Settings"
@@ -68,7 +78,16 @@
                              Style="{StaticResource MenuButtonTheme}"
                              Command="{Binding KeyboardSettingViewCommand}">
                 </RadioButton>
+                <RadioButton Grid.Row="1" Content="Help"
+                                 Foreground="White"
+                                 Height="50"
+                                 FontSize="14"
+                                 Style="{StaticResource MenuButtonTheme}"
+                                 Command="{Binding HelpVMViewCommand}"
+                                 VerticalAlignment="Bottom">
+                </RadioButton>
             </StackPanel>
+            
 
             <ContentControl Grid.Row="1" Grid.Column="1" Margin="10"
                             Content="{Binding CurrentView}"/>

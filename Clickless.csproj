@@ -12,6 +12,8 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <ApplicationIcon>Resources\Images\clicklessIcon.ico</ApplicationIcon>
+    <PackageIcon>clicklessIcon.png</PackageIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -36,6 +38,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Images\clicklessIcon.png" />
     <None Remove="Resources\Images\EntireKeyboard.png" />
     <None Remove="Resources\Images\EntireKeyboard.svg" />
     <None Remove="Resources\Images\LeftKeyboardOnly.png" />
@@ -89,6 +92,9 @@
 
 
   <ItemGroup>
+    <Resource Include="Resources\Images\clicklessIcon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Content Include="Resources\DBScan.hlsl" />
     <Content Include="Resources\SobelFilter.hlsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -104,6 +110,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\Images\clicklessIcon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\Images\EntireKeyboard.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>

@@ -116,7 +116,7 @@
             <Label Content="Iterations" VerticalAlignment="Center" Foreground="White"/>
             <Slider Name="Iterations"
             Width="100" Orientation="Horizontal" HorizontalAlignment="Left" 
-            Value="{Binding DetectionSettings.iterations}" Minimum="0" Maximum="100" 
+            Value="{Binding DetectionSettings.iterations}" Minimum="1" Maximum="200" 
             SmallChange="1" LargeChange="1"
             TickPlacement="None" TickFrequency="10"/>
 
@@ -129,9 +129,7 @@
             TextAlignment="Center"
             Background="#474465"/>
 
-
-
-                <Label Content="Edge Thresh" VerticalAlignment="Center" Foreground="White"/>
+            <Label Content="Edge Thresh" VerticalAlignment="Center" Foreground="White"/>
             <Slider Name="RectangleHeight"
                 Width="100" Orientation="Horizontal" HorizontalAlignment="Left" 
                 Value="{Binding DetectionSettings.lowerEdgeDetectionThreshold}" Minimum="0" Maximum="5" 
@@ -147,9 +145,28 @@
                     TextAlignment="Center"
                     Background="#474465"/>
 
-           <Rectangle Height="2" Margin="5,5,5,0" Fill="White" />
 
-            <Button Content="Update" Margin="5" VerticalAlignment="Center" Command="{Binding SaveSettingsCommand}"
+
+            <Label Content="Color Threshold" VerticalAlignment="Center" Foreground="White"/>
+            <Slider Name="ColorThreshold"
+            Width="100" Orientation="Horizontal" HorizontalAlignment="Left" 
+            Value="{Binding DetectionSettings.colorClusteringThreshold}" Minimum="0" Maximum="1" 
+            SmallChange="0.01" LargeChange="0.1"
+            TickPlacement="None"/>
+
+            <TextBox x:Name="ColorThresholdInput" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" 
+            PreviewTextInput="NumericOnly"
+            IsEnabled="False"
+            Foreground="White"
+            Text="{Binding DetectionSettings.colorClusteringThreshold, UpdateSourceTrigger=PropertyChanged}"
+            BorderThickness="0"
+            TextAlignment="Center"
+            Background="#474465"/>
+
+
+            <Rectangle Height="2" Margin="5,5,5,0" Fill="White"/>
+
+           <Button Content="Update" Margin="5" VerticalAlignment="Center" Command="{Binding SaveSettingsCommand}"
                     Style="{StaticResource RoundedButton}" />
             
             

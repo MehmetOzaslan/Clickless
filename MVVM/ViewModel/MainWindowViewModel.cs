@@ -7,6 +7,8 @@ namespace Clickless.MVVM.ViewModel
     {
 		public DetectionSettingsViewModel DetectionSettingsVM { get; set; }
         public KeyboardSettingsViewModel KeyboardSettingsVM{ get; set; }
+        public HelpViewModel HelpVM { get; set; }
+        public RelayCommand HelpVMViewCommand {  get; set; }
         public RelayCommand DetectionSettingViewCommand { get; set; }
 		public RelayCommand KeyboardSettingViewCommand { get; set; }
         public RelayCommand RestoreWindowCommand { get; set; }
@@ -27,9 +29,12 @@ namespace Clickless.MVVM.ViewModel
 		{
             DetectionSettingsVM = new DetectionSettingsViewModel();
             KeyboardSettingsVM = new KeyboardSettingsViewModel();
+            HelpVM = new HelpViewModel();  
             CurrentView = DetectionSettingsVM;
 			DetectionSettingViewCommand = new RelayCommand( (o) => { CurrentView = DetectionSettingsVM; });
             KeyboardSettingViewCommand = new RelayCommand((o) => { CurrentView = KeyboardSettingsVM;  });
+            HelpVMViewCommand = new RelayCommand((o) => { CurrentView = HelpVM; });
+
             RestoreWindowCommand = new RelayCommand((o) => { RestoreWindow(); });
             MinimizeWindowCommand = new RelayCommand((o) => { MinimizeWindow(); });
             MaximizeWindowCommand = new RelayCommand((o) => { MaximizeWindow(); });
