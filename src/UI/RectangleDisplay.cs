@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Clickless;
 
-public class TransparentForm : Form
+public class RectangleDisplay : Form
 {
-    public TransparentForm()
+    public RectangleDisplay()
     {
         this.BackColor = new Color();
         this.FormBorderStyle = FormBorderStyle.None;
