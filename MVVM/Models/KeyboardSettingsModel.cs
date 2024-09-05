@@ -13,13 +13,11 @@ namespace Clickless.MVVM.Models
         RIGHT = 3,
         CUSTOM = 4
     }
+
     public class KeyboardSettingsModel : IFileNameProvider
     {
         public static readonly string settingsFile = "keyboardsettings.json";
-
-
-        public KeyboardSettingsModel() { chosenSetting = KeyboardSpan.ALL;  }
-
+        public KeyboardSettingsModel() { chosenSetting = KeyboardSpan.LEFT;  }
         public KeyboardSpan chosenSetting {  get; set; }
 
         public string GetFileName()

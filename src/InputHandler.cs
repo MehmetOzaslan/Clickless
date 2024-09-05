@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Automation;
 using System.Windows.Forms;
 
 namespace Clickless
 {
+
     public class InputHandler
     {
-        IRectEngine _rectEngine;
         private RectangleDisplay transparentForm = new RectangleDisplay();
         string pattern_typed = "";
         enum States { FORM_CLOSED, FORM_OPEN, WAITING_SEARCH }
@@ -23,7 +24,6 @@ namespace Clickless
         public InputHandler()
         {
             //Initialize _rectEngine, defaulting to the mlclient for now.
-            _rectEngine = new GridClient();
 
             Commands = new Dictionary<HashSet<Keys>, Action>(new KeySetComparer());
 
@@ -43,8 +43,8 @@ namespace Clickless
                     if (state == States.FORM_OPEN)
                     {
                         Console.WriteLine("Closing Window");
-                        pattern_typed = "";
                         CloseWindow();
+                        ResetPattern();
                         state = States.FORM_CLOSED;
                     }
                 });
@@ -70,6 +70,9 @@ namespace Clickless
             return;
         }
 
+
+        int curRecursionCount = GridClient.gridSettings.recursionCount;
+
         private async void UpdateRects()
         {
             //Update the rects on the display
@@ -81,12 +84,41 @@ namespace Clickless
             {
                 case 0:
                     CloseWindow();
+                    ResetPattern();
                     break;
                 case 1:
-                    //Used to avoid inputting keyboard command, due to it not being captured for some reason.
-                    await Task.Delay(20);
-                    CloseWindow();
-                    MouseUtilities.ClickAtRectCenter(rects.First().Rectangle);
+                    ResetPattern();
+
+                    var chosenRect = rects.First().Rectangle;
+
+                    //TODO: Rip this out. NOT a pattern I want in my codebase.
+                    if (ClientHandler.GetEngine() is GridClient)
+                    {
+                        curRecursionCount -= 1;
+                        var GridClient = ClientHandler.GetEngine() as GridClient;
+
+                        if (curRecursionCount <= 0)
+                        {
+                            //Used to avoid inputting keyboard command, due to it not being captured for some reason.
+                            await Task.Delay(20);
+                            CloseWindow();
+                            MouseUtilities.ClickAtRectCenter(chosenRect);
+                            curRecursionCount = GridClient.gridSettings.recursionCount;
+                        }
+                        else
+                        {
+                            var recursedRects = await GridClient.GenerateRects(chosenRect);
+                            transparentForm.SetRects(recursedRects);
+                        }
+                    }
+                    else
+                    {
+                        await Task.Delay(20);
+                        CloseWindow();
+                        MouseUtilities.ClickAtRectCenter(chosenRect);
+                        curRecursionCount = GridClient.gridSettings.recursionCount;
+                    }
+
                     break;
                 default:
                     transparentForm.Rects = rects;
@@ -108,10 +140,15 @@ namespace Clickless
 
         public async Task RunRectGenerationAndDisplayWindow()
         {
-            var rectsTask = _rectEngine.GenerateRects();
+            var rectsTask = ClientHandler.GetEngine().GenerateRects();
             transparentForm = new RectangleDisplay();
             transparentForm.Show();
             transparentForm.SetRects(await rectsTask);
+        }
+
+        public void ResetPattern()
+        {
+            pattern_typed = "";
         }
 
         public void CloseWindow()
@@ -123,7 +160,6 @@ namespace Clickless
                 });
                 state = States.FORM_CLOSED;
             }
-            pattern_typed = "";
         }
     }
 }

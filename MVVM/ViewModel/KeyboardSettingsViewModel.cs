@@ -44,15 +44,36 @@ namespace Clickless.MVVM.ViewModel
                 {
                     _selectedSpan = value;
                     keyboardSettingsModel.chosenSetting = value;
+                    UpdateCharsetFromChosenSetting();
                     SaveSettings();
                     OnPropertyChanged();
                 }
             }
         }
 
+        public void UpdateCharsetFromChosenSetting()
+        {
+            switch (_selectedSpan)
+            {
+                case KeyboardSpan.LEFT:
+                    CommandGenerator.SetCharset(CommandGenerator.lhsChars);
+                    break;
+                case KeyboardSpan.ALL:
+                    CommandGenerator.SetCharset(CommandGenerator.allChars);
+                    break;
+                case KeyboardSpan.RIGHT:
+                    CommandGenerator.SetCharset(CommandGenerator.rhsChars);
+                    break;
+                case KeyboardSpan.CUSTOM:
+                    break;
+            }
+        }
+
+
         public KeyboardSettingsViewModel()
         {
             keyboardSettingsModel = LoadSettings();
+            
             SelectedSpan = keyboardSettingsModel.chosenSetting;
         }
 

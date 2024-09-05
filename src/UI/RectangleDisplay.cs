@@ -8,8 +8,10 @@ using Clickless;
 
 public class RectangleDisplay : Form
 {
+    private string procName;
     public RectangleDisplay()
     {
+        this.procName = Process.GetCurrentProcess().ProcessName;
         this.BackColor = new Color();
         this.FormBorderStyle = FormBorderStyle.None;
         this.TransparencyKey = this.BackColor;
@@ -19,34 +21,17 @@ public class RectangleDisplay : Form
         this.LostFocus += new EventHandler((sender, e) => { ToFront(); } );
     }
 
-
-    [DllImport("user32.dll")]
-    public static extern bool ShowWindowAsync(HandleRef hWnd, int nCmdShow);
-    [DllImport("user32.dll")]
-    public static extern bool SetForegroundWindow(IntPtr WindowHandle);
-    public const int SW_RESTORE = 9;
-    private void FocusProcess(string procName)
-    {
-        Process[] objProcesses = System.Diagnostics.Process.GetProcessesByName(procName);
-        if (objProcesses.Length > 0)
-        {
-            IntPtr hWnd = IntPtr.Zero;
-            hWnd = objProcesses[0].MainWindowHandle;
-            ShowWindowAsync(new HandleRef(null, hWnd), SW_RESTORE);
-            SetForegroundWindow(objProcesses[0].MainWindowHandle);
-        }
-    }
-
     private void ToFront()
     {
         this.WindowState = FormWindowState.Minimized;
         this.Show();
         this.WindowState = FormWindowState.Normal;
         this.BringToFront();
+        //FocusProcess(procName);
     }
 
     private List<TextRect> rects = new List<TextRect> { };
-
+    
     public List<TextRect> Rects { get => rects; set { rects = value;  this.Invalidate(); } }
 
     public void SetRects(List<Rectangle> rects)
