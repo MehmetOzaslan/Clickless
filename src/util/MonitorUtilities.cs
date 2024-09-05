@@ -50,6 +50,30 @@ namespace Clickless
             return outList;
         }
 
+        public static List<Rectangle> ObtainRectGrid(int margins = 0, int spacing = 30)
+        {
+            int width = SystemInformation.VirtualScreen.Width;
+            int height = SystemInformation.VirtualScreen.Height;
+            int numRow = (width - margins * 2) / spacing;
+            int numCol = (height - margins * 2) / spacing;
+            List<Rectangle> outList = new List<Rectangle>();
+
+            float dx = 1.0f / numRow;
+            float dy = 1.0f / numCol;
+
+            //i and j are bound between 0 and 1, representing the % position on the screen.
+            for (float i = 0; i <= 1; i += dx)
+            {
+                for (float j = 0; j <= 1; j += dy)
+                {
+                    float x = MathUtilities.Lerp(margins, width - margins, i);
+                    float y = MathUtilities.Lerp(margins, height - margins, j);
+                    outList.Add(new Rectangle((int)(x), (int)(y), spacing, spacing));
+                }
+            }
+            return outList;
+        }
+
         public static List<MathUtilities.Vector2> ObtainGrid(RECT rect, int margins = 30, int spacing = 30)
         {
             int width = Math.Abs(rect.Left-rect.Right);

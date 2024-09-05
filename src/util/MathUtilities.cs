@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace Clickless
 {
@@ -46,8 +47,12 @@ namespace Clickless
 
                 points[i] = new Vector2(x,y);
             }
-
             return points;
+        }
+
+        public static Rectangle GenerateRectFromPoint(Vector2 point, int h, int w)
+        {
+            return new Rectangle((int)(point.x - w / 2), (int)(point.y - h / 2), h, w);
         }
 
     }

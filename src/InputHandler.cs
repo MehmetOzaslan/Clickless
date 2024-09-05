@@ -23,7 +23,7 @@ namespace Clickless
         public InputHandler()
         {
             //Initialize _rectEngine, defaulting to the mlclient for now.
-            _rectEngine = MLClient.Instance;
+            _rectEngine = new GridClient();
 
             Commands = new Dictionary<HashSet<Keys>, Action>(new KeySetComparer());
 
