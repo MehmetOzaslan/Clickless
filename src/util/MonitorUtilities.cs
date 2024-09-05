@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
-using Clickless;
 
 namespace Clickless
 {
@@ -101,6 +100,8 @@ namespace Clickless
             int screenTop = SystemInformation.VirtualScreen.Top;
             int screenWidth = SystemInformation.VirtualScreen.Width;
             int screenHeight = SystemInformation.VirtualScreen.Height;
+
+
 
             // Create a bitmap of the appropriate size to receive the full-screen screenshot.
             var bitmap = new Bitmap(screenWidth, screenHeight);

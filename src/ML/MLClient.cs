@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace Clickless
 {
-    public class MLClient
+    public class MLClient : IRectEngine
     {
         ImageToRectEngine Engine;
 
@@ -35,6 +35,14 @@ namespace Clickless
             }
         }
 
+        public async Task<List<Rectangle>> GenerateRects()
+        {
+            Bitmap img = MonitorUtilities.CaptureDesktopBitmap();
+            var bboxes = await Task.Run(() => GetBboxes(img));
+            img.Dispose();
+            return bboxes;
+        }
+
         public static void UpdateSettings(DetectionSettings settings)
         {
             Instance.Engine.SetDetectionSettings(settings);
@@ -50,5 +58,7 @@ namespace Clickless
         {
             return Instance.Engine.GetImagePasses();
         }
+
+
     }
 }

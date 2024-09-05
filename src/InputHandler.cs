@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Automation;
 using System.Windows.Forms;
 
 namespace Clickless
 {
     public class InputHandler
     {
-        private TransparentForm transparentForm = new TransparentForm();
+        IRectEngine _rectEngine;
+        private RectangleDisplay transparentForm = new RectangleDisplay();
         string pattern_typed = "";
-
         enum States { FORM_CLOSED, FORM_OPEN, WAITING_SEARCH }
-
         private States state = States.FORM_CLOSED;
-
         Dictionary<HashSet<Keys>, Action> Commands;
-
-
         public void AddCommand(Keys[] keys, Action action)
         {
             Commands[keys.ToHashSet()] = action; 
         }
         public InputHandler()
         {
+            //Initialize _rectEngine, defaulting to the mlclient for now.
+            _rectEngine = MLClient.Instance;
+
             Commands = new Dictionary<HashSet<Keys>, Action>(new KeySetComparer());
 
             //Search Command (WIN+SHIFT+S)
@@ -33,7 +33,7 @@ namespace Clickless
                 {
                     state = States.FORM_OPEN;
                     Console.WriteLine("Creating Window");
-                    Task task = RunMLandDisplayWindow();
+                    Task task = RunRectGenerationAndDisplayWindow();
                     await task;
                 }
             });
@@ -83,11 +83,10 @@ namespace Clickless
                     CloseWindow();
                     break;
                 case 1:
-                    
                     //Used to avoid inputting keyboard command, due to it not being captured for some reason.
                     await Task.Delay(20);
                     CloseWindow();
-                    ClickRect(rects.First().Rectangle);
+                    MouseUtilities.ClickAtRectCenter(rects.First().Rectangle);
                     break;
                 default:
                     transparentForm.Rects = rects;
@@ -107,25 +106,12 @@ namespace Clickless
             }
         }
 
-        private async Task<List<TextRect>> RunML()
+        public async Task RunRectGenerationAndDisplayWindow()
         {
-            Bitmap img = MonitorUtilities.CaptureDesktopBitmap();
-            var bboxes = await Task.Run(() => MLClient.GetBboxes(img));
-            var rects = TextRectGenerator.GenerateBoxesFromRects(bboxes);
-            img.Dispose();
-            return rects;
-        }
-
-        public async Task RunMLandDisplayWindow()
-        {
-            var rectsTask = RunML();
-
-            transparentForm = new TransparentForm();
+            var rectsTask = _rectEngine.GenerateRects();
+            transparentForm = new RectangleDisplay();
             transparentForm.Show();
-
-            var rects = await rectsTask;
-            transparentForm.Rects = rects;
-            state = States.FORM_OPEN;
+            transparentForm.SetRects(await rectsTask);
         }
 
         public void CloseWindow()
@@ -138,14 +124,6 @@ namespace Clickless
                 state = States.FORM_CLOSED;
             }
             pattern_typed = "";
-        }
-
-        public void ClickRect(Rectangle rect_selected)
-        {
-            if(rect_selected != null)
-            {
-                MouseUtilities.ClickAtRectCenter(rect_selected);
-            }
         }
     }
 }

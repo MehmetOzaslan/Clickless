@@ -16,7 +16,7 @@ public class RectangleDisplay : Form
         this.Bounds = Screen.PrimaryScreen.Bounds;
         this.TopMost = true;
         this.DoubleBuffered = true;
-        this.LostFocus += new EventHandler((sender, e) => { toFront(); } );
+        this.LostFocus += new EventHandler((sender, e) => { ToFront(); } );
     }
 
 
@@ -37,7 +37,7 @@ public class RectangleDisplay : Form
         }
     }
 
-    private void toFront()
+    private void ToFront()
     {
         this.WindowState = FormWindowState.Minimized;
         this.Show();
@@ -48,6 +48,18 @@ public class RectangleDisplay : Form
     private List<TextRect> rects = new List<TextRect> { };
 
     public List<TextRect> Rects { get => rects; set { rects = value;  this.Invalidate(); } }
+
+    public void SetRects(List<Rectangle> rects)
+    {
+        SetRects(TextRectGenerator.GenerateBoxesFromRects(rects));
+    }
+
+    public void SetRects(List<TextRect> rects)
+    {
+        this.rects = rects;
+        Invalidate();
+    }
+
 
     protected override void OnPaint(PaintEventArgs e)
     {

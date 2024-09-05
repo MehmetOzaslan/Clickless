@@ -132,7 +132,7 @@ namespace NUnit.Tests
             Console.WriteLine("Rcvd " + result);
             var rects = TextRectGenerator.GenerateBoxesFromResponse(result);
 
-            var form = new TransparentForm();
+            var form = new RectangleDisplay();
             form.Rects = rects;
             Application.EnableVisualStyles();
             Application.Run(form);
@@ -164,7 +164,7 @@ namespace NUnit.Tests
         public async Task TestKeyMatcher()
         {
             var matcher = new InputHandler();
-            matcher.RunMLandDisplayWindow();
+            matcher.RunRectGenerationAndDisplayWindow();
         }
 
 
