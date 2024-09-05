@@ -41,8 +41,10 @@
     <None Remove="Resources\Images\clicklessIcon.png" />
     <None Remove="Resources\Images\EntireKeyboard.png" />
     <None Remove="Resources\Images\EntireKeyboard.svg" />
+    <None Remove="Resources\Images\GridClient.png" />
     <None Remove="Resources\Images\LeftKeyboardOnly.png" />
     <None Remove="Resources\Images\LeftKeyboardOnly.svg" />
+    <None Remove="Resources\Images\MLClient.png" />
     <None Remove="Resources\Images\RightKeyboardOnly.png" />
     <None Remove="Resources\Images\RightKeyboardOnly.svg" />
   </ItemGroup>
@@ -121,10 +123,16 @@
     <Resource Include="Resources\Images\EntireKeyboard.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\Images\GridClient.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\Images\LeftKeyboardOnly.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Images\LeftKeyboardOnly.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\MLClient.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Images\RightKeyboardOnly.png">
