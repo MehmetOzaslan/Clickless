@@ -19,9 +19,16 @@
                 <view:KeyboardSettings/>
             </DataTemplate>
 
-
             <DataTemplate DataType="{x:Type viewModel:HelpViewModel}">
                 <view:Help/>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModel:SelectedClientSettingsViewModel}">
+                <view:SelectedClientSettings/>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModel:GridSettingsViewModel}">
+                <view:GridSettings/>
             </DataTemplate>
 
 

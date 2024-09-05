@@ -26,6 +26,8 @@ namespace Clickless.MVVM.ViewModel
                 SaveSettings();
             }
         }
+
+        //TODO: Get the right windowstate.
         public WindowState WindowState {  get; set; }
 
         private void Minimize()

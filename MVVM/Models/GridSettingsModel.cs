@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PropertyChanged;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Clickless.MVVM.Models
 {
+    [AddINotifyPropertyChangedInterface]
     public class GridSettingsModel : IFileNameProvider
     {
         public static readonly string settingsFile = "gridsettings.json";

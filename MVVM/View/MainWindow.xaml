@@ -63,6 +63,16 @@
             </StackPanel>
             
             <StackPanel Grid.Row="1">
+
+                <RadioButton Grid.Row="1" Content="Mode"
+                                 Foreground="White"
+                                 Height="50"
+                                 FontSize="14"
+                                 Style="{StaticResource MenuButtonTheme}"
+                                 Command="{Binding SelectedClientViewCommand}"
+                                 VerticalAlignment="Bottom">
+                </RadioButton>
+
                 <RadioButton Content="Detection Settings"
                              Foreground="White"
                              Height="50"
@@ -71,6 +81,17 @@
                              Command="{Binding DetectionSettingViewCommand}"
                              IsChecked="True">
                 </RadioButton>
+
+                <RadioButton Grid.Row="1" Content="Grid Settings"
+                                 Foreground="White"
+                                 Height="50"
+                                 FontSize="14"
+                                 Style="{StaticResource MenuButtonTheme}"
+                                 Command="{Binding GridSettingsViewCommand}"
+                                 VerticalAlignment="Bottom">
+                </RadioButton>
+
+
                 <RadioButton Content="Keyboard Settings"
                              Foreground="White"
                              Height="50"
@@ -78,6 +99,7 @@
                              Style="{StaticResource MenuButtonTheme}"
                              Command="{Binding KeyboardSettingViewCommand}">
                 </RadioButton>
+
                 <RadioButton Grid.Row="1" Content="Help"
                                  Foreground="White"
                                  Height="50"
@@ -86,6 +108,8 @@
                                  Command="{Binding HelpVMViewCommand}"
                                  VerticalAlignment="Bottom">
                 </RadioButton>
+
+
             </StackPanel>
             
 

@@ -33,9 +33,7 @@ namespace Clickless
 
         public static void UpdateSettings(SelectedClientSettingsModel s)
         {
-            if (s.selectedClient != selectedClientSettings.selectedClient) {
-                selectedClientSettings = s;
-            }
+            selectedClientSettings = s;
             UpdateEngine();
         }
     }

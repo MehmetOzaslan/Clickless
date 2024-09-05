@@ -38,7 +38,7 @@ namespace Clickless
         //Divides up a rect into nxn rects.
         public static List<Rectangle> RecurseOnGridBox(Rectangle rectangle, int n)
         {
-            if (n<= 0)
+            if ( n<= 0)
             {
                 return new List<Rectangle>() { rectangle };
             }

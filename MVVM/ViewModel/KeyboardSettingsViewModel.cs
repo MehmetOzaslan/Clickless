@@ -73,7 +73,8 @@ namespace Clickless.MVVM.ViewModel
         public KeyboardSettingsViewModel()
         {
             keyboardSettingsModel = LoadSettings();
-            
+            UpdateCharsetFromChosenSetting();
+
             SelectedSpan = keyboardSettingsModel.chosenSetting;
         }
 

@@ -1,12 +1,7 @@
 ﻿using Clickless.MVVM.Models;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Clickless.Core
 {
@@ -39,7 +34,8 @@ namespace Clickless.Core
             }
             if (!File.Exists(path))
             {
-                File.Create(path);
+                var ret = File.Create(path);
+                ret.Close();
             }
 
             string jsonData = JsonConvert.SerializeObject(data, Formatting.Indented);
@@ -56,23 +52,12 @@ namespace Clickless.Core
             {
                 string jsonData = File.ReadAllText(filePath);
                 data = JsonConvert.DeserializeObject<T>(jsonData);
-                return data;
+                data = data ?? new T();
+
+                return data ;
             }
 
-            return default(T);
-        }
-
-        public static T LoadDataOrDefault<T>(string filePath)
-        {
-            filePath = Path.Combine(appDataPath, filePath);
-
-            if (File.Exists(filePath))
-            {
-                string jsonData = File.ReadAllText(filePath);
-                return JsonConvert.DeserializeObject<T>(jsonData);
-            }
-
-            return default(T);
+            return data;
         }
     }
 }
