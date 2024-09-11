@@ -18,6 +18,7 @@ public class RectangleDisplay : Form
         this.Bounds = Screen.PrimaryScreen.Bounds;
         this.TopMost = true;
         this.DoubleBuffered = true;
+        this.Focus();
         this.LostFocus += new EventHandler((sender, e) => { ToFront(); } );
     }
 
@@ -27,6 +28,7 @@ public class RectangleDisplay : Form
         this.Show();
         this.WindowState = FormWindowState.Normal;
         this.BringToFront();
+        this.Focus();
         //FocusProcess(procName);
     }
 

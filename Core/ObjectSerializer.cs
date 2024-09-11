@@ -9,7 +9,6 @@ namespace Clickless.Core
     {
         static readonly string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Clickless");
 
-
         public static void SaveData(object data, string filename)
         {
             var path = Path.Combine(appDataPath, filename);

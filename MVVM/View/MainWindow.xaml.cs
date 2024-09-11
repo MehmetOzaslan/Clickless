@@ -24,6 +24,12 @@ namespace Clickless.MVVM.View
             InitializeComponent();
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Environment.Exit(1);
+        }
+
         private void MinimizeWindow(object sender, RoutedEventArgs e)
         {
             this.WindowState = WindowState.Minimized;
